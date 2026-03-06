@@ -176,22 +176,26 @@
         }
     }
 
-    function renderStudents() {
+function renderStudents() {
         const container = document.getElementById('studentContainer');
         const activeClass = state.classes[state.lastSelectedIndex];
         if(!activeClass) return;
 
         // UI Updates
         document.querySelectorAll('.btn').forEach(b => b.classList.remove('active-sort'));
-        document.getElementById(`sort-${state.lastSortMode}`).classList.add('active-sort');
+        const sortBtn = document.getElementById(`sort-${state.lastSortMode}`);
+        if(sortBtn) sortBtn.classList.add('active-sort');
 
-        // Calculate Medals (Handle Ties)
-        const uniqueScores = [...new Set(activeClass.students.map(s => s.score))].sort((a,b) => b-a);
+        // NEW: Medal Logic (Filter out 0 and negative scores)
+        const uniquePositiveScores = [...new Set(activeClass.students.map(s => s.score))]
+            .filter(s => s > 0) 
+            .sort((a,b) => b-a);
+
         const getMedal = (score) => {
-            if (score === 0) return "";
-            if (score === uniqueScores[0]) return "🥇";
-            if (score === uniqueScores[1]) return "🥈";
-            if (score === uniqueScores[2]) return "🥉";
+            if (score <= 0) return ""; // Explicitly hide for 0 or negative
+            if (score === uniquePositiveScores[0]) return "🥇";
+            if (score === uniquePositiveScores[1]) return "🥈";
+            if (score === uniquePositiveScores[2]) return "🥉";
             return "";
         };
 
@@ -279,9 +283,19 @@
         setTimeout(() => row.classList.remove('highlighted'), 3000);
     }
     function downloadData() {
+        const now = new Date();
+        const dateStr = now.toISOString().split('T')[0]; // YYYY-MM-DD
+        const timeStr = now.getHours().toString().padStart(2, '0') + '-' + 
+                        now.getMinutes().toString().padStart(2, '0');
+        
+        const fileName = `Scoreboard_${dateStr}_${timeStr}.json`;
+        
         const blob = new Blob([JSON.stringify(state)], { type: 'application/json' });
-        const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-        a.download = `Scoreboard_Backup.json`; a.click();
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = fileName;
+        a.click();
+        URL.revokeObjectURL(a.href);
     }
     function uploadData(event) {
         const file = event.target.files[0]; if (!file) return;
