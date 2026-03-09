@@ -6,47 +6,35 @@
     <title>Teacher Scoreboard Pro</title>
     <style>
         :root { 
-            --primary: #2563eb; 
-            --bg: #f1f5f9; 
-            --card: #ffffff; 
-            --text: #0f172a; 
-            --border: #e2e8f0; 
-            --subtle: #64748b; 
-            --highlight: #fef08a;
+            --primary: #2563eb; --bg: #f1f5f9; --card: #ffffff; --text: #0f172a; 
+            --border: #e2e8f0; --subtle: #64748b; --highlight: #fef08a;
         }
 
+        /* Dark Mode Support */
         @media (prefers-color-scheme: dark) {
             :root { 
-                --bg: #0f172a; 
-                --card: #1e293b; 
-                --text: #f1f5f9; 
-                --border: #334155; 
-                --subtle: #94a3b8; 
-                --highlight: #854d0e;
+                --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; 
+                --border: #334155; --subtle: #94a3b8; --highlight: #854d0e;
             }
             input, textarea { background: #0f172a; color: white; border-color: #334155; }
             .btn { background: #334155; color: #f1f5f9; border-color: #475569; }
             .setup-area { background: #1e293b; }
             .student-row.absent { opacity: 0.2; }
             .minus { background: #475569; color: #cbd5e1; }
-            .tab { background: rgba(255,255,255,0.05) !important; }
         }
 
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 10px; margin: 0; transition: background 0.3s; }
         .container { max-width: 750px; margin: 0 auto; background: var(--card); border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); overflow: hidden; }
         
-        /* Header */
         .header { padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
         .header-actions { display: flex; gap: 15px; align-items: center; }
         .icon-btn { background: none; border: none; font-size: 1.3rem; cursor: pointer; padding: 4px; transition: transform 0.1s; display: flex; align-items: center; }
         .icon-btn:hover { transform: scale(1.2); }
         
-        /* Drawer */
         .setup-area { background: #f8fafc; padding: 0; max-height: 0; overflow: hidden; transition: all 0.3s ease-out; }
         .setup-area.open { padding: 20px; max-height: 500px; border-bottom: 1px solid var(--border); }
         input, textarea { width: 100%; margin: 5px 0 12px 0; border: 1px solid var(--border); border-radius: 8px; padding: 10px; box-sizing: border-box; font-size: 14px; }
         
-        /* Tabs */
         .tabs-wrapper { padding: 10px 20px 0 20px; background: var(--card); }
         .tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
         .tab { padding: 8px 16px; background: rgba(0,0,0,0.05); border: 1px solid var(--border); border-radius: 8px 8px 0 0; cursor: pointer; white-space: nowrap; font-size: 0.9rem; border-bottom: none; display: flex; align-items: center; }
@@ -54,34 +42,30 @@
         .tab-delete { margin-left: 8px; color: var(--subtle); padding: 2px 6px; border-radius: 4px; transition: 0.2s; }
         .tab-delete:hover { background: #fee2e2; color: #ef4444; }
         
-        /* Toolbar */
-        .toolbar { padding: 10px 20px; display: flex; flex-wrap: wrap; gap: 12px; background: rgba(0,0,0,0.02); border-bottom: 1px solid var(--border); justify-content: space-between; align-items: center; }
-        .btn-group { display: flex; gap: 5px; align-items: center; }
+        .toolbar { padding: 10px 20px; display: flex; flex-wrap: wrap; gap: 8px; background: rgba(0,0,0,0.02); border-bottom: 1px solid var(--border); justify-content: space-between; }
+        .btn-group { display: flex; gap: 5px; flex-wrap: wrap; }
         .btn { padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border); cursor: pointer; font-size: 0.8rem; font-weight: 600; color: var(--subtle); background: var(--card); }
         .btn.active-sort { background: var(--subtle); color: white; }
         .btn-action { background: #e0e7ff; color: var(--primary); border-color: #c7d2fe; }
         .btn-danger.confirming { background: #fee2e2; color: #dc2626; }
         
-        .toggle-label { font-size: 0.75rem; font-weight: bold; color: var(--subtle); display: flex; align-items: center; gap: 5px; cursor: pointer; user-select: none; }
-
-        /* List Rows */
         #studentContainer { padding: 0; min-height: 200px; }
-        .student-row { display: flex; align-items: center; padding: 10px 20px; border-bottom: 1px solid var(--border); transition: all 0.2s; }
+        .student-row { display: flex; align-items: center; padding: 10px 20px; border-bottom: 1px solid var(--border); transition: all 0.2s; background: var(--card); }
         .student-row.absent { opacity: 0.3; filter: grayscale(1); }
-        .student-row.highlighted { background: var(--highlight); transform: scale(1.02); z-index: 10; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .student-row.highlighted { background: var(--highlight); transform: scale(1.02); z-index: 10; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         
         .attendance-toggle { cursor: pointer; margin-right: 12px; font-size: 1.2rem; background: none; border: none; }
-        .student-info { flex-grow: 1; cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 5px 0; }
+        .student-info { flex-grow: 1; cursor: pointer; display: flex; align-items: center; gap: 8px; }
         .student-name { font-weight: 500; font-size: 1.05rem; user-select: none; }
-        .medal { font-size: 1.2rem; width: 24px; text-align: center; }
+        .medal { font-size: 1.2rem; }
         
         .score-box { display: flex; align-items: center; gap: 10px; }
-        .score-display { font-size: 1.4rem; font-weight: 800; min-width: 45px; text-align: center; }
-        .points-btn { width: 34px; height: 34px; border-radius: 8px; font-size: 1.2rem; color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .score-display { font-size: 1.4rem; font-weight: 800; min-width: 40px; text-align: center; }
+        .points-btn { width: 34px; height: 34px; border-radius: 8px; font-size: 1.2rem; color: white; border: none; cursor: pointer; }
         .minus { background: #cbd5e1; color: #475569; }
         .plus { background: #4ade80; }
         
-        .empty-state { text-align: center; padding: 40px; color: var(--subtle); font-style: italic; }
+        .empty-state { text-align: center; padding: 40px; color: var(--subtle); }
         .hidden { display: none; }
     </style>
 </head>
@@ -89,20 +73,20 @@
 
 <div class="container">
     <div class="header">
-        <h2 style="margin:0; font-size: 1.2rem;">Scoreboard Pro</h2>
+        <h2 style="margin:0; font-size: 1.2rem;">Scoreboard</h2>
         <div class="header-actions">
             <input type="file" id="fileInput" class="hidden" accept=".json" onchange="uploadData(event)">
-            <button class="icon-btn" onclick="downloadData()" title="Backup Data">💾</button>
-            <button class="icon-btn" onclick="document.getElementById('fileInput').click()" title="Load Data">📂</button>
+            <button class="icon-btn" onclick="downloadData()" title="Backup">💾</button>
+            <button class="icon-btn" onclick="document.getElementById('fileInput').click()" title="Load">📂</button>
             <button class="icon-btn" onclick="toggleSetup()" title="New Class">➕</button>
         </div>
     </div>
 
     <div id="setupArea" class="setup-area">
         <h3 style="margin-top:0; font-size: 0.9rem; color: var(--subtle);">ADD NEW CLASS</h3>
-        <input type="text" id="className" placeholder="e.g. 3A History">
-        <textarea id="studentList" rows="5" placeholder="Paste student names (one per line)..."></textarea>
-        <button onclick="addClass()" style="background:var(--primary); color:white; border:none; padding:12px; border-radius:8px; cursor:pointer; width:100%; font-weight:bold; font-size: 1rem;">Create Class</button>
+        <input type="text" id="className" placeholder="Class Name">
+        <textarea id="studentList" rows="5" placeholder="Paste names (one per line)..."></textarea>
+        <button onclick="addClass()" style="background:var(--primary); color:white; border:none; padding:12px; border-radius:8px; cursor:pointer; width:100%; font-weight:bold;">Create Class</button>
     </div>
 
     <div class="tabs-wrapper"><div id="tabsContainer" class="tabs"></div></div>
@@ -113,49 +97,37 @@
             <button id="sort-alpha" class="btn" onclick="setSort('alpha')">A-Z</button>
             <button id="sort-score" class="btn" onclick="setSort('score')">Rank</button>
         </div>
-        
         <div class="btn-group">
-            <label class="toggle-label">
-                <input type="checkbox" id="noRepeatToggle" onchange="toggleNoRepeat(this.checked)"> No-Repeat
-            </label>
-            <button class="btn btn-action" onclick="pickRandom()">🎲 Random</button>
+            <button class="btn btn-action" onclick="pickRandom()">🎲</button>
+            <button id="noRepeatBtn" class="btn btn-action" onclick="pickRandomNoRepeat()" title="Draws everyone once before repeating">♻️</button>
             <button class="btn btn-action" onclick="awardAll(1)">🌟 +1 All</button>
             <button class="btn btn-danger" onclick="resetScores(this)">Reset</button>
         </div>
     </div>
 
-    <div id="studentContainer">
-        <div class="empty-state">Click ➕ to add a class or 📂 to load a backup.</div>
-    </div>
+    <div id="studentContainer"></div>
 </div>
 
 <script>
-    let state = { 
-        classes: [], 
-        lastSelectedIndex: null, 
-        lastSortMode: 'original',
-        noRepeatMode: false,
-        pickedIds: [] 
-    };
-    const STORE_KEY = 'teacherApp_v8_final';
+    let state = { classes: [], lastSelectedIndex: null, lastSortMode: 'original' };
+    const STORE_KEY = 'teacherApp_v7_final';
 
-    // --- Audio Engine (Web Audio API) ---
+    // --- Audio Engine ---
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playSound(type) {
-        if (audioCtx.state === 'suspended') audioCtx.resume();
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.connect(gain);
         gain.connect(audioCtx.destination);
         
         if (type === 'up') {
-            osc.frequency.setValueAtTime(600, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(900, audioCtx.currentTime + 0.1);
+            osc.frequency.setValueAtTime(500, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(1000, audioCtx.currentTime + 0.1);
             gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
         } else {
-            osc.frequency.setValueAtTime(300, audioCtx.currentTime);
-            osc.frequency.linearRampToValueAtTime(150, audioCtx.currentTime + 0.2);
+            osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+            osc.frequency.linearRampToValueAtTime(100, audioCtx.currentTime + 0.2);
             gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
             gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
         }
@@ -166,18 +138,9 @@
 
     function init() {
         const saved = localStorage.getItem(STORE_KEY);
-        if (saved) { 
-            state = JSON.parse(saved);
-            // Patch for old versions
-            if (state.noRepeatMode === undefined) state.noRepeatMode = false;
-            if (state.pickedIds === undefined) state.pickedIds = [];
-            
-            document.getElementById('noRepeatToggle').checked = state.noRepeatMode;
-            renderTabs(); 
-        }
+        if (saved) { state = JSON.parse(saved); renderTabs(); }
     }
 
-    // --- Actions ---
     function toggleSetup() { document.getElementById('setupArea').classList.toggle('open'); }
 
     function addClass() {
@@ -187,7 +150,8 @@
         if (!nameField.value || names.length === 0) return;
         state.classes.push({
             name: nameField.value,
-            students: names.map((s, i) => ({ id: Date.now() + i, name: s, score: 0, order: i, absent: false }))
+            students: names.map((s, i) => ({ id: Date.now() + i, name: s, score: 0, order: i, absent: false })),
+            pickedIds: [] // Track "No Repeat" history
         });
         nameField.value = ""; listField.value = "";
         state.lastSelectedIndex = state.classes.length - 1;
@@ -197,17 +161,11 @@
     function editStudentName(studentId, event) {
         event.stopPropagation();
         const student = state.classes[state.lastSelectedIndex].students.find(s => s.id === studentId);
-        const newName = prompt("Rename student:", student.name);
+        const newName = prompt("Edit Student Name:", student.name);
         if (newName && newName.trim() !== "") {
             student.name = newName.trim();
             sync(); renderStudents();
         }
-    }
-
-    function toggleNoRepeat(val) {
-        state.noRepeatMode = val;
-        state.pickedIds = []; 
-        sync();
     }
 
     function updateScore(studentId, delta, event = null) {
@@ -220,71 +178,28 @@
         }
     }
 
-    function pickRandom() {
-        const activeClass = state.classes[state.lastSelectedIndex];
-        const presentStudents = activeClass.students.filter(s => !s.absent);
-        if (presentStudents.length === 0) return;
-
-        let pool = presentStudents;
-        if (state.noRepeatMode) {
-            pool = presentStudents.filter(s => !state.pickedIds.includes(s.id));
-            if (pool.length === 0) { // Reset cycle
-                state.pickedIds = [];
-                pool = presentStudents;
-            }
-        }
-
-        const winner = pool[Math.floor(Math.random() * pool.length)];
-        if (state.noRepeatMode) state.pickedIds.push(winner.id);
-        
-        sync();
-        
-        const row = document.getElementById(`student-${winner.id}`);
-        document.querySelectorAll('.student-row').forEach(r => r.classList.remove('highlighted'));
-        row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        row.classList.add('highlighted');
-        playSound('up');
-        setTimeout(() => row.classList.remove('highlighted'), 3000);
-    }
-
-    // --- Rendering ---
-    function renderTabs() {
-        const container = document.getElementById('tabsContainer');
-        container.innerHTML = "";
-        if (state.classes.length === 0) {
-            document.getElementById('studentContainer').innerHTML = '<div class="empty-state">No classes found. Click ➕ to begin.</div>';
-            document.getElementById('scoreboardActions').classList.add('hidden');
-            return;
-        }
-        state.classes.forEach((cls, i) => {
-            const btn = document.createElement('div');
-            btn.className = `tab ${state.lastSelectedIndex === i ? 'active' : ''}`;
-            btn.innerHTML = `${cls.name} <span class="tab-delete" onclick="deleteClass(${i}, event, this)">×</span>`;
-            btn.onclick = (e) => { if (e.target.className !== 'tab-delete') selectClass(i); };
-            container.appendChild(btn);
-        });
-        if (state.lastSelectedIndex !== null && state.classes[state.lastSelectedIndex]) {
-            renderStudents();
-            document.getElementById('scoreboardActions').classList.remove('hidden');
-        }
-    }
-
     function renderStudents() {
         const container = document.getElementById('studentContainer');
         const activeClass = state.classes[state.lastSelectedIndex];
         if(!activeClass) return;
 
+        // UI Updates
         document.querySelectorAll('.btn').forEach(b => b.classList.remove('active-sort'));
         const sortBtn = document.getElementById(`sort-${state.lastSortMode}`);
         if(sortBtn) sortBtn.classList.add('active-sort');
 
-        // Medal Logic: Only positive scores
+        // Update No Repeat Counter UI
+        const presentCount = activeClass.students.filter(s => !s.absent).length;
+        const pickedCount = (activeClass.pickedIds || []).length;
+        document.getElementById('noRepeatBtn').innerText = `♻️ ${pickedCount}/${presentCount}`;
+
+        // Medal Logic
         const uniquePositiveScores = [...new Set(activeClass.students.map(s => s.score))]
-            .filter(s => s > 0)
+            .filter(s => s > 0) 
             .sort((a,b) => b-a);
 
         const getMedal = (score) => {
-            if (score <= 0) return "";
+            if (score <= 0) return ""; 
             if (score === uniquePositiveScores[0]) return "🥇";
             if (score === uniquePositiveScores[1]) return "🥈";
             if (score === uniquePositiveScores[2]) return "🥉";
@@ -312,20 +227,40 @@
         `).join('');
     }
 
-    // --- Helpers ---
-    function selectClass(index) { 
-        state.lastSelectedIndex = index; 
-        state.pickedIds = []; // Reset picker pool when switching classes
-        sync(); 
-        renderTabs(); 
+    function renderTabs() {
+        const container = document.getElementById('tabsContainer');
+        container.innerHTML = "";
+        if (state.classes.length === 0) {
+            document.getElementById('studentContainer').innerHTML = '<div class="empty-state">No classes found. Click ➕ to begin.</div>';
+            document.getElementById('scoreboardActions').classList.add('hidden');
+            return;
+        }
+        state.classes.forEach((cls, i) => {
+            const btn = document.createElement('div');
+            btn.className = `tab ${state.lastSelectedIndex === i ? 'active' : ''}`;
+            btn.innerHTML = `${cls.name} <span class="tab-delete" onclick="deleteClass(${i}, event, this)">×</span>`;
+            btn.onclick = (e) => { if (e.target.className !== 'tab-delete') selectClass(i); };
+            container.appendChild(btn);
+        });
+        if (state.lastSelectedIndex !== null && state.classes[state.lastSelectedIndex]) {
+            renderStudents();
+            document.getElementById('scoreboardActions').classList.remove('hidden');
+        }
     }
-    
-    function setSort(mode) { state.lastSortMode = mode; sync(); renderStudents(); }
 
+    function selectClass(index) { state.lastSelectedIndex = index; sync(); renderTabs(); }
+    function setSort(mode) { state.lastSortMode = mode; sync(); renderStudents(); }
+    
     function toggleAbsent(studentId, event) {
         event.stopPropagation();
         const student = state.classes[state.lastSelectedIndex].students.find(s => s.id === studentId);
-        if (student) { student.absent = !student.absent; sync(); renderStudents(); }
+        if (student) { 
+            student.absent = !student.absent; 
+            // If they become absent, remove them from picked history if they were in it
+            const activeClass = state.classes[state.lastSelectedIndex];
+            activeClass.pickedIds = (activeClass.pickedIds || []).filter(id => id !== studentId);
+            sync(); renderStudents(); 
+        }
     }
 
     function awardAll(delta) {
@@ -338,9 +273,10 @@
             btn.innerText = "Sure?"; btn.classList.add('confirming');
             setTimeout(() => { btn.innerText = "Reset"; btn.classList.remove('confirming'); }, 3000);
         } else {
-            state.classes[state.lastSelectedIndex].students.forEach(s => s.score = 0);
-            state.pickedIds = []; sync(); renderStudents();
-            btn.innerText = "Reset"; btn.classList.remove('confirming');
+            const activeClass = state.classes[state.lastSelectedIndex];
+            activeClass.students.forEach(s => s.score = 0);
+            activeClass.pickedIds = []; // Clear "No Repeat" on Reset
+            sync(); renderStudents(); btn.innerText = "Reset"; btn.classList.remove('confirming');
         }
     }
 
@@ -356,29 +292,62 @@
         }
     }
 
+    function pickRandom() {
+        const presentStudents = state.classes[state.lastSelectedIndex].students.filter(s => !s.absent);
+        if (presentStudents.length === 0) return;
+        const winner = presentStudents[Math.floor(Math.random() * presentStudents.length)];
+        highlightStudent(winner.id);
+    }
+
+    function pickRandomNoRepeat() {
+        const activeClass = state.classes[state.lastSelectedIndex];
+        const presentStudents = activeClass.students.filter(s => !s.absent);
+        if (presentStudents.length === 0) return;
+
+        if (!activeClass.pickedIds) activeClass.pickedIds = [];
+
+        // Filter for students not yet picked
+        let available = presentStudents.filter(s => !activeClass.pickedIds.includes(s.id));
+
+        // If pool is empty, reset cycle
+        if (available.length === 0) {
+            activeClass.pickedIds = [];
+            available = presentStudents;
+        }
+
+        const winner = available[Math.floor(Math.random() * available.length)];
+        activeClass.pickedIds.push(winner.id);
+        
+        sync();
+        renderStudents(); // Refresh the counter on the button
+        highlightStudent(winner.id);
+    }
+
+    function highlightStudent(id) {
+        const row = document.getElementById(`student-${id}`);
+        document.querySelectorAll('.student-row').forEach(r => r.classList.remove('highlighted'));
+        row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        row.classList.add('highlighted');
+        setTimeout(() => row.classList.remove('highlighted'), 3000);
+    }
+
     function downloadData() {
         const now = new Date();
-        const dateStr = now.toISOString().split('T')[0];
+        const dateStr = now.toISOString().split('T')[0]; 
         const timeStr = now.getHours().toString().padStart(2, '0') + '-' + now.getMinutes().toString().padStart(2, '0');
         const fileName = `Scoreboard_${dateStr}_${timeStr}.json`;
-        
         const blob = new Blob([JSON.stringify(state)], { type: 'application/json' });
-        const a = document.createElement('a'); 
+        const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = fileName; 
+        a.download = fileName;
         a.click();
-        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+        URL.revokeObjectURL(a.href);
     }
-    
+
     function uploadData(event) {
         const file = event.target.files[0]; if (!file) return;
         const reader = new FileReader();
-        reader.onload = (e) => { 
-            try {
-                state = JSON.parse(e.target.result); 
-                sync(); renderTabs();
-            } catch(err) { alert("Invalid file format."); }
-        };
+        reader.onload = (e) => { state = JSON.parse(e.target.result); sync(); renderTabs(); };
         reader.readAsText(file);
     }
 
