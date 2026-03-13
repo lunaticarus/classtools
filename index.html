@@ -60,7 +60,8 @@
         .medal { font-size: 1.2rem; }
         
         .score-box { display: flex; align-items: center; gap: 10px; }
-        .score-display { font-size: 1.4rem; font-weight: 800; min-width: 40px; text-align: center; }
+        .score-display { font-size: 1.4rem; font-weight: 800; min-width: 44px; text-align: center; cursor: pointer; padding: 2px 6px; border-radius: 4px; transition: background 0.2s; }
+        .score-display:hover { background: rgba(0,0,0,0.05); }
         .points-btn { width: 34px; height: 34px; border-radius: 8px; font-size: 1.2rem; color: white; border: none; cursor: pointer; }
         .minus { background: #cbd5e1; color: #475569; }
         .plus { background: #4ade80; }
@@ -98,8 +99,8 @@
             <button id="sort-score" class="btn" onclick="setSort('score')">Rank</button>
         </div>
         <div class="btn-group">
-            <button class="btn btn-action" onclick="pickRandom()">🎲</button>
-            <button id="noRepeatBtn" class="btn btn-action" onclick="pickRandomNoRepeat()" title="Draws everyone once before repeating">♻️</button>
+            <button class="btn btn-action" onclick="pickRandom()">🎲 Random</button>
+            <button id="noRepeatBtn" class="btn btn-action" onclick="pickRandomNoRepeat()" title="Draws everyone once before repeating">♻️ No Repeat</button>
             <button class="btn btn-action" onclick="awardAll(1)">🌟 +1 All</button>
             <button class="btn btn-danger" onclick="resetScores(this)">Reset</button>
         </div>
@@ -112,7 +113,6 @@
     let state = { classes: [], lastSelectedIndex: null, lastSortMode: 'original' };
     const STORE_KEY = 'teacherApp_v7_final';
 
-    // --- Audio Engine ---
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playSound(type) {
         const osc = audioCtx.createOscillator();
@@ -151,7 +151,7 @@
         state.classes.push({
             name: nameField.value,
             students: names.map((s, i) => ({ id: Date.now() + i, name: s, score: 0, order: i, absent: false })),
-            pickedIds: [] // Track "No Repeat" history
+            pickedIds: []
         });
         nameField.value = ""; listField.value = "";
         state.lastSelectedIndex = state.classes.length - 1;
@@ -165,6 +165,18 @@
         if (newName && newName.trim() !== "") {
             student.name = newName.trim();
             sync(); renderStudents();
+        }
+    }
+
+    function editScoreManually(studentId, event) {
+        event.stopPropagation();
+        const student = state.classes[state.lastSelectedIndex].students.find(s => s.id === studentId);
+        const input = prompt(`Enter new score for ${student.name}:`, student.score);
+        
+        if (input !== null && input.trim() !== "" && !isNaN(input)) {
+            student.score = parseInt(input, 10);
+            sync();
+            renderStudents();
         }
     }
 
@@ -183,17 +195,14 @@
         const activeClass = state.classes[state.lastSelectedIndex];
         if(!activeClass) return;
 
-        // UI Updates
         document.querySelectorAll('.btn').forEach(b => b.classList.remove('active-sort'));
         const sortBtn = document.getElementById(`sort-${state.lastSortMode}`);
         if(sortBtn) sortBtn.classList.add('active-sort');
 
-        // Update No Repeat Counter UI
         const presentCount = activeClass.students.filter(s => !s.absent).length;
         const pickedCount = (activeClass.pickedIds || []).length;
         document.getElementById('noRepeatBtn').innerText = `♻️ ${pickedCount}/${presentCount}`;
 
-        // Medal Logic
         const uniquePositiveScores = [...new Set(activeClass.students.map(s => s.score))]
             .filter(s => s > 0) 
             .sort((a,b) => b-a);
@@ -220,7 +229,7 @@
                 </div>
                 <div class="score-box">
                     <button class="points-btn minus" onclick="updateScore(${s.id}, -1, event)">−</button>
-                    <span class="score-display">${s.score}</span>
+                    <span class="score-display" onclick="editScoreManually(${s.id}, event)" title="Click to edit score">${s.score}</span>
                     <button class="points-btn plus" onclick="updateScore(${s.id}, 1, event)">+</button>
                 </div>
             </div>
@@ -256,7 +265,6 @@
         const student = state.classes[state.lastSelectedIndex].students.find(s => s.id === studentId);
         if (student) { 
             student.absent = !student.absent; 
-            // If they become absent, remove them from picked history if they were in it
             const activeClass = state.classes[state.lastSelectedIndex];
             activeClass.pickedIds = (activeClass.pickedIds || []).filter(id => id !== studentId);
             sync(); renderStudents(); 
@@ -275,7 +283,7 @@
         } else {
             const activeClass = state.classes[state.lastSelectedIndex];
             activeClass.students.forEach(s => s.score = 0);
-            activeClass.pickedIds = []; // Clear "No Repeat" on Reset
+            activeClass.pickedIds = []; 
             sync(); renderStudents(); btn.innerText = "Reset"; btn.classList.remove('confirming');
         }
     }
@@ -303,23 +311,16 @@
         const activeClass = state.classes[state.lastSelectedIndex];
         const presentStudents = activeClass.students.filter(s => !s.absent);
         if (presentStudents.length === 0) return;
-
         if (!activeClass.pickedIds) activeClass.pickedIds = [];
-
-        // Filter for students not yet picked
         let available = presentStudents.filter(s => !activeClass.pickedIds.includes(s.id));
-
-        // If pool is empty, reset cycle
         if (available.length === 0) {
             activeClass.pickedIds = [];
             available = presentStudents;
         }
-
         const winner = available[Math.floor(Math.random() * available.length)];
         activeClass.pickedIds.push(winner.id);
-        
         sync();
-        renderStudents(); // Refresh the counter on the button
+        renderStudents();
         highlightStudent(winner.id);
     }
 
@@ -334,8 +335,7 @@
     function downloadData() {
         const now = new Date();
         const dateStr = now.toISOString().split('T')[0]; 
-        const timeStr = now.getHours().toString().padStart(2, '0') + '-' + now.getMinutes().toString().padStart(2, '0');
-        const fileName = `Scoreboard_${dateStr}_${timeStr}.json`;
+        const fileName = `Scoreboard_${dateStr}.json`;
         const blob = new Blob([JSON.stringify(state)], { type: 'application/json' });
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
