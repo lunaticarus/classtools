@@ -8,6 +8,7 @@
         :root {
             --system-blue: #007aff;
             --system-red: #ff3b30;
+            --system-orange: #ff9500;
             --system-gray-bg: #f5f5f7;
             --system-card-bg: #ffffff;
             --system-border: #d2d2d7;
@@ -22,7 +23,7 @@
             background-color: var(--system-gray-bg);
             color: var(--text-primary);
             margin: 0;
-            padding: 100px 20px 60px 20px;
+            padding: 100px 20px 80px 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -30,105 +31,64 @@
         }
 
         .top-nav {
-            position: fixed;
-            top: 25px;
-            right: 30px;
-            display: flex;
-            gap: 24px;
-            z-index: 100;
+            position: fixed; top: 25px; right: 30px;
+            display: flex; gap: 24px; z-index: 100;
         }
 
         .minimal-btn {
-            background: none;
-            border: none;
-            color: var(--text-tertiary);
-            font-size: 13px;
-            font-weight: 400;
-            cursor: pointer;
-            padding: 5px;
-            transition: all 0.2s ease;
+            background: none; border: none;
+            color: var(--text-tertiary); font-size: 13px;
+            cursor: pointer; padding: 5px; transition: all 0.2s ease;
         }
 
         .minimal-btn:hover { color: var(--text-primary); }
         .minimal-btn.warning { color: var(--system-red); font-weight: 600; }
 
         h1 {
-            font-weight: 600;
-            font-size: 22px;
-            letter-spacing: -0.5px;
-            position: fixed;
-            top: 20px;
-            left: 30px;
-            margin: 0;
-            color: var(--text-primary);
+            font-weight: 600; font-size: 22px; letter-spacing: -0.5px;
+            position: fixed; top: 20px; left: 30px; margin: 0;
         }
 
-        .container { 
-            width: 100%; 
-            max-width: 700px; 
-        }
+        .container { width: 100%; max-width: 700px; }
 
         .vocab-row {
-            display: grid;
-            grid-template-columns: 44px 1fr 1fr 44px;
-            background: var(--system-card-bg);
-            margin-bottom: 8px;
-            border-radius: var(--radius);
-            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
-            border: 1px solid rgba(0,0,0,0.02);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: grid; grid-template-columns: 44px 1fr 1fr 44px;
+            background: var(--system-card-bg); margin-bottom: 8px;
+            border-radius: var(--radius); border: 1px solid rgba(0,0,0,0.02);
+            transition: all 0.2s ease;
         }
 
         .vocab-row:focus-within {
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
             border-color: var(--system-border);
-            transform: translateY(-1px);
         }
 
         textarea {
-            padding: 18px 12px;
-            border: none;
-            font-size: 15px;
-            outline: none;
-            background: transparent;
-            color: var(--text-primary);
-            font-family: inherit;
-            resize: none;
-            overflow: hidden;
-            line-height: 1.4;
-            min-height: 20px;
-            width: 100%;
-            box-sizing: border-box;
+            padding: 18px 12px; border: none; font-size: 15px; outline: none;
+            background: transparent; color: var(--text-primary); font-family: inherit;
+            resize: none; overflow: hidden; line-height: 1.4; width: 100%; box-sizing: border-box;
         }
 
-        .zh-input { 
-            border-left: 1px solid #f8f8f8; 
-            color: var(--text-secondary); 
-        }
+        .en-input.duplicate { color: var(--system-orange); font-weight: 500; }
+        .zh-input { border-left: 1px solid #f8f8f8; color: var(--text-secondary); }
 
         .icon-btn {
-            background: transparent;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            color: #d2d2d7;
-            transition: color 0.2s;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: #d2d2d7; transition: color 0.2s;
         }
-
         .audio-btn:hover { color: var(--system-blue); }
         .del-btn:hover { color: var(--system-red); }
 
-        .hint { 
-            margin-top: 40px; 
-            text-align: center; 
-            font-size: 12px; 
-            color: var(--text-tertiary); 
-            opacity: 0.8;
-            line-height: 1.6;
+        .footer-info {
+            position: fixed; bottom: 20px; right: 30px;
+            font-size: 11px; color: var(--text-tertiary); font-weight: 500;
         }
 
-        .loading { color: var(--text-tertiary) !important; font-style: italic; }
+        .hint { 
+            margin-top: 40px; text-align: center; font-size: 12px; 
+            color: var(--text-tertiary); opacity: 0.8; line-height: 1.6;
+        }
+
         #fileInput { display: none; }
         .icon { width: 16px; height: 16px; fill: currentColor; }
     </style>
@@ -148,10 +108,12 @@
     <div class="container">
         <div id="vocabList"></div>
         <div class="hint">
-            <b>Enter / Tab</b> Next Item &nbsp; • &nbsp; <b>Arrows</b> Move Between Fields <br>
-            <b>Esc</b> Speak English &nbsp; • &nbsp; <b>Ctrl+Space</b> Speak
+            <b>Enter/Tab</b> Next Item &nbsp; • &nbsp; <b>Arrows</b> Move Field <br>
+            <b>Esc</b> Speak English &nbsp; • &nbsp; <b>` (Backtick)</b> Clear Row
         </div>
     </div>
+
+    <div class="footer-info" id="counter">0 Words</div>
 
     <script>
         const vocabList = document.getElementById('vocabList');
@@ -168,6 +130,26 @@
                 if (en || zh) data.push([en, zh]);
             });
             localStorage.setItem('appleVocabData', JSON.stringify(data));
+            updateCounter();
+            checkDuplicates();
+        }
+
+        function updateCounter() {
+            const count = document.querySelectorAll('.vocab-row').length;
+            document.getElementById('counter').innerText = `${count} Word${count !== 1 ? 's' : ''}`;
+        }
+
+        function checkDuplicates() {
+            const inputs = document.querySelectorAll('.en-input');
+            const values = Array.from(inputs).map(i => i.value.trim().toLowerCase()).filter(v => v !== "");
+            inputs.forEach(input => {
+                const val = input.value.trim().toLowerCase();
+                if (val && values.filter(v => v === val).length > 1) {
+                    input.classList.add('duplicate');
+                } else {
+                    input.classList.remove('duplicate');
+                }
+            });
         }
 
         function handleReset() {
@@ -232,9 +214,13 @@
 
             enInput.addEventListener('blur', async () => {
                 const word = enInput.value.trim();
+                // Cleanup empty row on blur
+                if (!word && !zhInput.value.trim() && document.querySelectorAll('.vocab-row').length > 1) {
+                    row.remove(); saveToCache(); return;
+                }
+                
                 if (!word || (zhInput.value.trim() !== "" && zhInput.dataset.auto !== "true")) return;
                 
-                zhInput.classList.add('loading');
                 zhInput.value = "...";
                 try {
                     const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=zh-TW&dt=t&q=${encodeURIComponent(word)}`);
@@ -244,7 +230,6 @@
                     autoResize(zhInput);
                     saveToCache();
                 } catch (e) { zhInput.value = ""; }
-                finally { zhInput.classList.remove('loading'); }
             });
 
             [enInput, zhInput].forEach(el => {
@@ -259,61 +244,33 @@
                 const allInputs = Array.from(document.querySelectorAll('textarea'));
                 const index = allInputs.indexOf(e.target);
 
-                // ESC: Speak English
-                if (e.key === 'Escape') {
-                    speak(enInput.value);
-                    e.preventDefault();
+                if (e.key === 'Escape') { speak(enInput.value); e.preventDefault(); }
+                
+                if (e.key === '`') { // Clear row shortcut
+                    enInput.value = ""; zhInput.value = ""; 
+                    autoResize(enInput); autoResize(zhInput);
+                    saveToCache(); e.preventDefault();
                 }
 
-                // Ctrl + Space: Speak (Alternative)
-                if (e.ctrlKey && e.code === 'Space') {
-                    speak(enInput.value);
-                    e.preventDefault();
-                }
-
-                // Enter / Tab: Go to Next ITEM (Next row's first field)
                 if (e.key === 'Enter' || e.key === 'Tab') {
                     e.preventDefault();
-                    const nextRowEnInput = row.nextElementSibling?.querySelector('.en-input');
-                    if (nextRowEnInput) {
-                        nextRowEnInput.focus();
-                    } else if (enInput.value.trim() !== "") {
-                        addRow(true);
-                    }
+                    const nextRowEn = row.nextElementSibling?.querySelector('.en-input');
+                    if (nextRowEn) nextRowEn.focus();
+                    else if (enInput.value.trim() !== "") addRow(true);
                 }
 
-                // Arrow keys: Navigate between fields and rows
-                if (e.key === 'ArrowRight') {
-                    if (e.target === enInput) {
-                        zhInput.focus();
-                        e.preventDefault();
-                    }
-                } else if (e.key === 'ArrowLeft') {
-                    if (e.target === zhInput) {
-                        enInput.focus();
-                        e.preventDefault();
-                    }
-                } else if (e.key === 'ArrowDown') {
-                    const nextInput = allInputs[index + 2]; // Jump to same field in next row
-                    if (nextInput) { nextInput.focus(); e.preventDefault(); }
-                } else if (e.key === 'ArrowUp') {
-                    const prevInput = allInputs[index - 2]; // Jump to same field in prev row
-                    if (prevInput) { prevInput.focus(); e.preventDefault(); }
-                }
+                if (e.key === 'ArrowRight' && e.target === enInput) { zhInput.focus(); e.preventDefault(); }
+                else if (e.key === 'ArrowLeft' && e.target === zhInput) { enInput.focus(); e.preventDefault(); }
+                else if (e.key === 'ArrowDown') { allInputs[index + 2]?.focus(); e.preventDefault(); }
+                else if (e.key === 'ArrowUp') { allInputs[index - 2]?.focus(); e.preventDefault(); }
             };
 
             enInput.onkeydown = handleKeys;
             zhInput.onkeydown = handleKeys;
             
             del.onclick = () => {
-                if (document.querySelectorAll('.vocab-row').length > 1) {
-                    row.remove();
-                    saveToCache();
-                } else { 
-                    enInput.value = ""; zhInput.value = ""; 
-                    autoResize(enInput); autoResize(zhInput); 
-                    saveToCache();
-                }
+                if (document.querySelectorAll('.vocab-row').length > 1) { row.remove(); saveToCache(); }
+                else { enInput.value = ""; zhInput.value = ""; autoResize(enInput); saveToCache(); }
             };
 
             row.append(audioBtn, enInput, zhInput, del);
@@ -339,8 +296,7 @@
             url.searchParams.set('list', encoded);
             navigator.clipboard.writeText(url.href).then(() => {
                 const btn = document.querySelector('[onclick="shareList()"]');
-                const original = btn.innerText;
-                btn.innerText = "Copied";
+                const original = btn.innerText; btn.innerText = "Copied";
                 setTimeout(() => btn.innerText = original, 2000);
             });
         }
@@ -376,6 +332,7 @@
             reader.readAsText(file);
         }
 
+        // Init
         const params = new URLSearchParams(window.location.search);
         const urlData = params.get('list');
         const cachedData = localStorage.getItem('appleVocabData');
@@ -389,13 +346,10 @@
         } else if (cachedData) {
             try {
                 const data = JSON.parse(cachedData);
-                if (data.length > 0) {
-                    data.forEach(item => addRow(false, item[0], item[1]));
-                } else { addRow(); }
+                if (data.length > 0) data.forEach(item => addRow(false, item[0], item[1]));
+                else addRow();
             } catch (e) { addRow(); }
-        } else {
-            addRow();
-        }
+        } else { addRow(); }
     </script>
 </body>
 </html>
