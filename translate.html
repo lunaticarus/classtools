@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>vocabulary.</title>
+    <title>Vocab Manager</title>
     <style>
         :root {
             --system-blue: #007aff;
@@ -12,93 +12,95 @@
             --system-border: #d2d2d7;
             --text-primary: #1d1d1f;
             --text-secondary: #86868b;
-            --radius: 14px;
-            --shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+            --radius: 12px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
             background-color: var(--system-gray-bg);
             color: var(--text-primary);
-            padding: 80px 40px;
             margin: 0;
+            padding: 80px 20px 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             -webkit-font-smoothing: antialiased;
         }
 
+        /* Minimal Top Right Header */
         header {
-            max-width: 850px;
-            margin: 0 auto 40px auto;
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: 0;
+            height: 60px;
             display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 0 24px;
+            background: rgba(245, 245, 247, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 100;
         }
 
-        h1 {
-            font-weight: 700;
-            font-size: 42px;
-            letter-spacing: -1.5px;
-            margin: 0;
-            color: var(--text-primary);
-        }
-
-        /* Minimal Top Right Controls */
         .controls { 
             display: flex; 
-            gap: 4px; 
-            background: rgba(0,0,0,0.04);
-            padding: 4px;
-            border-radius: 10px;
+            gap: 8px; 
         }
 
-        .btn-minimal {
+        /* Minimal Icon Buttons */
+        .btn-icon {
             background: transparent;
             border: none;
-            padding: 6px 12px;
-            border-radius: 7px;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--text-secondary);
-            transition: all 0.2s;
-        }
-
-        .btn-minimal:hover {
-            background: var(--system-card-bg);
-            color: var(--text-primary);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-
-        .btn-share-minimal {
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: var(--system-blue);
+            transition: background 0.2s;
+        }
+
+        .btn-icon:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-icon svg {
+            width: 20px;
+            height: 20px;
+            stroke-width: 2;
         }
 
         .container { 
             width: 100%; 
-            max-width: 850px; 
-            margin: 0 auto;
+            max-width: 700px; 
+            margin-top: 20px;
         }
 
         .vocab-row {
             display: grid;
-            grid-template-columns: 50px 1fr 1fr 50px;
+            grid-template-columns: 44px 1fr 1fr 44px;
             background: var(--system-card-bg);
             margin-bottom: 8px;
             border-radius: var(--radius);
             box-shadow: var(--shadow);
-            border: 1px solid rgba(0,0,0,0.02);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border: 0.5px solid rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
         }
 
         .vocab-row:focus-within {
-            transform: scale(1.005);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
-            z-index: 10;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            transform: translateY(-1px);
         }
 
         textarea {
-            padding: 20px 14px;
+            padding: 16px 8px;
             border: none;
-            font-size: 17px;
+            font-size: 15px;
             outline: none;
             background: transparent;
             color: var(--text-primary);
@@ -106,56 +108,60 @@
             resize: none;
             overflow: hidden;
             line-height: 1.4;
-            min-height: 24px;
+            min-height: 20px;
             width: 100%;
             box-sizing: border-box;
         }
 
         .zh-input { 
-            border-left: 1px solid #f5f5f7; 
             color: var(--text-secondary); 
+            border-left: 0.5px solid #f0f0f0;
         }
 
         .icon-btn {
-            background: transparent;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            color: #c7c7cc;
-            transition: 0.2s;
+            color: #c1c1c6;
+            transition: color 0.2s;
         }
 
         .audio-btn:hover { color: var(--system-blue); }
         .del-btn:hover { color: #ff3b30; }
 
         .hint { 
-            margin-top: 50px; 
-            text-align: center; 
+            margin-top: 40px; 
             font-size: 12px; 
             color: var(--text-secondary); 
+            text-align: center;
             opacity: 0.6;
-            letter-spacing: 0.2px;
         }
 
         #fileInput { display: none; }
 
-        .icon { width: 18px; height: 18px; fill: currentColor; }
-
         @media (max-width: 600px) {
-            header { flex-direction: column; align-items: flex-start; gap: 20px; }
-            .controls { align-self: flex-end; }
+            .vocab-row { grid-template-columns: 40px 1fr 1fr 40px; }
+            header { padding: 0 12px; }
         }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>vocabulary.</h1>
         <div class="controls">
-            <button class="btn-minimal" onclick="exportCSV()">Export</button>
-            <button class="btn-minimal" onclick="document.getElementById('fileInput').click()">Import</button>
-            <button class="btn-minimal btn-share-minimal" onclick="shareList()">Share</button>
+            <button class="btn-icon" onclick="addRow(true)" title="New Entry">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 5v14M5 12h14"/></svg>
+            </button>
+            <button class="btn-icon" onclick="document.getElementById('fileInput').click()" title="Import CSV">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 15V3m0 0L8 7m4-4l4 4M2 17l.621 2.485A2 2 0 004.561 21h14.878a2 2 0 001.94-1.515L22 17"/></svg>
+            </button>
+            <button class="btn-icon" onclick="exportCSV()" title="Export CSV">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3v12m0 0l4-4m-4 4l-4-4M2 17l.621 2.485A2 2 0 004.561 21h14.878a2 2 0 001.94-1.515L22 17"/></svg>
+            </button>
+            <button class="btn-icon" onclick="shareList()" title="Copy Share Link">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+            </button>
             <input type="file" id="fileInput" accept=".csv" onchange="importCSV(event)">
         </div>
     </header>
@@ -163,14 +169,15 @@
     <div class="container">
         <div id="vocabList"></div>
         <div class="hint">
-            <strong>SHIFT + ENTER</strong> NEXT FIELD &nbsp; • &nbsp; <strong>CTRL + SPACE</strong> PRONOUNCE
+            Entries auto-save to the URL. Use Tab or Arrow keys to move between fields.
         </div>
     </div>
 
     <script>
         const vocabList = document.getElementById('vocabList');
-        const audioIcon = `<svg class="icon" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>`;
-        const deleteIcon = `<svg class="icon" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>`;
+
+        const audioIcon = `<svg style="width:18px;height:18px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5zM15.54 8.46a5 5 0 010 7.07M19.07 4.93a10 10 0 010 14.14"/></svg>`;
+        const deleteIcon = `<svg style="width:18px;height:18px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"/></svg>`;
 
         function autoResize(el) {
             el.style.height = 'auto';
@@ -195,15 +202,13 @@
             audioBtn.innerHTML = audioIcon;
 
             const enInput = document.createElement('textarea');
-            enInput.placeholder = "English";
+            enInput.placeholder = "Word";
             enInput.className = "en-input";
-            enInput.rows = 1;
             enInput.value = enValue;
 
             const zhInput = document.createElement('textarea');
             zhInput.placeholder = "Translation";
             zhInput.className = "zh-input";
-            zhInput.rows = 1;
             zhInput.value = zhValue;
 
             const del = document.createElement('div');
@@ -235,11 +240,17 @@
             const handleKeys = (e) => {
                 const allInputs = Array.from(document.querySelectorAll('textarea'));
                 const index = allInputs.indexOf(e.target);
-                if (e.ctrlKey && e.code === 'Space') { speak(enInput.value); e.preventDefault(); }
-                if ((e.key === 'Enter' && e.shiftKey) || e.key === 'Tab') {
+
+                if (e.ctrlKey && e.code === 'Space') {
+                    speak(enInput.value);
                     e.preventDefault();
-                    if (index === allInputs.length - 1 && enInput.value) addRow(true);
-                    else if (allInputs[index + 1]) allInputs[index + 1].focus();
+                }
+
+                if (e.key === 'Tab') {
+                    if (index === allInputs.length - 1 && enInput.value) {
+                        e.preventDefault();
+                        addRow(true);
+                    }
                 } else if (e.key === 'ArrowDown' && !e.shiftKey) {
                     const next = allInputs[index + 2];
                     if (next) { next.focus(); e.preventDefault(); }
@@ -252,9 +263,15 @@
 
             enInput.onkeydown = handleKeys;
             zhInput.onkeydown = handleKeys;
+            
             del.onclick = () => {
-                if (document.querySelectorAll('.vocab-row').length > 1) row.remove();
-                else { enInput.value = ""; zhInput.value = ""; autoResize(enInput); autoResize(zhInput); }
+                if (document.querySelectorAll('.vocab-row').length > 1) {
+                    row.style.opacity = '0';
+                    setTimeout(() => row.remove(), 150);
+                } else { 
+                    enInput.value = ""; zhInput.value = ""; 
+                    autoResize(enInput); autoResize(zhInput); 
+                }
             };
 
             row.append(audioBtn, enInput, zhInput, del);
@@ -277,11 +294,7 @@
             const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
             const url = new URL(window.location);
             url.searchParams.set('list', encoded);
-            navigator.clipboard.writeText(url.href).then(() => {
-                const shareBtn = document.querySelector('.btn-share-minimal');
-                shareBtn.innerText = "Copied!";
-                setTimeout(() => shareBtn.innerText = "Share", 2000);
-            });
+            navigator.clipboard.writeText(url.href).then(() => alert("Link copied to clipboard"));
         }
 
         function loadFromURL() {
@@ -306,7 +319,8 @@
             });
             const blob = new Blob([csv], { type: 'text/csv' });
             const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url; a.download = 'vocab.csv'; a.click();
+            const a = document.createElement('a');
+            a.href = url; a.download = 'vocab.csv'; a.click();
         }
 
         function importCSV(event) {
