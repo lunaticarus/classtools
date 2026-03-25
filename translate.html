@@ -3,117 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vocab Manager</title>
+    <title>vocabulary.</title>
     <style>
         :root {
-            /* Apple System Colors */
             --system-blue: #007aff;
             --system-gray-bg: #f5f5f7;
             --system-card-bg: #ffffff;
             --system-border: #d2d2d7;
             --text-primary: #1d1d1f;
             --text-secondary: #86868b;
-            --radius: 12px;
-            --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            --radius: 14px;
+            --shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif;
             background-color: var(--system-gray-bg);
             color: var(--text-primary);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 60px 20px;
+            padding: 80px 40px;
             margin: 0;
             -webkit-font-smoothing: antialiased;
         }
 
+        header {
+            max-width: 850px;
+            margin: 0 auto 40px auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
         h1 {
-            font-weight: 600;
-            font-size: 28px;
-            letter-spacing: -0.5px;
-            margin-bottom: 30px;
-        }
-
-        .controls { 
-            margin-bottom: 32px; 
-            display: flex; 
-            gap: 12px; 
-            flex-wrap: wrap; 
-            justify-content: center; 
-        }
-
-        /* Apple Capsule Button Style */
-        .btn-secondary {
-            background: var(--system-card-bg);
-            border: 1px solid var(--system-border);
-            padding: 10px 20px;
-            border-radius: 20px; /* Capsule shape */
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
+            font-weight: 700;
+            font-size: 42px;
+            letter-spacing: -1.5px;
+            margin: 0;
             color: var(--text-primary);
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
 
-        .btn-secondary:hover {
-            background: #fafafa;
-            border-color: #acacb0;
-            transform: translateY(-1px);
+        /* Minimal Top Right Controls */
+        .controls { 
+            display: flex; 
+            gap: 4px; 
+            background: rgba(0,0,0,0.04);
+            padding: 4px;
+            border-radius: 10px;
         }
 
-        .btn-share { 
-            background: var(--system-blue); 
-            color: white; 
-            border: none; 
+        .btn-minimal {
+            background: transparent;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            transition: all 0.2s;
         }
-        
-        .btn-share:hover {
-            background: #0062cc;
-            color: white;
+
+        .btn-minimal:hover {
+            background: var(--system-card-bg);
+            color: var(--text-primary);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .btn-share-minimal {
+            color: var(--system-blue);
         }
 
         .container { 
             width: 100%; 
-            max-width: 800px; 
+            max-width: 850px; 
+            margin: 0 auto;
         }
 
         .vocab-row {
             display: grid;
             grid-template-columns: 50px 1fr 1fr 50px;
             background: var(--system-card-bg);
-            margin-bottom: 12px;
+            margin-bottom: 8px;
             border-radius: var(--radius);
             box-shadow: var(--shadow);
-            border: 1px solid rgba(0,0,0,0.03);
-            transition: transform 0.2s ease;
+            border: 1px solid rgba(0,0,0,0.02);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
         .vocab-row:focus-within {
-            transform: scale(1.01);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            transform: scale(1.005);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+            z-index: 10;
         }
 
         textarea {
-            padding: 18px 12px;
+            padding: 20px 14px;
             border: none;
-            font-size: 16px;
+            font-size: 17px;
             outline: none;
             background: transparent;
             color: var(--text-primary);
             font-family: inherit;
             resize: none;
             overflow: hidden;
-            line-height: 1.45;
+            line-height: 1.4;
             min-height: 24px;
             width: 100%;
             box-sizing: border-box;
         }
 
         .zh-input { 
-            border-left: 1px solid #f2f2f2; 
+            border-left: 1px solid #f5f5f7; 
             color: var(--text-secondary); 
         }
 
@@ -123,56 +122,54 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            color: var(--system-border);
-            transition: color 0.2s, background 0.2s;
-            user-select: none;
+            color: #c7c7cc;
+            transition: 0.2s;
         }
 
         .audio-btn:hover { color: var(--system-blue); }
-        .del-btn:hover { color: #ff3b30; } /* Apple System Red */
+        .del-btn:hover { color: #ff3b30; }
 
         .hint { 
-            margin-top: 40px; 
+            margin-top: 50px; 
             text-align: center; 
-            font-size: 13px; 
+            font-size: 12px; 
             color: var(--text-secondary); 
-            line-height: 1.8;
-            background: rgba(0,0,0,0.03);
-            padding: 15px;
-            border-radius: 12px;
+            opacity: 0.6;
+            letter-spacing: 0.2px;
         }
 
-        .loading { color: var(--system-border) !important; font-style: italic; }
         #fileInput { display: none; }
 
-        /* Custom icons using SVGs for that crisp look */
-        .icon { width: 20px; height: 20px; fill: currentColor; }
+        .icon { width: 18px; height: 18px; fill: currentColor; }
+
+        @media (max-width: 600px) {
+            header { flex-direction: column; align-items: flex-start; gap: 20px; }
+            .controls { align-self: flex-end; }
+        }
     </style>
 </head>
 <body>
 
-    <h1>Vocabulary Manager</h1>
-
-    <div class="controls">
-        <button class="btn-secondary" onclick="exportCSV()">Export CSV</button>
-        <button class="btn-secondary" onclick="document.getElementById('fileInput').click()">Import CSV</button>
-        <button class="btn-secondary btn-share" onclick="shareList()">Copy Share Link</button>
-        <input type="file" id="fileInput" accept=".csv" onchange="importCSV(event)">
-    </div>
+    <header>
+        <h1>vocabulary.</h1>
+        <div class="controls">
+            <button class="btn-minimal" onclick="exportCSV()">Export</button>
+            <button class="btn-minimal" onclick="document.getElementById('fileInput').click()">Import</button>
+            <button class="btn-minimal btn-share-minimal" onclick="shareList()">Share</button>
+            <input type="file" id="fileInput" accept=".csv" onchange="importCSV(event)">
+        </div>
+    </header>
 
     <div class="container">
         <div id="vocabList"></div>
         <div class="hint">
-            <strong>Enter</strong>: New line &nbsp; • &nbsp; <strong>Shift + Enter / Tab</strong>: Next field <br>
-            <strong>Arrows</strong>: Navigate &nbsp; • &nbsp; <strong>Ctrl + Space</strong>: Pronounce
+            <strong>SHIFT + ENTER</strong> NEXT FIELD &nbsp; • &nbsp; <strong>CTRL + SPACE</strong> PRONOUNCE
         </div>
     </div>
 
     <script>
         const vocabList = document.getElementById('vocabList');
-
-        // SVG Icons
-        const audioIcon = `<svg class="icon" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>`;
+        const audioIcon = `<svg class="icon" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>`;
         const deleteIcon = `<svg class="icon" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>`;
 
         function autoResize(el) {
@@ -185,7 +182,7 @@
             window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'en-US';
-            utterance.rate = 0.95;
+            utterance.rate = 0.9;
             window.speechSynthesis.speak(utterance);
         }
 
@@ -198,13 +195,13 @@
             audioBtn.innerHTML = audioIcon;
 
             const enInput = document.createElement('textarea');
-            enInput.placeholder = "English word...";
+            enInput.placeholder = "English";
             enInput.className = "en-input";
             enInput.rows = 1;
             enInput.value = enValue;
 
             const zhInput = document.createElement('textarea');
-            zhInput.placeholder = "Translation...";
+            zhInput.placeholder = "Translation";
             zhInput.className = "zh-input";
             zhInput.rows = 1;
             zhInput.value = zhValue;
@@ -218,17 +215,14 @@
             enInput.addEventListener('blur', async () => {
                 const word = enInput.value.trim();
                 if (!word || (zhInput.value.trim() !== "" && zhInput.dataset.auto !== "true")) return;
-                
-                zhInput.classList.add('loading');
-                zhInput.value = "Translating...";
+                zhInput.placeholder = "Translating...";
                 try {
                     const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=zh-TW&dt=t&q=${encodeURIComponent(word)}`);
                     const data = await res.json();
                     zhInput.value = data[0][0][0];
                     zhInput.dataset.auto = "true"; 
                     autoResize(zhInput);
-                } catch (e) { zhInput.value = ""; }
-                finally { zhInput.classList.remove('loading'); }
+                } catch (e) { zhInput.placeholder = "Translation"; }
             });
 
             [enInput, zhInput].forEach(el => {
@@ -241,19 +235,11 @@
             const handleKeys = (e) => {
                 const allInputs = Array.from(document.querySelectorAll('textarea'));
                 const index = allInputs.indexOf(e.target);
-
-                if (e.ctrlKey && e.code === 'Space') {
-                    speak(enInput.value);
-                    e.preventDefault();
-                }
-
+                if (e.ctrlKey && e.code === 'Space') { speak(enInput.value); e.preventDefault(); }
                 if ((e.key === 'Enter' && e.shiftKey) || e.key === 'Tab') {
                     e.preventDefault();
-                    if (index === allInputs.length - 1 && enInput.value) {
-                        addRow(true);
-                    } else if (allInputs[index + 1]) {
-                        allInputs[index + 1].focus();
-                    }
+                    if (index === allInputs.length - 1 && enInput.value) addRow(true);
+                    else if (allInputs[index + 1]) allInputs[index + 1].focus();
                 } else if (e.key === 'ArrowDown' && !e.shiftKey) {
                     const next = allInputs[index + 2];
                     if (next) { next.focus(); e.preventDefault(); }
@@ -266,16 +252,9 @@
 
             enInput.onkeydown = handleKeys;
             zhInput.onkeydown = handleKeys;
-            
             del.onclick = () => {
-                if (document.querySelectorAll('.vocab-row').length > 1) {
-                    row.style.opacity = '0';
-                    row.style.transform = 'scale(0.95)';
-                    setTimeout(() => row.remove(), 200);
-                } else { 
-                    enInput.value = ""; zhInput.value = ""; 
-                    autoResize(enInput); autoResize(zhInput); 
-                }
+                if (document.querySelectorAll('.vocab-row').length > 1) row.remove();
+                else { enInput.value = ""; zhInput.value = ""; autoResize(enInput); autoResize(zhInput); }
             };
 
             row.append(audioBtn, enInput, zhInput, del);
@@ -299,10 +278,9 @@
             const url = new URL(window.location);
             url.searchParams.set('list', encoded);
             navigator.clipboard.writeText(url.href).then(() => {
-                const btn = document.querySelector('.btn-share');
-                const originalText = btn.innerText;
-                btn.innerText = "✓ Copied";
-                setTimeout(() => btn.innerText = originalText, 2000);
+                const shareBtn = document.querySelector('.btn-share-minimal');
+                shareBtn.innerText = "Copied!";
+                setTimeout(() => shareBtn.innerText = "Share", 2000);
             });
         }
 
@@ -328,8 +306,7 @@
             });
             const blob = new Blob([csv], { type: 'text/csv' });
             const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url; a.download = 'vocab_list.csv'; a.click();
+            const a = document.createElement('a'); a.href = url; a.download = 'vocab.csv'; a.click();
         }
 
         function importCSV(event) {
