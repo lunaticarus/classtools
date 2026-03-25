@@ -125,6 +125,7 @@
             font-size: 12px; 
             color: var(--text-tertiary); 
             opacity: 0.8;
+            line-height: 1.6;
         }
 
         .loading { color: var(--text-tertiary) !important; font-style: italic; }
@@ -147,7 +148,8 @@
     <div class="container">
         <div id="vocabList"></div>
         <div class="hint">
-            <b>Tab</b> Next Field &nbsp; • &nbsp; <b>Arrows</b> Move &nbsp; • &nbsp; <b>Ctrl+Space</b> Speak
+            <b>Enter / Tab</b> Next Item &nbsp; • &nbsp; <b>Arrows</b> Move Between Fields <br>
+            <b>Esc</b> Speak English &nbsp; • &nbsp; <b>Ctrl+Space</b> Speak
         </div>
     </div>
 
@@ -158,7 +160,6 @@
         const audioIcon = `<svg class="icon" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>`;
         const deleteIcon = `<svg class="icon" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>`;
 
-        // --- CACHE LOGIC ---
         function saveToCache() {
             const data = [];
             document.querySelectorAll('.vocab-row').forEach(row => {
@@ -241,7 +242,7 @@
                     zhInput.value = data[0][0][0];
                     zhInput.dataset.auto = "true"; 
                     autoResize(zhInput);
-                    saveToCache(); // Save after auto-translate
+                    saveToCache();
                 } catch (e) { zhInput.value = ""; }
                 finally { zhInput.classList.remove('loading'); }
             });
@@ -258,24 +259,46 @@
                 const allInputs = Array.from(document.querySelectorAll('textarea'));
                 const index = allInputs.indexOf(e.target);
 
+                // ESC: Speak English
+                if (e.key === 'Escape') {
+                    speak(enInput.value);
+                    e.preventDefault();
+                }
+
+                // Ctrl + Space: Speak (Alternative)
                 if (e.ctrlKey && e.code === 'Space') {
                     speak(enInput.value);
                     e.preventDefault();
                 }
 
-                if ((e.key === 'Enter' && e.shiftKey) || e.key === 'Tab') {
+                // Enter / Tab: Go to Next ITEM (Next row's first field)
+                if (e.key === 'Enter' || e.key === 'Tab') {
                     e.preventDefault();
-                    if (index === allInputs.length - 1) {
+                    const nextRowEnInput = row.nextElementSibling?.querySelector('.en-input');
+                    if (nextRowEnInput) {
+                        nextRowEnInput.focus();
+                    } else if (enInput.value.trim() !== "") {
                         addRow(true);
-                    } else if (allInputs[index + 1]) {
-                        allInputs[index + 1].focus();
                     }
-                } else if (e.key === 'ArrowDown' && !e.shiftKey) {
-                    const next = allInputs[index + 2];
-                    if (next) { next.focus(); e.preventDefault(); }
-                } else if (e.key === 'ArrowUp' && !e.shiftKey) {
-                    const prev = allInputs[index - 2];
-                    if (prev) { prev.focus(); e.preventDefault(); }
+                }
+
+                // Arrow keys: Navigate between fields and rows
+                if (e.key === 'ArrowRight') {
+                    if (e.target === enInput) {
+                        zhInput.focus();
+                        e.preventDefault();
+                    }
+                } else if (e.key === 'ArrowLeft') {
+                    if (e.target === zhInput) {
+                        enInput.focus();
+                        e.preventDefault();
+                    }
+                } else if (e.key === 'ArrowDown') {
+                    const nextInput = allInputs[index + 2]; // Jump to same field in next row
+                    if (nextInput) { nextInput.focus(); e.preventDefault(); }
+                } else if (e.key === 'ArrowUp') {
+                    const prevInput = allInputs[index - 2]; // Jump to same field in prev row
+                    if (prevInput) { prevInput.focus(); e.preventDefault(); }
                 }
             };
 
@@ -315,9 +338,10 @@
             const url = new URL(window.location);
             url.searchParams.set('list', encoded);
             navigator.clipboard.writeText(url.href).then(() => {
-                const original = document.querySelector('[onclick="shareList()"]').innerText;
-                document.querySelector('[onclick="shareList()"]').innerText = "Copied";
-                setTimeout(() => document.querySelector('[onclick="shareList()"]').innerText = original, 2000);
+                const btn = document.querySelector('[onclick="shareList()"]');
+                const original = btn.innerText;
+                btn.innerText = "Copied";
+                setTimeout(() => btn.innerText = original, 2000);
             });
         }
 
@@ -352,21 +376,17 @@
             reader.readAsText(file);
         }
 
-        // --- INITIALIZATION ---
         const params = new URLSearchParams(window.location.search);
         const urlData = params.get('list');
         const cachedData = localStorage.getItem('appleVocabData');
 
         if (urlData) {
-            // Priority 1: URL Share Link
             try {
                 const data = JSON.parse(decodeURIComponent(escape(atob(urlData))));
                 data.forEach(item => addRow(false, item[0], item[1]));
-                // Clean URL after loading so refresh doesn't keep old data
                 window.history.replaceState({}, document.title, window.location.pathname);
             } catch (e) { addRow(); }
         } else if (cachedData) {
-            // Priority 2: Browser Cache
             try {
                 const data = JSON.parse(cachedData);
                 if (data.length > 0) {
@@ -374,7 +394,6 @@
                 } else { addRow(); }
             } catch (e) { addRow(); }
         } else {
-            // Priority 3: Fresh Start
             addRow();
         }
     </script>
