@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shareable Vocab Manager</title>
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --bg: #f8fafc;
+            --border: #e2e8f0;
+            --text: #1e293b;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--bg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        .controls { margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+
+        .btn-secondary {
+            background: white;
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: var(--text);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-secondary:hover { background: #f1f5f9; border-color: #cbd5e1; }
+        .btn-share { background: var(--primary); color: white; border: none; }
+        .btn-share:hover { opacity: 0.9; background: var(--primary); }
+
+        .container { width: 100%; max-width: 800px; }
+
+        .vocab-row {
+            display: grid;
+            grid-template-columns: 45px 1fr 1fr 45px;
+            gap: 1px;
+            background: var(--border);
+            margin-bottom: 4px;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        input {
+            padding: 14px;
+            border: none;
+            font-size: 1rem;
+            outline: none;
+            background: white;
+            color: var(--text);
+        }
+
+        .zh-input { border-left: 1px solid var(--border); color: #475569; }
+        input:focus { background: #fff; box-shadow: inset 0 0 0 2px var(--primary); z-index: 2; }
+
+        .icon-btn {
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #94a3b8;
+            font-size: 1.1rem;
+            transition: 0.2s;
+            user-select: none;
+        }
+
+        .audio-btn:hover { color: var(--primary); background: #eff6ff; }
+        .del-btn:hover { color: #ef4444; background: #fee2e2; }
+
+        .hint { margin-top: 20px; text-align: center; font-size: 0.85rem; color: #94a3b8; }
+        .loading { background: #f1f5f9 !important; color: #94a3b8; }
+        #fileInput { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="controls">
+        <button class="btn-secondary" onclick="exportCSV()">Export CSV</button>
+        <button class="btn-secondary" onclick="document.getElementById('fileInput').click()">Import CSV</button>
+        <button class="btn-secondary btn-share" onclick="shareList()">🔗 Copy Share Link</button>
+        <input type="file" id="fileInput" accept=".csv" onchange="importCSV(event)">
+    </div>
+
+    <div class="container">
+        <div id="vocabList"></div>
+        <div class="hint">
+            <b>Tab/Enter</b>: Next &nbsp; | &nbsp; <b>Ctrl + Space</b>: Pronounce &nbsp; | &nbsp; <b>Share Link</b> saves your edits!
+        </div>
+    </div>
+
+    <script>
+        const vocabList = document.getElementById('vocabList');
+
+        function speak(text) {
+            if (!text) return;
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.9;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function createRow(enValue = "", zhValue = "") {
+            const row = document.createElement('div');
+            row.className = 'vocab-row';
+
+            const audioBtn = document.createElement('div');
+            audioBtn.className = "icon-btn audio-btn";
+            audioBtn.innerHTML = "🔊";
+
+            const enInput = document.createElement('input');
+            enInput.placeholder = "English...";
+            enInput.className = "en-input";
+            enInput.value = enValue;
+
+            const zhInput = document.createElement('input');
+            zhInput.placeholder = "Translation...";
+            zhInput.className = "zh-input";
+            zhInput.value = zhValue;
+
+            const del = document.createElement('div');
+            del.className = "icon-btn del-btn";
+            del.innerHTML = "×";
+
+            audioBtn.onclick = () => speak(enInput.value);
+
+            enInput.addEventListener('blur', async () => {
+                const word = enInput.value.trim();
+                if (!word || (zhInput.value.trim() !== "" && zhInput.dataset.auto !== "true")) return;
+                
+                zhInput.classList.add('loading');
+                zhInput.value = "Translating...";
+                try {
+                    const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=zh-TW&dt=t&q=${encodeURIComponent(word)}`);
+                    const data = await res.json();
+                    zhInput.value = data[0][0][0];
+                    zhInput.dataset.auto = "true"; 
+                } catch (e) { zhInput.value = "Error"; }
+                finally { zhInput.classList.remove('loading'); }
+            });
+
+            zhInput.addEventListener('input', () => { zhInput.dataset.auto = "false"; });
+
+            const handleKeys = (e) => {
+                const allInputs = Array.from(document.querySelectorAll('input:not([type="file"])'));
+                const index = allInputs.indexOf(e.target);
+
+                if (e.ctrlKey && e.code === 'Space') {
+                    speak(enInput.value);
+                    e.preventDefault();
+                }
+
+                if (e.key === 'Enter' || e.key === 'Tab') {
+                    if (index === allInputs.length - 1 && enInput.value) {
+                        addRow(true);
+                        e.preventDefault();
+                    }
+                } else if (e.key === 'ArrowDown') {
+                    const next = allInputs[index + 2];
+                    if (next) next.focus(); else if (index >= allInputs.length - 2) addRow(true);
+                } else if (e.key === 'ArrowUp') {
+                    const prev = allInputs[index - 2];
+                    if (prev) prev.focus();
+                }
+            };
+
+            enInput.onkeydown = handleKeys;
+            zhInput.onkeydown = handleKeys;
+            del.onclick = () => {
+                if (document.querySelectorAll('.vocab-row').length > 1) row.remove();
+                else { enInput.value = ""; zhInput.value = ""; }
+            };
+
+            row.append(audioBtn, enInput, zhInput, del);
+            return row;
+        }
+
+        function addRow(focus = false, en = "", zh = "") {
+            const row = createRow(en, zh);
+            vocabList.appendChild(row);
+            if (focus) setTimeout(() => row.querySelector('.en-input').focus(), 10);
+        }
+
+        // --- SHARING LOGIC ---
+        function shareList() {
+            const data = [];
+            document.querySelectorAll('.vocab-row').forEach(row => {
+                const inputs = row.querySelectorAll('input');
+                if (inputs[0].value) {
+                    data.push([inputs[0].value, inputs[1].value]);
+                }
+            });
+            
+            // Encode data as Base64 to put in URL
+            const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+            const url = new URL(window.location);
+            url.searchParams.set('list', encoded);
+            
+            navigator.clipboard.writeText(url.href).then(() => {
+                alert("Share link copied to clipboard!");
+            });
+        }
+
+        function loadFromURL() {
+            const params = new URLSearchParams(window.location.search);
+            const encoded = params.get('list');
+            if (encoded) {
+                try {
+                    const data = JSON.parse(decodeURIComponent(escape(atob(encoded))));
+                    vocabList.innerHTML = "";
+                    data.forEach(item => addRow(false, item[0], item[1]));
+                } catch (e) {
+                    console.error("Failed to load list from URL", e);
+                    addRow();
+                }
+            } else {
+                addRow();
+            }
+        }
+
+        // --- CSV Logic remains the same ---
+        function exportCSV() {
+            let csv = "English,Chinese\n";
+            document.querySelectorAll('.vocab-row').forEach(row => {
+                const inputs = row.querySelectorAll('input');
+                if (inputs[0].value) csv += `${inputs[0].value.replace(/,/g, "")},${inputs[1].value.replace(/,/g, "")}\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = 'vocab_list.csv'; a.click();
+        }
+
+        function importCSV(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const lines = e.target.result.split('\n').slice(1);
+                vocabList.innerHTML = "";
+                lines.forEach(line => {
+                    const [en, zh] = line.split(',');
+                    if (en) addRow(false, en.trim(), zh ? zh.trim() : "");
+                });
+                if (vocabList.innerHTML === "") addRow();
+            };
+            reader.readAsText(file);
+        }
+
+        loadFromURL();
+    </script>
+</body>
+</html>
