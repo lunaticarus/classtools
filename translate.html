@@ -7,6 +7,7 @@
     <style>
         :root {
             --system-blue: #007aff;
+            --system-red: #ff3b30;
             --system-gray-bg: #f5f5f7;
             --system-card-bg: #ffffff;
             --system-border: #d2d2d7;
@@ -21,20 +22,20 @@
             background-color: var(--system-gray-bg);
             color: var(--text-primary);
             margin: 0;
-            padding: 80px 20px;
+            padding: 100px 20px 60px 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
             -webkit-font-smoothing: antialiased;
         }
 
-        /* Top Right Minimal Controls */
         .top-nav {
-            position: absolute;
+            position: fixed;
             top: 25px;
             right: 30px;
             display: flex;
-            gap: 20px;
+            gap: 24px;
+            z-index: 100;
         }
 
         .minimal-btn {
@@ -45,28 +46,26 @@
             font-weight: 400;
             cursor: pointer;
             padding: 5px;
-            transition: color 0.2s ease;
-            text-decoration: none;
+            transition: all 0.2s ease;
         }
 
-        .minimal-btn:hover {
-            color: var(--text-primary);
-        }
+        .minimal-btn:hover { color: var(--text-primary); }
+        .minimal-btn.warning { color: var(--system-red); font-weight: 600; }
 
         h1 {
             font-weight: 600;
-            font-size: 24px;
+            font-size: 22px;
             letter-spacing: -0.5px;
-            margin-bottom: 40px;
             position: fixed;
             top: 20px;
             left: 30px;
+            margin: 0;
+            color: var(--text-primary);
         }
 
         .container { 
             width: 100%; 
-            max-width: 750px; 
-            margin-top: 20px;
+            max-width: 700px; 
         }
 
         .vocab-row {
@@ -75,18 +74,19 @@
             background: var(--system-card-bg);
             margin-bottom: 8px;
             border-radius: var(--radius);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-            border: 1px solid rgba(0,0,0,0.04);
-            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+            border: 1px solid rgba(0,0,0,0.02);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
         .vocab-row:focus-within {
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
             border-color: var(--system-border);
+            transform: translateY(-1px);
         }
 
         textarea {
-            padding: 16px 12px;
+            padding: 18px 12px;
             border: none;
             font-size: 15px;
             outline: none;
@@ -102,7 +102,7 @@
         }
 
         .zh-input { 
-            border-left: 1px solid #f2f2f2; 
+            border-left: 1px solid #f8f8f8; 
             color: var(--text-secondary); 
         }
 
@@ -117,19 +117,19 @@
         }
 
         .audio-btn:hover { color: var(--system-blue); }
-        .del-btn:hover { color: #ff3b30; }
+        .del-btn:hover { color: var(--system-red); }
 
         .hint { 
-            margin-top: 50px; 
+            margin-top: 40px; 
             text-align: center; 
             font-size: 12px; 
             color: var(--text-tertiary); 
-            letter-spacing: 0.2px;
+            opacity: 0.8;
         }
 
         .loading { color: var(--text-tertiary) !important; font-style: italic; }
         #fileInput { display: none; }
-        .icon { width: 18px; height: 18px; fill: currentColor; }
+        .icon { width: 16px; height: 16px; fill: currentColor; }
     </style>
 </head>
 <body>
@@ -137,7 +137,7 @@
     <h1>Vocab</h1>
 
     <nav class="top-nav">
-        <button class="minimal-btn" onclick="addRow(true)">New</button>
+        <button id="resetBtn" class="minimal-btn" onclick="handleReset()">New</button>
         <button class="minimal-btn" onclick="document.getElementById('fileInput').click()">Import</button>
         <button class="minimal-btn" onclick="exportCSV()">Export</button>
         <button class="minimal-btn" onclick="shareList()">Share</button>
@@ -153,8 +153,31 @@
 
     <script>
         const vocabList = document.getElementById('vocabList');
+        let resetTimer = null;
+
         const audioIcon = `<svg class="icon" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>`;
         const deleteIcon = `<svg class="icon" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>`;
+
+        function handleReset() {
+            const btn = document.getElementById('resetBtn');
+            if (btn.classList.contains('warning')) {
+                // Second click: Reset
+                vocabList.innerHTML = "";
+                addRow(true);
+                resetConfirmState(btn);
+            } else {
+                // First click: Ask
+                btn.innerText = "Sure?";
+                btn.classList.add('warning');
+                resetTimer = setTimeout(() => resetConfirmState(btn), 3000);
+            }
+        }
+
+        function resetConfirmState(btn) {
+            btn.innerText = "New";
+            btn.classList.remove('warning');
+            clearTimeout(resetTimer);
+        }
 
         function autoResize(el) {
             el.style.height = 'auto';
@@ -276,7 +299,11 @@
             const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
             const url = new URL(window.location);
             url.searchParams.set('list', encoded);
-            navigator.clipboard.writeText(url.href).then(() => alert("Link Copied"));
+            navigator.clipboard.writeText(url.href).then(() => {
+                const original = document.querySelector('[onclick="shareList()"]').innerText;
+                document.querySelector('[onclick="shareList()"]').innerText = "Copied";
+                setTimeout(() => document.querySelector('[onclick="shareList()"]').innerText = original, 2000);
+            });
         }
 
         function exportCSV() {
@@ -309,6 +336,7 @@
             reader.readAsText(file);
         }
 
+        // Initialize
         const params = new URLSearchParams(window.location.search);
         const encoded = params.get('list');
         if (encoded) {
