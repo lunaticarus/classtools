@@ -158,15 +158,25 @@
         const audioIcon = `<svg class="icon" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>`;
         const deleteIcon = `<svg class="icon" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>`;
 
+        // --- CACHE LOGIC ---
+        function saveToCache() {
+            const data = [];
+            document.querySelectorAll('.vocab-row').forEach(row => {
+                const en = row.querySelector('.en-input').value;
+                const zh = row.querySelector('.zh-input').value;
+                if (en || zh) data.push([en, zh]);
+            });
+            localStorage.setItem('appleVocabData', JSON.stringify(data));
+        }
+
         function handleReset() {
             const btn = document.getElementById('resetBtn');
             if (btn.classList.contains('warning')) {
-                // Second click: Reset
                 vocabList.innerHTML = "";
+                localStorage.removeItem('appleVocabData');
                 addRow(true);
                 resetConfirmState(btn);
             } else {
-                // First click: Ask
                 btn.innerText = "Sure?";
                 btn.classList.add('warning');
                 resetTimer = setTimeout(() => resetConfirmState(btn), 3000);
@@ -231,6 +241,7 @@
                     zhInput.value = data[0][0][0];
                     zhInput.dataset.auto = "true"; 
                     autoResize(zhInput);
+                    saveToCache(); // Save after auto-translate
                 } catch (e) { zhInput.value = ""; }
                 finally { zhInput.classList.remove('loading'); }
             });
@@ -239,6 +250,7 @@
                 el.addEventListener('input', () => {
                     autoResize(el);
                     if(el === zhInput) zhInput.dataset.auto = "false";
+                    saveToCache();
                 });
             });
 
@@ -273,9 +285,11 @@
             del.onclick = () => {
                 if (document.querySelectorAll('.vocab-row').length > 1) {
                     row.remove();
+                    saveToCache();
                 } else { 
                     enInput.value = ""; zhInput.value = ""; 
                     autoResize(enInput); autoResize(zhInput); 
+                    saveToCache();
                 }
             };
 
@@ -288,6 +302,7 @@
             const row = createRow(en, zh);
             vocabList.appendChild(row);
             if (focus) setTimeout(() => row.querySelector('.en-input').focus(), 10);
+            saveToCache();
         }
 
         function shareList() {
@@ -332,19 +347,36 @@
                     if (en) addRow(false, en.trim(), zh ? zh.trim() : "");
                 });
                 if (vocabList.innerHTML === "") addRow();
+                saveToCache();
             };
             reader.readAsText(file);
         }
 
-        // Initialize
+        // --- INITIALIZATION ---
         const params = new URLSearchParams(window.location.search);
-        const encoded = params.get('list');
-        if (encoded) {
+        const urlData = params.get('list');
+        const cachedData = localStorage.getItem('appleVocabData');
+
+        if (urlData) {
+            // Priority 1: URL Share Link
             try {
-                const data = JSON.parse(decodeURIComponent(escape(atob(encoded))));
+                const data = JSON.parse(decodeURIComponent(escape(atob(urlData))));
                 data.forEach(item => addRow(false, item[0], item[1]));
+                // Clean URL after loading so refresh doesn't keep old data
+                window.history.replaceState({}, document.title, window.location.pathname);
             } catch (e) { addRow(); }
-        } else { addRow(); }
+        } else if (cachedData) {
+            // Priority 2: Browser Cache
+            try {
+                const data = JSON.parse(cachedData);
+                if (data.length > 0) {
+                    data.forEach(item => addRow(false, item[0], item[1]));
+                } else { addRow(); }
+            } catch (e) { addRow(); }
+        } else {
+            // Priority 3: Fresh Start
+            addRow();
+        }
     </script>
 </body>
 </html>
