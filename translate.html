@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shareable Vocab Manager</title>
+    <title>Multi-Line Vocab Manager</title>
     <style>
         :root {
             --primary: #3b82f6;
@@ -39,32 +39,40 @@
 
         .btn-secondary:hover { background: #f1f5f9; border-color: #cbd5e1; }
         .btn-share { background: var(--primary); color: white; border: none; }
-        .btn-share:hover { opacity: 0.9; background: var(--primary); }
 
-        .container { width: 100%; max-width: 800px; }
+        .container { width: 100%; max-width: 900px; }
 
         .vocab-row {
             display: grid;
             grid-template-columns: 45px 1fr 1fr 45px;
             gap: 1px;
             background: var(--border);
-            margin-bottom: 4px;
-            border-radius: 6px;
+            margin-bottom: 8px;
+            border-radius: 8px;
             overflow: hidden;
             border: 1px solid var(--border);
+            align-items: stretch;
         }
 
-        input {
+        textarea {
             padding: 14px;
             border: none;
             font-size: 1rem;
             outline: none;
             background: white;
             color: var(--text);
+            font-family: inherit;
+            resize: none; /* Hide manual resize handle */
+            overflow: hidden; /* Hide scrollbars */
+            line-height: 1.5;
+            min-height: 24px;
+            display: block;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .zh-input { border-left: 1px solid var(--border); color: #475569; }
-        input:focus { background: #fff; box-shadow: inset 0 0 0 2px var(--primary); z-index: 2; }
+        textarea:focus { background: #fff; box-shadow: inset 0 0 0 2px var(--primary); z-index: 2; }
 
         .icon-btn {
             background: white;
@@ -81,7 +89,7 @@
         .audio-btn:hover { color: var(--primary); background: #eff6ff; }
         .del-btn:hover { color: #ef4444; background: #fee2e2; }
 
-        .hint { margin-top: 20px; text-align: center; font-size: 0.85rem; color: #94a3b8; }
+        .hint { margin-top: 20px; text-align: center; font-size: 0.85rem; color: #94a3b8; line-height: 1.6; }
         .loading { background: #f1f5f9 !important; color: #94a3b8; }
         #fileInput { display: none; }
     </style>
@@ -98,12 +106,18 @@
     <div class="container">
         <div id="vocabList"></div>
         <div class="hint">
-            <b>Tab/Enter</b>: Next &nbsp; | &nbsp; <b>Ctrl + Space</b>: Pronounce &nbsp; | &nbsp; <b>Share Link</b> saves your edits!
+            <b>Enter</b>: New line &nbsp; | &nbsp; <b>Shift + Enter / Tab</b>: Next field <br>
+            <b>Arrows</b>: Move between rows &nbsp; | &nbsp; <b>Ctrl + Space</b>: Pronounce
         </div>
     </div>
 
     <script>
         const vocabList = document.getElementById('vocabList');
+
+        function autoResize(el) {
+            el.style.height = 'auto';
+            el.style.height = el.scrollHeight + 'px';
+        }
 
         function speak(text) {
             if (!text) return;
@@ -122,14 +136,16 @@
             audioBtn.className = "icon-btn audio-btn";
             audioBtn.innerHTML = "🔊";
 
-            const enInput = document.createElement('input');
+            const enInput = document.createElement('textarea');
             enInput.placeholder = "English...";
             enInput.className = "en-input";
+            enInput.rows = 1;
             enInput.value = enValue;
 
-            const zhInput = document.createElement('input');
+            const zhInput = document.createElement('textarea');
             zhInput.placeholder = "Translation...";
             zhInput.className = "zh-input";
+            zhInput.rows = 1;
             zhInput.value = zhValue;
 
             const del = document.createElement('div');
@@ -138,6 +154,7 @@
 
             audioBtn.onclick = () => speak(enInput.value);
 
+            // Trigger translation
             enInput.addEventListener('blur', async () => {
                 const word = enInput.value.trim();
                 if (!word || (zhInput.value.trim() !== "" && zhInput.dataset.auto !== "true")) return;
@@ -149,14 +166,21 @@
                     const data = await res.json();
                     zhInput.value = data[0][0][0];
                     zhInput.dataset.auto = "true"; 
+                    autoResize(zhInput);
                 } catch (e) { zhInput.value = "Error"; }
                 finally { zhInput.classList.remove('loading'); }
             });
 
-            zhInput.addEventListener('input', () => { zhInput.dataset.auto = "false"; });
+            // Resize listeners
+            [enInput, zhInput].forEach(el => {
+                el.addEventListener('input', () => {
+                    autoResize(el);
+                    if(el === zhInput) zhInput.dataset.auto = "false";
+                });
+            });
 
             const handleKeys = (e) => {
-                const allInputs = Array.from(document.querySelectorAll('input:not([type="file"])'));
+                const allInputs = Array.from(document.querySelectorAll('textarea'));
                 const index = allInputs.indexOf(e.target);
 
                 if (e.ctrlKey && e.code === 'Space') {
@@ -164,28 +188,36 @@
                     e.preventDefault();
                 }
 
-                if (e.key === 'Enter' || e.key === 'Tab') {
+                if ((e.key === 'Enter' && e.shiftKey) || e.key === 'Tab') {
+                    e.preventDefault();
                     if (index === allInputs.length - 1 && enInput.value) {
                         addRow(true);
-                        e.preventDefault();
+                    } else if (allInputs[index + 1]) {
+                        allInputs[index + 1].focus();
                     }
-                } else if (e.key === 'ArrowDown') {
+                } else if (e.key === 'ArrowDown' && !e.shiftKey) {
                     const next = allInputs[index + 2];
-                    if (next) next.focus(); else if (index >= allInputs.length - 2) addRow(true);
-                } else if (e.key === 'ArrowUp') {
+                    if (next) { next.focus(); e.preventDefault(); }
+                    else if (index >= allInputs.length - 2) { addRow(true); e.preventDefault(); }
+                } else if (e.key === 'ArrowUp' && !e.shiftKey) {
                     const prev = allInputs[index - 2];
-                    if (prev) prev.focus();
+                    if (prev) { prev.focus(); e.preventDefault(); }
                 }
             };
 
             enInput.onkeydown = handleKeys;
             zhInput.onkeydown = handleKeys;
+            
             del.onclick = () => {
                 if (document.querySelectorAll('.vocab-row').length > 1) row.remove();
-                else { enInput.value = ""; zhInput.value = ""; }
+                else { enInput.value = ""; zhInput.value = ""; autoResize(enInput); autoResize(zhInput); }
             };
 
             row.append(audioBtn, enInput, zhInput, del);
+            
+            // Initial resize after being added to DOM
+            setTimeout(() => { autoResize(enInput); autoResize(zhInput); }, 0);
+            
             return row;
         }
 
@@ -195,24 +227,16 @@
             if (focus) setTimeout(() => row.querySelector('.en-input').focus(), 10);
         }
 
-        // --- SHARING LOGIC ---
         function shareList() {
             const data = [];
             document.querySelectorAll('.vocab-row').forEach(row => {
-                const inputs = row.querySelectorAll('input');
-                if (inputs[0].value) {
-                    data.push([inputs[0].value, inputs[1].value]);
-                }
+                const inputs = row.querySelectorAll('textarea');
+                if (inputs[0].value) data.push([inputs[0].value, inputs[1].value]);
             });
-            
-            // Encode data as Base64 to put in URL
             const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
             const url = new URL(window.location);
             url.searchParams.set('list', encoded);
-            
-            navigator.clipboard.writeText(url.href).then(() => {
-                alert("Share link copied to clipboard!");
-            });
+            navigator.clipboard.writeText(url.href).then(() => alert("Share link copied!"));
         }
 
         function loadFromURL() {
@@ -223,21 +247,18 @@
                     const data = JSON.parse(decodeURIComponent(escape(atob(encoded))));
                     vocabList.innerHTML = "";
                     data.forEach(item => addRow(false, item[0], item[1]));
-                } catch (e) {
-                    console.error("Failed to load list from URL", e);
-                    addRow();
-                }
-            } else {
-                addRow();
-            }
+                } catch (e) { addRow(); }
+            } else { addRow(); }
         }
 
-        // --- CSV Logic remains the same ---
         function exportCSV() {
             let csv = "English,Chinese\n";
             document.querySelectorAll('.vocab-row').forEach(row => {
-                const inputs = row.querySelectorAll('input');
-                if (inputs[0].value) csv += `${inputs[0].value.replace(/,/g, "")},${inputs[1].value.replace(/,/g, "")}\n`;
+                const inputs = row.querySelectorAll('textarea');
+                // Replace internal newlines with spaces for CSV safety
+                const en = inputs[0].value.replace(/,/g, "").replace(/\n/g, " ");
+                const zh = inputs[1].value.replace(/,/g, "").replace(/\n/g, " ");
+                if (en) csv += `${en},${zh}\n`;
             });
             const blob = new Blob([csv], { type: 'text/csv' });
             const url = window.URL.createObjectURL(blob);
