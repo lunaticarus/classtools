@@ -108,12 +108,12 @@
     <div class="container">
         <div id="vocabList"></div>
         <div class="hint">
-            <b>Enter/Tab</b> Next Item &nbsp; • &nbsp; <b>Arrows</b> Move Field <br>
-            <b>Esc</b> Speak English &nbsp; • &nbsp; <b>` (Backtick)</b> Clear Row
+            <b>Enter/Tab</b> Next Vocab Item &nbsp; • &nbsp; <b>Arrows</b> Move Field <br>
+            <b>Esc</b> Speak English
         </div>
     </div>
 
-    <div class="footer-info" id="counter">0 Words</div>
+    <div class="footer-info" id="counter">0 Vocab Items</div>
 
     <script>
         const vocabList = document.getElementById('vocabList');
@@ -136,7 +136,7 @@
 
         function updateCounter() {
             const count = document.querySelectorAll('.vocab-row').length;
-            document.getElementById('counter').innerText = `${count} Word${count !== 1 ? 's' : ''}`;
+            document.getElementById('counter').innerText = `${count} Vocab Item${count !== 1 ? 's' : ''}`;
         }
 
         function checkDuplicates() {
@@ -195,7 +195,7 @@
             audioBtn.innerHTML = audioIcon;
 
             const enInput = document.createElement('textarea');
-            enInput.placeholder = "Word";
+            enInput.placeholder = "Vocab Item";
             enInput.className = "en-input";
             enInput.rows = 1;
             enInput.value = enValue;
@@ -213,17 +213,17 @@
             audioBtn.onclick = () => speak(enInput.value);
 
             enInput.addEventListener('blur', async () => {
-                const word = enInput.value.trim();
-                // Cleanup empty row on blur
-                if (!word && !zhInput.value.trim() && document.querySelectorAll('.vocab-row').length > 1) {
+                const val = enInput.value.trim();
+                // Auto-cleanup completely empty rows
+                if (!val && !zhInput.value.trim() && document.querySelectorAll('.vocab-row').length > 1) {
                     row.remove(); saveToCache(); return;
                 }
                 
-                if (!word || (zhInput.value.trim() !== "" && zhInput.dataset.auto !== "true")) return;
+                if (!val || (zhInput.value.trim() !== "" && zhInput.dataset.auto !== "true")) return;
                 
                 zhInput.value = "...";
                 try {
-                    const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=zh-TW&dt=t&q=${encodeURIComponent(word)}`);
+                    const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=zh-TW&dt=t&q=${encodeURIComponent(val)}`);
                     const data = await res.json();
                     zhInput.value = data[0][0][0];
                     zhInput.dataset.auto = "true"; 
@@ -246,12 +246,6 @@
 
                 if (e.key === 'Escape') { speak(enInput.value); e.preventDefault(); }
                 
-                if (e.key === '`') { // Clear row shortcut
-                    enInput.value = ""; zhInput.value = ""; 
-                    autoResize(enInput); autoResize(zhInput);
-                    saveToCache(); e.preventDefault();
-                }
-
                 if (e.key === 'Enter' || e.key === 'Tab') {
                     e.preventDefault();
                     const nextRowEn = row.nextElementSibling?.querySelector('.en-input');
@@ -332,7 +326,7 @@
             reader.readAsText(file);
         }
 
-        // Init
+        // Initialize from Cache or URL
         const params = new URLSearchParams(window.location.search);
         const urlData = params.get('list');
         const cachedData = localStorage.getItem('appleVocabData');
@@ -349,7 +343,9 @@
                 if (data.length > 0) data.forEach(item => addRow(false, item[0], item[1]));
                 else addRow();
             } catch (e) { addRow(); }
-        } else { addRow(); }
+        } else {
+            addRow();
+        }
     </script>
 </body>
 </html>
