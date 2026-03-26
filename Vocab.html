@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vocab Manager</title>
+    <style>
+        :root {
+            --system-blue: #007aff;
+            --system-red: #ff3b30;
+            --system-gray-bg: #f5f5f7;
+            --system-card-bg: #ffffff;
+            --system-border: #d2d2d7;
+            --text-primary: #1d1d1f;
+            --text-secondary: #86868b;
+            --text-tertiary: #a1a1a6;
+            --mode-active: #424245; /* Dark Grey for Modes */
+            --radius: 12px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+            background-color: var(--system-gray-bg);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 100px 20px 140px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Fixed Navigation */
+        h1 {
+            font-weight: 600; font-size: 22px; letter-spacing: -0.5px;
+            position: fixed; top: 20px; left: 30px; margin: 0; z-index: 100;
+        }
+
+        .top-nav {
+            position: fixed; top: 25px; right: 30px;
+            display: flex; gap: 24px; z-index: 100;
+        }
+
+        .minimal-btn {
+            background: none; border: none;
+            color: var(--text-tertiary); font-size: 13px;
+            cursor: pointer; padding: 5px; transition: all 0.2s ease;
+        }
+        .minimal-btn:hover { color: var(--text-primary); }
+
+        /* Mode Hub (Bottom Left Anchor) */
+        .mode-hub {
+            position: fixed; bottom: 30px; left: 30px;
+            display: flex; flex-direction: column-reverse;
+            align-items: flex-start; z-index: 1000;
+        }
+
+        .mode-trigger {
+            font-weight: 700; color: var(--mode-active); cursor: pointer; font-size: 14px;
+            padding: 5px 0; user-select: none;
+        }
+
+        .mode-options {
+            display: none; flex-direction: column; 
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            padding: 8px; border-radius: 14px;
+            border: 1px solid rgba(0,0,0,0.08);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+            margin-bottom: 12px; min-width: 160px;
+        }
+        .mode-options.show { display: flex; }
+
+        .mode-link {
+            font-size: 13px; color: var(--text-primary); cursor: pointer; 
+            padding: 8px 12px; border-radius: 8px; transition: 0.2s;
+        }
+        .mode-link:hover { background: var(--mode-active); color: white; }
+
+        /* Containers */
+        .container { width: 100%; max-width: 700px; display: none; }
+        .container.active { display: block; }
+
+        /* Edit Mode List */
+        .vocab-row {
+            display: grid; grid-template-columns: 44px 1fr 1fr 44px;
+            background: var(--system-card-bg); margin-bottom: 8px;
+            border-radius: var(--radius); border: 1px solid rgba(0,0,0,0.02);
+        }
+        textarea {
+            padding: 18px 12px; border: none; font-size: 15px; outline: none;
+            background: transparent; color: var(--text-primary); font-family: inherit;
+            resize: none; overflow: hidden; line-height: 1.4; width: 100%; box-sizing: border-box;
+        }
+        .zh-input { border-left: 1px solid #f8f8f8; color: var(--text-secondary); }
+
+        /* Flashcards */
+        .card-view {
+            background: var(--system-card-bg); border-radius: 24px;
+            height: 320px; display: flex; align-items: center; justify-content: center;
+            text-align: center; cursor: pointer; box-shadow: 0 10px 40px rgba(0,0,0,0.04);
+            font-size: 32px; font-weight: 500; padding: 40px; user-select: none;
+        }
+        .card-controls { margin-top: 40px; display: flex; justify-content: center; gap: 20px; align-items: center; }
+        
+        /* Custom Neutral Checkbox */
+        .shuffle-label {
+            font-size: 13px; color: var(--text-secondary); cursor: pointer; 
+            display: flex; align-items: center; gap: 8px;
+        }
+        input[type="checkbox"] {
+            accent-color: var(--mode-active); /* Replaces blue with dark grey */
+            cursor: pointer;
+        }
+
+        /* Spell Mode */
+        .spell-row {
+            background: var(--system-card-bg); padding: 12px 18px;
+            border-radius: var(--radius); margin-bottom: 10px;
+            display: flex; align-items: center; gap: 15px;
+        }
+        .spell-translation { width: 35%; font-size: 15px; color: var(--text-secondary); }
+        .spell-input {
+            flex: 1; padding: 12px; border: 1px solid var(--system-gray-bg);
+            border-radius: 10px; outline: none; font-family: inherit; font-size: 15px;
+        }
+        .spell-input.wrong { border-color: var(--system-red); color: var(--system-red); background: #fff8f8; }
+        
+        .score-box { 
+            background: var(--mode-active); /* Replaces blue with neutral dark grey */
+            color: white; padding: 16px; border-radius: 16px; 
+            margin-bottom: 25px; text-align: center; font-weight: 600; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        /* UI Elements */
+        .icon-btn { display: flex; align-items: center; justify-content: center; cursor: pointer; color: #d2d2d7; }
+        .audio-btn:hover { color: var(--mode-active); }
+        .del-btn:hover { color: var(--system-red); }
+        .apple-btn {
+            background: var(--text-primary); color: white; border: none;
+            padding: 12px 30px; border-radius: 22px; font-weight: 600; cursor: pointer; font-size: 14px;
+        }
+        .hint { margin-top: 40px; text-align: center; font-size: 12px; color: var(--text-tertiary); opacity: 0.8; }
+        #fileInput { display: none; }
+        .icon { width: 16px; height: 16px; fill: currentColor; }
+    </style>
+</head>
+<body>
+
+    <h1>Vocab</h1>
+
+    <nav class="top-nav">
+        <button id="resetBtn" class="minimal-btn" onclick="handleReset()">New</button>
+        <button class="minimal-btn" onclick="document.getElementById('fileInput').click()">Import</button>
+        <button class="minimal-btn" onclick="exportCSV()">Export</button>
+        <button class="minimal-btn" onclick="shareList()">Share</button>
+        <input type="file" id="fileInput" accept=".csv" onchange="importCSV(event)">
+    </nav>
+
+    <div id="editContainer" class="container active">
+        <div id="vocabList"></div>
+        <div class="hint"><b>Enter/Tab</b> Next Item &nbsp; • &nbsp; <b>Arrows</b> Move Field &nbsp; • &nbsp; <b>Esc</b> Speak</div>
+    </div>
+
+    <div id="flashContainer" class="container">
+        <div class="card-view" id="flashcard" onclick="flipCard()">Click to Start</div>
+        <div class="card-controls">
+            <button class="minimal-btn" style="color:var(--text-primary)" onclick="prevCard()">← Prev</button>
+            <label class="shuffle-label">
+                <input type="checkbox" id="shuffleToggle" onchange="startFlashcards()"> Shuffle
+            </label>
+            <button class="apple-btn" onclick="nextCard()">Next →</button>
+        </div>
+    </div>
+
+    <div id="spellContainer" class="container">
+        <div id="scoreDisplay" class="score-box" style="display:none"></div>
+        <div id="spellList"></div>
+        <div style="display:flex; justify-content:center; gap:15px; margin-top:30px;">
+            <button id="spellSubmit" class="apple-btn" onclick="submitSpell()">Submit</button>
+            <button id="spellRestart" class="apple-btn" style="background:#e5e5ea; color:black; display:none" onclick="startSpellMode()">Restart</button>
+        </div>
+    </div>
+
+    <div class="mode-hub">
+        <div class="mode-trigger" id="modeTrigger" onclick="toggleModeMenu()">Edit Mode (0 Vocab Items)</div>
+        <div class="mode-options" id="modeOptions">
+            <div class="mode-link" onclick="switchMode('edit')">Edit Mode</div>
+            <div class="mode-link" onclick="switchMode('flash')">Flashcard Mode</div>
+            <div class="mode-link" onclick="switchMode('spell')">Spell Mode</div>
+        </div>
+    </div>
+
+    <script>
+        const vocabList = document.getElementById('vocabList');
+        let currentMode = 'edit';
+        let flashData = [];
+        let flashIdx = 0;
+        let flashFlipped = false;
+
+        const audioIcon = `<svg class="icon" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>`;
+        const deleteIcon = `<svg class="icon" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>`;
+
+        function updateCounter() {
+            const count = document.querySelectorAll('.vocab-row').length;
+            let label = "Edit Mode";
+            if(currentMode === 'flash') label = "Flashcard Mode";
+            if(currentMode === 'spell') label = "Spell Mode";
+            document.getElementById('modeTrigger').innerText = `${label} (${count} Vocab Item${count !== 1 ? 's' : ''})`;
+        }
+
+        function toggleModeMenu() {
+            document.getElementById('modeOptions').classList.toggle('show');
+        }
+
+        function switchMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
+            document.getElementById('modeOptions').classList.remove('show');
+            if(mode === 'edit') document.getElementById('editContainer').classList.add('active');
+            else if(mode === 'flash') { document.getElementById('flashContainer').classList.add('active'); startFlashcards(); }
+            else if(mode === 'spell') { document.getElementById('spellContainer').classList.add('active'); startSpellMode(); }
+            updateCounter();
+        }
+
+        function getRawData() {
+            const data = [];
+            document.querySelectorAll('.vocab-row').forEach(row => {
+                const en = row.querySelector('.en-input').value.trim();
+                const zh = row.querySelector('.zh-input').value.trim();
+                if (en) data.push({ en, zh });
+            });
+            return data;
+        }
+
+        function saveToCache() {
+            const data = getRawData().map(i => [i.en, i.zh]);
+            localStorage.setItem('appleVocabData', JSON.stringify(data));
+            updateCounter();
+        }
+
+        function startFlashcards() {
+            flashData = getRawData();
+            if (flashData.length === 0) { document.getElementById('flashcard').innerText = "Empty List"; return; }
+            if (document.getElementById('shuffleToggle').checked) {
+                flashData = [...flashData].sort(() => Math.random() - 0.5);
+            }
+            flashIdx = 0; showCard();
+        }
+        function showCard() { flashFlipped = false; document.getElementById('flashcard').innerText = flashData[flashIdx].en; }
+        function flipCard() { if (flashData.length === 0) return; flashFlipped = !flashFlipped; document.getElementById('flashcard').innerText = flashFlipped ? flashData[flashIdx].zh : flashData[flashIdx].en; }
+        function nextCard() { if (flashData.length === 0) return; flashIdx = (flashIdx + 1) % flashData.length; showCard(); }
+        function prevCard() { if (flashData.length === 0) return; flashIdx = (flashIdx - 1 + flashData.length) % flashData.length; showCard(); }
+
+        let spellSessionData = [];
+        function startSpellMode() {
+            const raw = getRawData();
+            if (raw.length === 0) return;
+            spellSessionData = [...raw].sort(() => Math.random() - 0.5);
+            const listEl = document.getElementById('spellList');
+            listEl.innerHTML = "";
+            document.getElementById('scoreDisplay').style.display = "none";
+            document.getElementById('spellRestart').style.display = "none";
+            document.getElementById('spellSubmit').style.display = "block";
+            spellSessionData.forEach((item, i) => {
+                const row = document.createElement('div');
+                row.className = "spell-row";
+                row.innerHTML = `<div class="icon-btn audio-btn" onclick="speak('${item.en.replace(/'/g, "\\'")}')">${audioIcon}</div>
+                    <div class="spell-translation">${item.zh}</div>
+                    <input type="text" class="spell-input" data-idx="${i}" placeholder="Type English...">`;
+                listEl.appendChild(row);
+            });
+        }
+
+        function submitSpell() {
+            const inputs = document.querySelectorAll('.spell-input');
+            let score = 0;
+            inputs.forEach(input => {
+                const idx = input.dataset.idx;
+                const userVal = input.value.trim().toLowerCase();
+                const correctVal = spellSessionData[idx].en.toLowerCase();
+                if (userVal === correctVal) { score++; input.style.borderColor = "#34c759"; }
+                else { input.classList.add('wrong'); input.value = `${userVal || '??'} → ${spellSessionData[idx].en}`; }
+                input.disabled = true;
+            });
+            document.getElementById('scoreDisplay').innerText = `Result: ${score} / ${spellSessionData.length}`;
+            document.getElementById('scoreDisplay').style.display = "block";
+            document.getElementById('spellSubmit').style.display = "none";
+            document.getElementById('spellRestart').style.display = "block";
+        }
+
+        function autoResize(el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }
+        function speak(text) { if (!text) return; window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = 'en-US'; u.rate = 0.9; window.speechSynthesis.speak(u); }
+
+        function createRow(en = "", zh = "") {
+            const row = document.createElement('div');
+            row.className = 'vocab-row';
+            row.innerHTML = `<div class="icon-btn audio-btn">${audioIcon}</div>
+                <textarea class="en-input" placeholder="Vocab Item" rows="1">${en}</textarea>
+                <textarea class="zh-input" placeholder="Translation" rows="1">${zh}</textarea>
+                <div class="icon-btn del-btn">${deleteIcon}</div>`;
+            const enInput = row.querySelector('.en-input');
+            const zhInput = row.querySelector('.zh-input');
+            row.querySelector('.audio-btn').onclick = () => speak(enInput.value);
+            row.querySelector('.del-btn').onclick = () => { if(document.querySelectorAll('.vocab-row').length > 1) { row.remove(); saveToCache(); } else { enInput.value=""; zhInput.value=""; saveToCache(); } };
+            enInput.addEventListener('blur', async () => {
+                if(!enInput.value.trim() && !zhInput.value.trim() && document.querySelectorAll('.vocab-row').length > 1) { row.remove(); saveToCache(); return; }
+                if(enInput.value && !zhInput.value) {
+                    zhInput.value = "...";
+                    const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=zh-TW&dt=t&q=${encodeURIComponent(enInput.value)}`);
+                    const d = await res.json(); zhInput.value = d[0][0][0]; autoResize(zhInput); saveToCache();
+                }
+            });
+            [enInput, zhInput].forEach(el => el.oninput = () => { autoResize(el); saveToCache(); });
+            enInput.onkeydown = (e) => {
+                if(e.key === 'Escape') { speak(enInput.value); e.preventDefault(); }
+                if(e.key === 'Enter' || e.key === 'Tab') { e.preventDefault(); const next = row.nextElementSibling?.querySelector('.en-input'); if(next) next.focus(); else if(enInput.value) addRow(true); }
+                if(e.key === 'ArrowRight') zhInput.focus();
+                if(e.key === 'ArrowDown') row.nextElementSibling?.querySelector('.en-input')?.focus();
+                if(e.key === 'ArrowUp') row.previousElementSibling?.querySelector('.en-input')?.focus();
+            };
+            zhInput.onkeydown = (e) => {
+                if(e.key === 'ArrowLeft') enInput.focus();
+                if(e.key === 'ArrowDown') row.nextElementSibling?.querySelector('.zh-input')?.focus();
+                if(e.key === 'ArrowUp') row.previousElementSibling?.querySelector('.zh-input')?.focus();
+            };
+            setTimeout(() => { autoResize(enInput); autoResize(zhInput); }, 0);
+            return row;
+        }
+
+        function addRow(focus = false, en = "", zh = "") {
+            const row = createRow(en, zh);
+            vocabList.appendChild(row);
+            if(focus) setTimeout(() => row.querySelector('.en-input').focus(), 10);
+            saveToCache();
+        }
+
+        function handleReset() { if(confirm("Clear all items?")) { vocabList.innerHTML = ""; localStorage.removeItem('appleVocabData'); addRow(true); } }
+        function exportCSV() { let csv = "Item,Translation\n"; getRawData().forEach(i => csv += `"${i.en}","${i.zh}"\n`); const blob = new Blob([csv], {type:'text/csv'}); const url = window.URL.createObjectURL(blob); const a = document.createElement('a'); a.href=url; a.download='vocab.csv'; a.click(); }
+        function importCSV(e) { const f = e.target.files[0]; if(!f) return; const r = new FileReader(); r.onload = (ev) => { const lines = ev.target.result.split('\n').slice(1); vocabList.innerHTML = ""; lines.forEach(l => { const [en, zh] = l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); if(en) addRow(false, en.replace(/"/g,"").trim(), zh?zh.replace(/"/g,"").trim():""); }); saveToCache(); }; r.readAsText(f); }
+        function shareList() { const data = getRawData().map(i=>[i.en, i.zh]); const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(data)))); const url = new URL(window.location); url.searchParams.set('list', encoded); navigator.clipboard.writeText(url.href).then(()=>alert("Link Copied")); }
+
+        const cached = localStorage.getItem('appleVocabData');
+        const params = new URLSearchParams(window.location.search);
+        if(params.get('list')) {
+            const d = JSON.parse(decodeURIComponent(escape(atob(params.get('list')))));
+            d.forEach(i => addRow(false, i[0], i[1]));
+            window.history.replaceState({}, '', window.location.pathname);
+        } else if(cached) {
+            JSON.parse(cached).forEach(i => addRow(false, i[0], i[1]));
+        } else { addRow(); }
+        updateCounter();
+    </script>
+</body>
+</html>
