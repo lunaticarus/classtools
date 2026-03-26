@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vocab</title>
+    <title>Vocab Manager</title>
     <style>
         :root {
             --system-blue: #007aff;
@@ -53,7 +53,7 @@
         
         .modal-actions { display: flex; flex-direction: column; gap: 10px; width: 100%; }
 
-        /* Existing Styles */
+        /* Mode Hub & Status */
         .mode-hub { position: fixed; bottom: 30px; left: 30px; display: flex; flex-direction: column-reverse; align-items: flex-start; z-index: 1000; }
         .mode-trigger { font-weight: 700; color: var(--mode-active); cursor: pointer; font-size: 14px; padding: 5px 0; user-select: none; }
         .mode-options { display: none; flex-direction: column; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 8px; border-radius: 14px; border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 8px 32px rgba(0,0,0,0.12); margin-bottom: 12px; min-width: 160px; }
@@ -61,14 +61,41 @@
         .mode-link { font-size: 13px; color: var(--text-primary); cursor: pointer; padding: 8px 12px; border-radius: 8px; transition: 0.2s; }
         .mode-link:hover { background: var(--mode-active); color: white; }
         .status-counter { position: fixed; bottom: 35px; right: 30px; font-weight: 700; color: var(--mode-active); font-size: 14px; z-index: 100; pointer-events: none; }
+        
         .container { width: 100%; max-width: 700px; display: none; }
         .container.active { display: block; }
+        
+        /* Edit Row */
         .vocab-row { display: grid; grid-template-columns: 44px 1fr 1fr 44px; background: var(--system-card-bg); margin-bottom: 8px; border-radius: var(--radius); border: 1px solid rgba(0,0,0,0.02); }
         textarea { padding: 18px 12px; border: none; font-size: 15px; outline: none; background: transparent; color: var(--text-primary); font-family: inherit; resize: none; overflow: hidden; line-height: 1.4; width: 100%; box-sizing: border-box; }
         .zh-input { border-left: 1px solid #f8f8f8; color: var(--text-secondary); }
-        .card-view { background: var(--system-card-bg); border-radius: 24px; height: 320px; width: 100%; max-width: 600px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; cursor: pointer; box-shadow: 0 10px 40px rgba(0,0,0,0.04); font-size: 32px; font-weight: 500; padding: 40px; user-select: none; position: relative; box-sizing: border-box; }
-        .card-audio-trigger { position: absolute; top: 20px; right: 20px; color: #d2d2d7; transition: color 0.2s; padding: 10px; }
+
+        /* Flashcard 3D Flip */
+        .card-scene {
+            width: 100%; max-width: 600px; height: 320px;
+            perspective: 1000px; margin: 0 auto;
+        }
+        .card-inner {
+            position: relative; width: 100%; height: 100%;
+            text-align: center; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d; cursor: pointer;
+        }
+        .card-inner.is-flipped { transform: rotateY(180deg); }
+        
+        .card-face {
+            position: absolute; width: 100%; height: 100%;
+            -webkit-backface-visibility: hidden; backface-visibility: hidden;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            border-radius: 24px; background: var(--system-card-bg);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.04);
+            padding: 40px; box-sizing: border-box; font-size: 32px; font-weight: 500;
+        }
+        .card-back { transform: rotateY(180deg); }
+        
+        .card-audio-trigger { position: absolute; top: 20px; right: 20px; color: #d2d2d7; transition: color 0.2s; padding: 10px; z-index: 10; }
         .card-audio-trigger:hover { color: var(--mode-active); }
+
+        /* Spelling/Buttons */
         .card-controls { margin-top: 40px; display: flex; justify-content: center; gap: 20px; align-items: center; }
         .shuffle-label { font-size: 13px; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; gap: 8px; }
         input[type="checkbox"] { accent-color: var(--mode-active); cursor: pointer; }
@@ -116,9 +143,16 @@
     </div>
 
     <div id="flashContainer" class="container">
-        <div class="card-view" id="flashcard" onclick="flipCard()">
-            <div class="card-audio-trigger" id="cardAudio" onclick="playCardAudio(event)"></div>
-            <span id="cardText">Click to Start</span>
+        <div class="card-scene">
+            <div class="card-inner" id="flashcard" onclick="flipCard()">
+                <div class="card-face card-front">
+                    <div class="card-audio-trigger" onclick="playCardAudio(event)"></div>
+                    <span id="frontText">...</span>
+                </div>
+                <div class="card-face card-back">
+                    <span id="backText">...</span>
+                </div>
+            </div>
         </div>
         <div class="card-controls">
             <button class="minimal-btn" style="color:var(--text-primary)" onclick="prevCard()">← Prev</button>
@@ -154,7 +188,6 @@
         let currentMode = 'edit';
         let flashData = [];
         let flashIdx = 0;
-        let flashFlipped = false;
         let lastGeneratedUrl = "";
 
         const audioIcon = `<svg class="icon" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>`;
@@ -200,18 +233,50 @@
             updateStatus();
         }
 
+        // Flashcard Logic
         function startFlashcards() {
             flashData = getRawData();
-            if (flashData.length === 0) { document.getElementById('cardText').innerText = "Empty List"; document.getElementById('cardAudio').innerHTML = ""; return; }
+            if (flashData.length === 0) { 
+                document.getElementById('frontText').innerText = "Empty List"; 
+                document.getElementById('backText').innerText = "Add items in Edit Mode";
+                return; 
+            }
             if (document.getElementById('shuffleToggle').checked) flashData = [...flashData].sort(() => Math.random() - 0.5);
-            flashIdx = 0; showCard();
+            flashIdx = 0; 
+            showCard();
         }
-        function showCard() { flashFlipped = false; document.getElementById('cardText').innerText = flashData[flashIdx].en; document.getElementById('cardAudio').innerHTML = audioIconLarge; }
-        function flipCard() { if (flashData.length === 0) return; flashFlipped = !flashFlipped; document.getElementById('cardText').innerText = flashFlipped ? flashData[flashIdx].zh : flashData[flashIdx].en; }
-        function playCardAudio(e) { e.stopPropagation(); if (flashData[flashIdx]) speak(flashData[flashIdx].en); }
-        function nextCard() { if (flashData.length === 0) return; flashIdx = (flashIdx + 1) % flashData.length; showCard(); }
-        function prevCard() { if (flashData.length === 0) return; flashIdx = (flashIdx - 1 + flashData.length) % flashData.length; showCard(); }
 
+        function showCard() { 
+            const cardInner = document.getElementById('flashcard');
+            cardInner.classList.remove('is-flipped'); // Always start unflipped
+            document.getElementById('frontText').innerText = flashData[flashIdx].en; 
+            document.getElementById('backText').innerText = flashData[flashIdx].zh; 
+            document.querySelectorAll('.card-audio-trigger').forEach(el => el.innerHTML = audioIconLarge);
+        }
+
+        function flipCard() { 
+            if (flashData.length === 0) return; 
+            document.getElementById('flashcard').classList.toggle('is-flipped');
+        }
+
+        function playCardAudio(e) { 
+            e.stopPropagation(); 
+            if (flashData[flashIdx]) speak(flashData[flashIdx].en); 
+        }
+
+        function nextCard() { 
+            if (flashData.length === 0) return; 
+            flashIdx = (flashIdx + 1) % flashData.length; 
+            showCard(); 
+        }
+
+        function prevCard() { 
+            if (flashData.length === 0) return; 
+            flashIdx = (flashIdx - 1 + flashData.length) % flashData.length; 
+            showCard(); 
+        }
+
+        // Spelling Mode Logic
         let spellSessionData = [];
         function startSpellMode() {
             const raw = getRawData();
@@ -306,17 +371,11 @@
             const url = new URL(window.location.origin + window.location.pathname);
             url.searchParams.set('list', encoded);
             lastGeneratedUrl = url.href;
-
-            // Generate QR
             const qrImg = document.getElementById('qrImage');
             qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(lastGeneratedUrl)}`;
-            
-            // Show Modal
             document.getElementById('qrOverlay').style.display = 'flex';
             document.getElementById('copyModalBtn').innerText = "Copy Link";
             document.getElementById('copyModalBtn').style.background = "var(--text-primary)";
-            
-            // Auto-copy link to clipboard as well
             navigator.clipboard.writeText(lastGeneratedUrl);
         }
 
@@ -325,10 +384,7 @@
                 const btn = document.getElementById('copyModalBtn');
                 btn.innerText = "Copied!";
                 btn.style.background = "var(--system-green)";
-                setTimeout(() => {
-                    btn.innerText = "Copy Link";
-                    btn.style.background = "var(--text-primary)";
-                }, 2000);
+                setTimeout(() => { btn.innerText = "Copy Link"; btn.style.background = "var(--text-primary)"; }, 2000);
             });
         }
 
