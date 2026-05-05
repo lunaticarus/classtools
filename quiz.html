@@ -1,0 +1,381 @@
+import React, { useState, useEffect } from 'react';
+import { Trophy, ArrowRight, ArrowLeft, CheckCircle, XCircle, BookOpen, Lock, ClipboardCheck, AlertCircle, RefreshCw } from 'lucide-react';
+
+const App = () => {
+  const [view, setView] = useState('menu'); // 'menu', 'quiz', 'summary'
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [activeQuestions, setActiveQuestions] = useState([]);
+  const [answers, setAnswers] = useState({});
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [userSentence, setUserSentence] = useState('');
+  const [passingCode, setPassingCode] = useState('');
+
+  const masterQuestions = [
+    // Section A: 30 Questions
+    { type: 'A', q: "The student ______ won the English public speaking contest is from my class.", a: "who" },
+    { type: 'A', q: "My neighbour, ______ son is a famous actor, just moved to Kowloon.", a: "whose" },
+    { type: 'A', q: "This is the dictionary ______ I use for my DSE English preparation.", a: "which" },
+    { type: 'A', q: "The Hong Kong Museum of History, ______ was built in 1975, attracts many tourists.", a: "which" },
+    { type: 'A', q: "Do you know the girl ______ mother works as a doctor in Queen Mary Hospital?", a: "whose" },
+    { type: 'A', q: "My grandfather, ______ is 85 years old, still walks to the park every morning.", a: "who" },
+    { type: 'A', q: "The MTR train ______ arrived just now was completely full.", a: "which" },
+    { type: 'A', q: "The Lantau Link, ______ connects Lantau Island to the rest of Hong Kong, includes the Tsing Ma Bridge.", a: "which" },
+    { type: 'A', q: "That is the teacher ______ advice helped me choose my university major.", a: "whose" },
+    { type: 'A', q: "Jennifer, ______ parents are both engineers, wants to study architecture.", a: "whose" },
+    { type: 'A', q: "The smartphone ______ I bought last week has already stopped working.", a: "which" },
+    { type: 'A', q: "Ocean Park, ______ is one of Hong Kong’s most popular attractions, recently opened a new roller coaster.", a: "which" },
+    { type: 'A', q: "The firefighter ______ rescued the cat from the tree received a medal.", a: "who" },
+    { type: 'A', q: "My best friend, ______ brother plays football for the Hong Kong team, is very proud.", a: "whose" },
+    { type: 'A', q: "The restaurant ______ serves the best egg waffles in Causeway Bay is always crowded.", a: "which" },
+    { type: 'A', q: "The Peak Tower, ______ design is unique, offers a spectacular view of Victoria Harbour.", a: "whose" },
+    { type: 'A', q: "Is this the artist ______ painting won first prize in the competition?", a: "whose" },
+    { type: 'A', q: "Mr. Chan, ______ has taught at our school for 20 years, is retiring next month.", a: "who" },
+    { type: 'A', q: "The laptop ______ I borrowed from the library is very fast.", a: "which" },
+    { type: 'A', q: "My cousin, ______ dream is to become a pilot, has just started flying lessons.", a: "whose" },
+    { type: 'A', q: "The police officer ______ helped us find the way was very friendly.", a: "who" },
+    { type: 'A', q: "Hong Kong Disneyland, ______ was fully booked last summer, is very expensive.", a: "which" },
+    { type: 'A', q: "The woman ______ handbag was stolen reported the incident immediately.", a: "whose" },
+    { type: 'A', q: "Dr. Lam, ______ research on climate change is famous worldwide, will give a lecture next week.", a: "whose" },
+    { type: 'A', q: "This is the pen ______ my father used when he was a student.", a: "which" },
+    { type: 'A', q: "The old man, ______ dog barks every night, lives alone on the ground floor.", a: "whose" },
+    { type: 'A', q: "The song ______ they played on the radio this morning reminded me of my childhood.", a: "which" },
+    { type: 'A', q: "Victoria Harbour, ______ water is famously deep, hosts the annual fireworks display.", a: "whose" },
+    { type: 'A', q: "The athlete ______ broke the Hong Kong record is only 18 years old.", a: "who" },
+    { type: 'A', q: "My grandmother, ______ cooking is known throughout our village, taught me how to make dumplings.", a: "whose" },
+
+    // Section B: 30 Questions with multiple acceptable answers
+    { type: 'B', s1: "The student is from Sha Tin.", s2: "He won the chess competition.", a: ["The student who won the chess competition is from Sha Tin.", "The student who is from Sha Tin won the chess competition."] },
+    { type: 'B', s1: "My uncle lives in Canada.", s2: "His daughter is a professional violinist.", a: ["My uncle, whose daughter is a professional violinist, lives in Canada."] },
+    { type: 'B', s1: "This is the book.", s2: "I read it during the summer holiday.", a: ["This is the book which I read during the summer holiday."] },
+    { type: 'B', s1: "The Peak is a famous tourist spot.", s2: "It offers a panoramic view of Hong Kong.", a: ["The Peak, which offers a panoramic view of Hong Kong, is a famous tourist spot.", "The Peak, which is a famous tourist spot, offers a panoramic view of Hong Kong."] },
+    { type: 'B', s1: "The woman is a dentist.", s2: "Her son studies in my class.", a: ["The woman whose son studies in my class is a dentist."] },
+    { type: 'B', s1: "My father bought a car last month.", s2: "The car is very fuel-efficient.", a: ["My father bought a car last month which is very fuel-efficient.", "The car which my father bought last month is very fuel-efficient."] },
+    { type: 'B', s1: "Temple Street Night Market is famous.", s2: "It is located in Kowloon.", a: ["Temple Street Night Market, which is located in Kowloon, is famous.", "Temple Street Night Market, which is famous, is located in Kowloon."] },
+    { type: 'B', s1: "The boy helped me find my way.", s2: "He is from my school.", a: ["The boy who helped me find my way is from my school.", "The boy who is from my school helped me find my way."] },
+    { type: 'B', s1: "My sister is studying in the UK.", s2: "Her best friend is from France.", a: ["My sister, whose best friend is from France, is studying in the UK."] },
+    { type: 'B', s1: "The laptop is very expensive.", s2: "My brother wants to buy it.", a: ["The laptop which my brother wants to buy is very expensive.", "My brother wants to buy the laptop which is very expensive."] },
+    { type: 'B', s1: "Dr. Wong is a famous surgeon.", s2: "His book on heart disease became a bestseller.", a: ["Dr. Wong, whose book on heart disease became a bestseller, is a famous surgeon."] },
+    { type: 'B', s1: "The dog was barking loudly.", s2: "It belonged to my neighbour.", a: ["The dog which belonged to my neighbour was barking loudly.", "The dog which was barking loudly belonged to my neighbour."] },
+    { type: 'B', s1: "The Hong Kong Coliseum is in Hung Hom.", s2: "Many famous singers have performed in this place.", a: ["The Hong Kong Coliseum, which many famous singers have performed in, is in Hung Hom.", "Many famous singers have performed in the Hong Kong Coliseum, which is in Hung Hom."] },
+    { type: 'B', s1: "The artist painted this mural.", s2: "He is from Italy.", a: ["The artist who painted this mural is from Italy.", "The artist who is from Italy painted this mural."] },
+    { type: 'B', s1: "My grandfather gave me a watch.", s2: "The watch was his father’s.", a: ["My grandfather gave me a watch which was his father's.", "The watch which my grandfather gave me was his father's."] },
+    { type: 'B', s1: "The athlete broke the Asian record.", s2: "She trained for ten years.", a: ["The athlete who broke the Asian record trained for ten years.", "The athlete who trained for ten years broke the Asian record."] },
+    { type: 'B', s1: "The University of Hong Kong is the oldest university in Hong Kong.", s2: "It was founded in 1911.", a: ["The University of Hong Kong, which was founded in 1911, is the oldest university in Hong Kong.", "The University of Hong Kong, which is the oldest university in Hong Kong, was founded in 1911."] },
+    { type: 'B', s1: "The girl is my cousin.", s2: "Her hair is very long.", a: ["The girl whose hair is very long is my cousin."] },
+    { type: 'B', s1: "Our English teacher is from the UK.", s2: "Her accent is very clear.", a: ["Our English teacher, whose accent is very clear, is from the UK."] },
+    { type: 'B', s1: "The camera is very old.", s2: "My father still uses it.", a: ["The camera which my father still uses is very old.", "My father still uses the camera which is very old."] },
+    { type: 'B', s1: "The Clock Tower is in Tsim Sha Tsui.", s2: "It is a declared monument.", a: ["The Clock Tower, which is in Tsim Sha Tsui, is a declared monument.", "The Clock Tower, which is a declared monument, is in Tsim Sha Tsui."] },
+    { type: 'B', s1: "The man is a famous chef.", s2: "His restaurant has three Michelin stars.", a: ["The man whose restaurant has three Michelin stars is a famous chef.", "The man is a famous chef whose restaurant has three Michelin stars."] },
+    { type: 'B', s1: "Jenny is moving to Japan next month.", s2: "Her parents own a restaurant in Causeway Bay.", a: ["Jenny, whose parents own a restaurant in Causeway Bay, is moving to Japan next month."] },
+    { type: 'B', s1: "The phone belongs to my brother.", s2: "It is on the table.", a: ["The phone which is on the table belongs to my brother.", "The phone which belongs to my brother is on the table."] },
+    { type: 'B', s1: "The Kowloon Walled City Park is very peaceful.", s2: "It was once a crowded settlement.", a: ["The Kowloon Walled City Park, which was once a crowded settlement, is very peaceful.", "The Kowloon Walled City Park, which is very peaceful, was once a crowded settlement."] },
+    { type: 'B', s1: "The child is sleeping peacefully.", s2: "His mother is reading a story.", a: ["The child whose mother is reading a story is sleeping peacefully."] },
+    { type: 'B', s1: "My grandmother baked these cookies.", s2: "Her recipe is a family secret.", a: ["My grandmother, whose recipe is a family secret, baked these cookies."] },
+    { type: 'B', s1: "The building was damaged in the typhoon.", s2: "It is being repaired now.", a: ["The building which was damaged in the typhoon is being repaired now.", "The building which is being repaired now was damaged in the typhoon."] },
+    { type: 'B', s1: "The Hong Kong Cultural Centre is located in Tsim Sha Tsui.", s2: "Its architecture is striking.", a: ["The Hong Kong Cultural Centre, whose architecture is striking, is located in Tsim Sha Tsui."] },
+    { type: 'B', s1: "The musician is only 16 years old.", s2: "She composed this symphony.", a: ["The musician who composed this symphony is only 16 years old.", "The musician who is only 16 years old composed this symphony."] }
+  ];
+
+  const normalize = (str) => str.toLowerCase().replace(/\s+/g, ' ').trim().replace(/[.,!?;]$/, "");
+
+  const handleStart = () => {
+    const sectionA = masterQuestions.filter(q => q.type === 'A');
+    const shuffledA = [...sectionA].sort(() => 0.5 - Math.random()).slice(0, 15);
+    const sectionB = masterQuestions.filter(q => q.type === 'B');
+    const shuffledB = [...sectionB].sort(() => 0.5 - Math.random()).slice(0, 15);
+
+    setActiveQuestions([...shuffledA, ...shuffledB]);
+    setCurrentIndex(0);
+    setAnswers({});
+    setShowFeedback(false);
+    setUserSentence('');
+    setView('quiz');
+  };
+
+  const handlePronounSelect = (option) => {
+    if (showFeedback) return;
+    setAnswers({ ...answers, [currentIndex]: option });
+    setShowFeedback(true);
+  };
+
+  const checkSentence = () => {
+    if (showFeedback) return;
+    setAnswers({ ...answers, [currentIndex]: userSentence });
+    setShowFeedback(true);
+  };
+
+  const nextQuestion = () => {
+    if (currentIndex < activeQuestions.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+      setShowFeedback(false);
+      setUserSentence('');
+    } else {
+      finishQuiz();
+    }
+  };
+
+  const finishQuiz = () => {
+    const score = calculateFinalScore();
+    const pass = score >= 24; 
+    
+    if (pass) {
+      const now = new Date();
+      
+      // Part 1: YYMMDD
+      const year = String(now.getFullYear()).slice(-2);
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const dateStr = `${year}${month}${day}`;
+
+      // Part 2: [AA][Score+3][Score-3]
+      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      const randomAA1 = chars[Math.floor(Math.random() * 26)] + chars[Math.floor(Math.random() * 26)];
+      const midPart = `${randomAA1}${score + 3}${score - 3}`;
+
+      // Part 3: [HHMMSS][Score][AA]
+      const hours = String(now.getHours()).padStart(2, '0');
+      const mins = String(now.getMinutes()).padStart(2, '0');
+      const secs = String(now.getSeconds()).padStart(2, '0');
+      const randomAA2 = chars[Math.floor(Math.random() * 26)] + chars[Math.floor(Math.random() * 26)];
+      const endPart = `${hours}${mins}${secs}${score}${randomAA2}`;
+
+      const code = `${dateStr}-${midPart}-${endPart}`;
+      setPassingCode(code);
+    }
+    setView('summary');
+  };
+
+  const calculateFinalScore = () => {
+    let score = 0;
+    activeQuestions.forEach((q, idx) => {
+      const studentAns = answers[idx] || "";
+      if (q.type === 'A') {
+        if (studentAns === q.a) score++;
+      } else {
+        const isMatch = q.a.some(validAns => normalize(studentAns) === normalize(validAns));
+        if (isMatch) score++;
+      }
+    });
+    return score;
+  };
+
+  const isCorrect = (idx) => {
+    const q = activeQuestions[idx];
+    const ans = answers[idx] || "";
+    if (!q) return false;
+    if (q.type === 'A') return ans === q.a;
+    return q.a.some(validAns => normalize(ans) === normalize(validAns));
+  };
+
+  const copyCode = () => {
+    const text = `Relative Clauses Quiz (30 Qs) Completion Code: ${passingCode}`;
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textArea);
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50 p-4 md:p-8 font-sans text-slate-900">
+      <div className="max-w-3xl mx-auto">
+        
+        {view === 'menu' && (
+          <div className="bg-white rounded-3xl shadow-xl p-10 text-center border border-slate-100">
+            <div className="w-20 h-20 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <RefreshCw size={40} />
+            </div>
+            <h1 className="text-4xl font-black text-slate-900 mb-4 tracking-tight">Randomized Challenge</h1>
+            <p className="text-slate-500 mb-8 max-w-md mx-auto leading-relaxed">
+              Answer <b>30 questions</b> (15 pronouns + 15 joinings) selected randomly. Score <b>80% (24/30)</b> to pass.
+            </p>
+            <button 
+              onClick={handleStart}
+              className="w-full py-5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-xl shadow-lg transition-all transform hover:-translate-y-1"
+            >
+              Start 30-Question Quiz
+            </button>
+            <div className="mt-8 flex justify-center gap-4 text-xs font-bold text-slate-400 uppercase tracking-widest">
+              <span>Section A: 15 Qs</span>
+              <span>•</span>
+              <span>Section B: 15 Qs</span>
+            </div>
+          </div>
+        )}
+
+        {view === 'quiz' && activeQuestions[currentIndex] && (
+          <div className="bg-white rounded-3xl shadow-lg p-6 md:p-10 border border-slate-100 relative overflow-hidden">
+            <div className="absolute top-0 left-0 h-1.5 bg-slate-100 w-full">
+              <div 
+                className="h-full bg-indigo-600 transition-all duration-500" 
+                style={{ width: `${((currentIndex + 1) / activeQuestions.length) * 100}%` }}
+              />
+            </div>
+
+            <div className="flex justify-between items-center mb-8 pt-4">
+              <div className="flex items-center gap-2">
+                <span className={`px-3 py-1 rounded-full text-xs font-black tracking-tighter ${activeQuestions[currentIndex].type === 'A' ? 'bg-blue-100 text-blue-600' : 'bg-emerald-100 text-emerald-600'}`}>
+                  {activeQuestions[currentIndex].type === 'A' ? 'PRONOUNS' : 'SENTENCE JOINING'}
+                </span>
+                <span className="text-sm font-bold text-slate-400">
+                  {currentIndex + 1} / {activeQuestions.length}
+                </span>
+              </div>
+              <button onClick={() => setView('menu')} className="text-slate-400 hover:text-red-500 transition-colors">
+                <XCircle size={20} />
+              </button>
+            </div>
+
+            {activeQuestions[currentIndex].type === 'A' ? (
+              <div className="space-y-10">
+                <h2 className="text-2xl md:text-3xl font-medium leading-relaxed text-slate-800">
+                  {activeQuestions[currentIndex].q.split('______').map((part, i) => (
+                    <React.Fragment key={i}>
+                      {part}
+                      {i === 0 && (
+                        <span className={`inline-block border-b-4 px-4 mx-1 transition-all ${showFeedback ? (isCorrect(currentIndex) ? 'text-emerald-600 border-emerald-500' : 'text-red-500 border-red-500') : 'text-indigo-600 border-indigo-200 min-w-[80px]'}`}>
+                          {answers[currentIndex] || '____'}
+                        </span>
+                      )}
+                    </React.Fragment>
+                  ))}
+                </h2>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {['who', 'which', 'whose'].map((option) => (
+                    <button
+                      key={option}
+                      disabled={showFeedback}
+                      onClick={() => handlePronounSelect(option)}
+                      className={`py-5 px-6 rounded-2xl border-2 font-black text-xl transition-all ${
+                        answers[currentIndex] === option
+                          ? (showFeedback && isCorrect(currentIndex) ? 'bg-emerald-50 border-emerald-500 text-emerald-700' : 
+                             showFeedback ? 'bg-red-50 border-red-500 text-red-700' : 'bg-indigo-50 border-indigo-500 text-indigo-700')
+                          : 'bg-white border-slate-200 hover:border-slate-300 text-slate-600'
+                      }`}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                <div className="bg-slate-50 p-6 rounded-2xl border-l-4 border-emerald-500">
+                  <p className="text-xl font-bold text-slate-700">1. {activeQuestions[currentIndex].s1}</p>
+                  <p className="text-xl font-bold text-slate-700 mt-2">2. {activeQuestions[currentIndex].s2}</p>
+                </div>
+
+                <div className="space-y-4">
+                  <textarea
+                    value={userSentence}
+                    onChange={(e) => setUserSentence(e.target.value)}
+                    disabled={showFeedback}
+                    placeholder="Combine them into one sentence..."
+                    className="w-full p-6 border-2 border-slate-200 rounded-3xl h-32 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 outline-none transition-all text-xl font-medium"
+                  />
+                  {!showFeedback && (
+                    <button 
+                      onClick={checkSentence}
+                      disabled={!userSentence.trim()}
+                      className="w-full py-5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold text-lg shadow-lg disabled:opacity-50 transition-all"
+                    >
+                      Submit Sentence
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {showFeedback && (
+              <div className={`mt-8 p-6 rounded-2xl border-2 animate-in fade-in slide-in-from-bottom-2 ${isCorrect(currentIndex) ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-red-50 border-red-200 text-red-800'}`}>
+                <div className="flex items-center gap-3 mb-2">
+                  {isCorrect(currentIndex) ? <CheckCircle className="text-emerald-600" /> : <AlertCircle className="text-red-600" />}
+                  <span className="font-black uppercase tracking-widest text-sm">{isCorrect(currentIndex) ? 'Correct' : 'Incorrect'}</span>
+                </div>
+                <p className="text-xs font-black opacity-50 uppercase mb-1">Acceptable Answer(s):</p>
+                <div className="space-y-2">
+                  {(activeQuestions[currentIndex].type === 'A' ? [activeQuestions[currentIndex].a] : activeQuestions[currentIndex].a).map((ans, i) => (
+                    <p key={i} className="text-lg font-bold leading-tight">{ans}</p>
+                  ))}
+                </div>
+                
+                <button 
+                  onClick={nextQuestion}
+                  className="mt-6 w-full py-4 bg-slate-900 text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-black transition-all"
+                >
+                  {currentIndex === activeQuestions.length - 1 ? 'Finish Quiz' : 'Next Question'} <ArrowRight size={20} />
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {view === 'summary' && (
+          <div className="bg-white rounded-3xl shadow-2xl p-10 text-center border border-slate-100 animate-in zoom-in duration-300">
+            {calculateFinalScore() >= 24 ? (
+              <>
+                <div className="w-24 h-24 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Trophy size={48} />
+                </div>
+                <h2 className="text-4xl font-black text-slate-900 mb-2 tracking-tight">Pass Achieved!</h2>
+                <p className="text-slate-500 mb-8 text-lg">Mastery of Relative Clauses confirmed.</p>
+                
+                <div className="bg-indigo-50 border-2 border-indigo-100 rounded-3xl p-8 mb-8">
+                  <div className="text-6xl font-black text-indigo-600 mb-2">
+                    {calculateFinalScore()} / {activeQuestions.length}
+                  </div>
+                  <p className="text-sm font-bold uppercase tracking-widest text-indigo-400 mb-8">Verification Code Available</p>
+                  
+                  <div className="bg-white p-6 rounded-2xl border-2 border-indigo-200 shadow-inner inline-flex flex-col items-center w-full max-w-sm">
+                    <p className="text-xs font-black text-slate-400 uppercase mb-3 flex items-center gap-1">
+                      <Lock size={14} /> Teacher Verification Code
+                    </p>
+                    <code className="text-2xl font-mono font-black text-slate-800 tracking-tighter bg-slate-50 px-4 py-2 rounded-lg border border-slate-100 mb-4 block w-full text-center">
+                      {passingCode}
+                    </code>
+                    <button 
+                      onClick={copyCode}
+                      className="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 flex items-center justify-center gap-2 transition-all active:scale-95"
+                    >
+                      <ClipboardCheck size={18} /> Copy Code
+                    </button>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="w-24 h-24 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <XCircle size={48} />
+                </div>
+                <h2 className="text-4xl font-black text-slate-900 mb-2">Try Again</h2>
+                <p className="text-slate-500 mb-8 text-lg">
+                  Score: <span className="text-red-600 font-bold">{calculateFinalScore()} / {activeQuestions.length}</span><br />
+                  You need 24 points to receive a code.
+                </p>
+              </>
+            )}
+
+            <div className="flex flex-col gap-4">
+              <button 
+                onClick={handleStart}
+                className="w-full py-5 bg-slate-900 text-white rounded-2xl font-bold text-xl hover:bg-black transition-all"
+              >
+                {calculateFinalScore() >= 24 ? 'Practice More' : 'Retake Random Quiz'}
+              </button>
+              <button 
+                onClick={() => setView('menu')}
+                className="w-full py-4 text-slate-400 font-bold hover:text-slate-600 transition-all"
+              >
+                Exit to Main Menu
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default App;
