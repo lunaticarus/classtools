@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Conditionals Mastery Challenge</title>
+    <title>Conditionals Challenge</title>
     <style>
         :root {
             --bg-color: #f5f5f7;
@@ -12,6 +12,7 @@
             --text-color: #1d1d1f;
             --error-color: #ff3b30;
             --success-color: #34c759;
+            --secondary-text: #86868b;
         }
 
         body {
@@ -28,242 +29,239 @@
 
         .container {
             width: 100%;
-            max-width: 600px;
+            max-width: 550px;
             background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-radius: 20px;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 24px;
             padding: 40px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.4);
             text-align: center;
         }
 
-        h1 { font-weight: 600; font-size: 24px; margin-bottom: 20px; }
+        h1 { font-weight: 600; font-size: 22px; margin-bottom: 8px; }
+        .sub-text { color: var(--secondary-text); font-size: 14px; margin-bottom: 24px; }
+
+        .progress-container {
+            height: 4px;
+            background: #e5e5ea;
+            border-radius: 2px;
+            margin-bottom: 30px;
+        }
+        #progress-fill {
+            height: 100%;
+            background: var(--accent-color);
+            width: 0%;
+            transition: width 0.4s ease;
+            border-radius: 2px;
+        }
+
+        .question-box { text-align: left; }
+        .sentence { font-size: 19px; line-height: 1.5; margin-bottom: 20px; font-weight: 400; }
         
-        .input-group { margin-bottom: 15px; text-align: left; }
-        label { display: block; font-size: 14px; margin-bottom: 5px; color: #86868b; }
-        
-        input[type="text"], input[type="number"] {
+        input[type="text"] {
             width: 100%;
-            padding: 12px;
+            padding: 14px;
             border: 1px solid #d2d2d7;
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.8);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.5);
             font-size: 16px;
+            margin-bottom: 12px;
             box-sizing: border-box;
             outline: none;
+            transition: all 0.2s;
+        }
+
+        input[type="text"]:focus { border-color: var(--accent-color); box-shadow: 0 0 0 3px rgba(0,122,255,0.1); }
+
+        .feedback-msg {
+            height: 20px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            font-weight: 600;
         }
 
         .btn {
             background-color: var(--accent-color);
             color: white;
             border: none;
-            padding: 12px 24px;
+            padding: 14px 28px;
             border-radius: 12px;
             font-size: 16px;
+            font-weight: 500;
             cursor: pointer;
-            transition: opacity 0.2s;
             width: 100%;
-            margin-top: 10px;
+            transition: transform 0.1s, opacity 0.2s;
         }
 
-        .btn:hover { opacity: 0.8; }
+        .btn:active { transform: scale(0.98); }
+
+        .correct-flash { border-color: var(--success-color) !important; background: rgba(52, 199, 89, 0.1) !important; }
+        .wrong-flash { border-color: var(--error-color) !important; background: rgba(255, 59, 48, 0.1) !important; }
 
         .hidden { display: none; }
-
-        .question-box { text-align: left; margin-bottom: 20px; }
-        .sentence { font-size: 18px; line-height: 1.6; margin-bottom: 15px; }
-        .progress-bar {
-            height: 6px;
-            background: #e5e5ea;
-            border-radius: 3px;
-            margin-bottom: 20px;
-            overflow: hidden;
-        }
-        #progress-fill {
-            height: 100%;
-            background: var(--accent-color);
-            width: 0%;
-            transition: width 0.3s;
-        }
-
-        .feedback { margin-top: 10px; font-weight: 500; }
-        .pass { color: var(--success-color); }
-        .fail { color: var(--error-color); }
-
-        .cert-box {
+        .code-box {
             background: #fff;
-            padding: 20px;
-            border-radius: 12px;
-            border: 2px dashed #d2d2d7;
-            margin-top: 20px;
+            padding: 15px;
+            border-radius: 14px;
+            border: 1px solid #d2d2d7;
+            font-family: monospace;
+            font-size: 18px;
+            color: var(--accent-color);
+            margin: 20px 0;
         }
-        .unique-code { font-family: monospace; font-size: 20px; font-weight: bold; color: var(--accent-color); }
     </style>
 </head>
 <body>
 
-<div class="container" id="app">
-    <!-- Landing Page -->
-    <div id="landing">
-        <h1>Conditionals Challenge</h1>
-        <p style="color: #86868b; margin-bottom: 30px;">Complete 30 questions with 80% accuracy to pass.</p>
-        <div class="input-group">
-            <label>Class (e.g., 4A)</label>
-            <input type="text" id="studentClass" placeholder="Enter class" required>
+<div class="container">
+    <div id="quiz-ui">
+        <h1 id="q-count">Question 1 of 30</h1>
+        <div class="sub-text">Score: <span id="current-score">0</span></div>
+        
+        <div class="progress-container">
+            <div id="progress-fill"></div>
         </div>
-        <div class="input-group">
-            <label>Class Number</label>
-            <input type="number" id="studentNo" placeholder="Enter number" required>
-        </div>
-        <div class="input-group">
-            <label>English Name</label>
-            <input type="text" id="studentName" placeholder="Enter name" required>
-        </div>
-        <button class="btn" onclick="startQuiz()">Start Quiz</button>
-    </div>
 
-    <!-- Quiz Page -->
-    <div id="quiz" class="hidden">
-        <div class="progress-bar"><div id="progress-fill"></div></div>
         <div class="question-box">
-            <p id="question-text" class="sentence"></p>
-            <input type="text" id="answer1" placeholder="First blank" style="margin-bottom: 10px;">
-            <input type="text" id="answer2" placeholder="Second blank">
+            <p id="sentence" class="sentence"></p>
+            <div id="feedback" class="feedback-msg"></div>
+            <input type="text" id="ans1" placeholder="First blank" autocomplete="off">
+            <input type="text" id="ans2" placeholder="Second blank" autocomplete="off">
+            <button class="btn" id="action-btn" onclick="handleSubmit()">Check Answer</button>
         </div>
-        <button class="btn" id="submit-btn" onclick="checkAnswer()">Submit Answer</button>
     </div>
 
-    <!-- Result Page -->
-    <div id="result" class="hidden">
-        <h1 id="result-title">Results</h1>
-        <p id="score-text"></p>
-        <div id="pass-content" class="hidden">
-            <div class="cert-box">
-                <p>Completion Certificate</p>
-                <p id="cert-info"></p>
-                <p class="unique-code" id="unique-code"></p>
-            </div>
-            <p style="font-size: 12px; color: #86868b; margin-top: 10px;">Show this screen to your teacher.</p>
+    <div id="result-ui" class="hidden">
+        <h1>Challenge Complete</h1>
+        <p id="final-stats"></p>
+        <div id="pass-ui" class="hidden">
+            <p style="color: var(--success-color); font-weight: 600;">Success! Here is your completion code:</p>
+            <div class="code-box" id="unique-code"></div>
         </div>
-        <div id="fail-content" class="hidden">
-            <p class="fail">You did not reach the 80% threshold.</p>
-            <button class="btn" onclick="location.reload()">Try Again</button>
+        <div id="fail-ui" class="hidden">
+            <p style="color: var(--error-color);">You need 80% to pass. Please try again.</p>
+            <button class="btn" onclick="location.reload()">Restart</button>
         </div>
     </div>
 </div>
 
 <script>
-    const questionPool = [
-        { s: "If you ____ (drop) this glass, it _____ (break).", a1: "drop", a2: "breaks", t: 0 },
-        { s: "If it ____ (rain), the grass ____ (get) wet.", a1: "rains", a2: "gets", t: 0 },
-        { s: "If plants ____ (not get) water, they ____ (die).", a1: "do not get", a2: "die", t: 0 },
-        { s: "If you ____ (mix) red and blue, you ____ (get) purple.", a1: "mix", a2: "get", t: 0 },
-        { s: "If I ____ (be) late for work, my boss ____ (get) angry.", a1: "am", a2: "gets", t: 0 },
-        { s: "If you ____ (finish) your homework, we ____ (go) to the cinema.", a1: "finish", a2: "will go", t: 1 },
-        { s: "If she ____ (study) hard, she ____ (pass) the exam.", a1: "studies", a2: "will pass", t: 1 },
-        { s: "If they ____ (not hurry), they ____ (miss) the bus.", a1: "don't hurry", a2: "will miss", t: 1 },
-        { s: "If I ____ (win) the lottery, I ____ (travel) around the world.", a1: "won", a2: "would travel", t: 2 },
-        { s: "If he ____ (be) taller, he ____ (play) basketball.", a1: "were", a2: "would play", t: 2 },
-        { s: "If we ____ (have) a car, we ____ (drive) to the beach.", a1: "had", a2: "would drive", t: 2 },
-        { s: "If they ____ (know) her address, they ____ (send) her an invitation.", a1: "knew", a2: "would send", t: 2 },
-        { s: "If you ____ (study) for the test, you ____ (pass) it.", a1: "had studied", a2: "would have passed", t: 3 },
-        { s: "If I ____ (see) him, I ____ (tell) him the news.", a1: "had seen", a2: "would have told", t: 3 },
-        { s: "If we ____ (not take) a taxi, we ____ (be) late.", a1: "hadn't taken", a2: "would have been", t: 3 },
-        // ... (Remaining 85 questions would be populated here)
-        // Adding more samples to ensure 30 logic works for this demo
-        { s: "If you ____ (freeze) water, it ____ (become) ice.", a1: "freeze", a2: "becomes", t: 0 },
-        { s: "If she ____ (have) time, she ____ (call) you later.", a1: "has", a2: "will call", t: 1 },
-        { s: "If I ____ (know) his number, I ____ (call) him.", a1: "knew", a2: "would call", t: 2 },
-        { s: "If they ____ (invite) us, we ____ (go) to the party.", a1: "had invited", a2: "would have gone", t: 3 },
-        { s: "If you ____ (touch) a fire, you ____ (get) burned.", a1: "touch", a2: "get", t: 0 },
-        { s: "If he ____ (eat) all that, he ____ (be) ill.", a1: "eats", a2: "will be", t: 1 },
-        { s: "If I ____ (be) a bird, I ____ (fly) to you.", a1: "were", a2: "would fly", t: 2 },
-        { s: "If she ____ (be) more careful, she ____ (not fall).", a1: "had been", a2: "wouldn't have fallen", t: 3 },
-        { s: "If you ____ (not eat), you ____ (get) hungry.", a1: "don't eat", a2: "get", t: 0 },
-        { s: "If we ____ (leave) now, we ____ (arrive) on time.", a1: "leave", a2: "will arrive", t: 1 },
-        { s: "If I ____ (speak) French, I ____ (live) in Paris.", a1: "spoke", a2: "would live", t: 2 },
-        { s: "If you ____ (ask) me, I ____ (help) you.", a1: "had asked", a2: "would have helped", t: 3 },
-        { s: "If wood ____ (not get) oxygen, it ____ (not burn).", a1: "doesn't get", a2: "doesn't burn", t: 0 },
-        { s: "If they ____ (practice), they ____ (win).", a1: "practice", a2: "will win", t: 1 },
-        { s: "If I ____ (be) rich, I ____ (buy) an island.", a1: "were", a2: "would buy", t: 2 },
-        { s: "If we ____ (book) earlier, it ____ (be) cheaper.", a1: "had booked", a2: "would have been", t: 3 }
+    const pool = [
+        { s: "If you ____ (drop) this glass, it _____ (break).", a1: "drop", a2: "breaks" },
+        { s: "If you ____ (heat) ice, it ____ (melt).", a1: "heat", a2: "melts" },
+        { s: "If it ____ (rain) tomorrow, we ____ (stay) home.", a1: "rains", a2: "will stay" },
+        { s: "If I ____ (be) you, I ____ (see) a doctor.", a1: "were", a2: "would see" },
+        { s: "If they ____ (arrive) earlier, they ____ (catch) the bus.", a1: "had arrived", a2: "would have caught" },
+        { s: "Plants ____ (die) if they ____ (not get) water.", a1: "die", a2: "don't get" },
+        { s: "If she ____ (study) more, she ____ (pass) the test next week.", a1: "studies", a2: "will pass" },
+        { s: "If I ____ (have) a million dollars, I ____ (buy) a boat.", a1: "had", a2: "would buy" },
+        { s: "If we ____ (not forget) the map, we ____ (not be) lost now.", a1: "hadn't forgotten", a2: "wouldn't be" },
+        { s: "Water ____ (boil) if it ____ (reach) 100 degrees.", a1: "boils", a2: "reaches" },
+        { s: "If you ____ (mix) blue and yellow, you ____ (get) green.", a1: "mix", a2: "get" },
+        { s: "If he ____ (call) me, I ____ (tell) him the truth.", a1: "calls", a2: "will tell" },
+        { s: "If I ____ (know) the answer, I ____ (tell) you.", a1: "knew", a2: "would tell" },
+        { s: "If it ____ (be) sunny, we ____ (go) to the park.", a1: "is", a2: "will go" },
+        { s: "If you ____ (not eat), you ____ (get) hungry.", a1: "don't eat", a2: "get" },
+        { s: "If I ____ (speak) Japanese, I ____ (work) in Tokyo.", a1: "spoke", a2: "would work" },
+        { s: "If she ____ (invite) me, I ____ (go) to the party.", a1: "had invited", a2: "would have gone" },
+        { s: "If you ____ (touch) the oven, you ____ (get) burned.", a1: "touch", a2: "get" },
+        { s: "If we ____ (win) the game, we ____ (celebrate).", a1: "win", a2: "will celebrate" },
+        { s: "If he ____ (be) here, he ____ (help) us.", a1: "were", a2: "would help" },
+        { s: "If they ____ (listen), they ____ (understand).", a1: "had listened", a2: "would have understood" },
+        { s: "If you ____ (freeze) water, it ____ (become) solid.", a1: "freeze", a2: "becomes" },
+        { s: "If I ____ (see) her, I ____ (say) hello.", a1: "see", a2: "will say" },
+        { s: "If we ____ (have) more time, we ____ (finish) it.", a1: "had", a2: "would finish" },
+        { s: "If you ____ (study) hard, you ____ (get) an A.", a1: "had studied", a2: "would have got" },
+        { s: "If it ____ (snow), we ____ (make) a snowman.", a1: "snows", a2: "will make" },
+        { s: "If I ____ (be) a bird, I ____ (fly) away.", a1: "were", a2: "would fly" },
+        { s: "If she ____ (be) careful, she ____ (not break) the vase.", a1: "had been", a2: "wouldn't have broken" },
+        { s: "If you ____ (not sleep), you ____ (feel) tired.", a1: "don't sleep", a2: "feel" },
+        { s: "If they ____ (ask), I ____ (help) them.", a1: "ask", a2: "will help" }
     ];
 
     let currentQuestions = [];
-    let currentIndex = 0;
+    let idx = 0;
     let score = 0;
-    let studentData = {};
+    let isLocked = false;
 
-    function startQuiz() {
-        const sClass = document.getElementById('studentClass').value;
-        const sNo = document.getElementById('studentNo').value;
-        const sName = document.getElementById('studentName').value;
+    function init() {
+        currentQuestions = pool.sort(() => 0.5 - Math.random()).slice(0, 30);
+        renderQuestion();
+    }
 
-        if (!sClass || !sNo || !sName) {
-            alert("Please fill in all details.");
+    function renderQuestion() {
+        isLocked = false;
+        const q = currentQuestions[idx];
+        document.getElementById('q-count').innerText = `Question ${idx + 1} of 30`;
+        document.getElementById('sentence').innerText = q.s;
+        document.getElementById('ans1').value = "";
+        document.getElementById('ans2').value = "";
+        document.getElementById('ans1').className = "";
+        document.getElementById('ans2').className = "";
+        document.getElementById('feedback').innerText = "";
+        document.getElementById('action-btn').innerText = "Check Answer";
+        document.getElementById('progress-fill').style.width = `${(idx / 30) * 100}%`;
+    }
+
+    function handleSubmit() {
+        if (isLocked) {
+            idx++;
+            if (idx < 30) renderQuestion();
+            else showFinalResult();
             return;
         }
 
-        studentData = { sClass, sNo, sName };
-        currentQuestions = questionPool.sort(() => 0.5 - Math.random()).slice(0, 30);
+        const q = currentQuestions[idx];
+        const v1 = document.getElementById('ans1').value.trim().toLowerCase();
+        const v2 = document.getElementById('ans2').value.trim().toLowerCase();
         
-        document.getElementById('landing').classList.add('hidden');
-        document.getElementById('quiz').classList.remove('hidden');
-        showQuestion();
-    }
+        const clean = (s) => s.replace("can't", "cannot").replace("don't", "do not").replace("doesn't", "does not").replace("won't", "will not").replace("didn't", "did not").replace("hadn't", "had not").replace("wouldn't", "would not").replace("haven't", "have not").replace("'d", " would");
 
-    function showQuestion() {
-        const q = currentQuestions[currentIndex];
-        document.getElementById('question-text').innerText = `Q${currentIndex + 1}: ${q.s}`;
-        document.getElementById('answer1').value = "";
-        document.getElementById('answer2').value = "";
-        document.getElementById('progress-fill').style.width = `${(currentIndex / 30) * 100}%`;
-    }
+        const isCorrect = clean(v1) === clean(q.a1.toLowerCase()) && clean(v2) === clean(q.a2.toLowerCase());
 
-    function checkAnswer() {
-        const q = currentQuestions[currentIndex];
-        const ans1 = document.getElementById('answer1').value.trim().toLowerCase();
-        const ans2 = document.getElementById('answer2').value.trim().toLowerCase();
-
-        // Simple validation: check if user inputs match expected answers
-        // Normalizing common contractions for Type 1-3
-        const normalize = (str) => str.replace("can't", "cannot").replace("don't", "do not").replace("doesn't", "does not").replace("won't", "will not").replace("didn't", "did not").replace("hadn't", "had not").replace("wouldn't", "would not");
-
-        if (normalize(ans1) === normalize(q.a1.toLowerCase()) && normalize(ans2) === normalize(q.a2.toLowerCase())) {
+        isLocked = true;
+        const f = document.getElementById('feedback');
+        
+        if (isCorrect) {
             score++;
+            f.innerText = "Correct!";
+            f.style.color = "var(--success-color)";
+            document.getElementById('ans1').classList.add('correct-flash');
+            document.getElementById('ans2').classList.add('correct-flash');
+        } else {
+            f.innerText = `Incorrect. Answers: ${q.a1}, ${q.a2}`;
+            f.style.color = "var(--error-color)";
+            document.getElementById('ans1').classList.add('wrong-flash');
+            document.getElementById('ans2').classList.add('wrong-flash');
         }
 
-        currentIndex++;
-        if (currentIndex < 30) {
-            showQuestion();
-        } else {
-            showResult();
-        }
+        document.getElementById('current-score').innerText = score;
+        document.getElementById('action-btn').innerText = "Next Question";
     }
 
-    function showResult() {
-        document.getElementById('quiz').classList.add('hidden');
-        document.getElementById('result').classList.remove('hidden');
+    function showFinalResult() {
+        document.getElementById('quiz-ui').classList.add('hidden');
+        document.getElementById('result-ui').classList.remove('hidden');
         
         const percent = Math.round((score / 30) * 100);
-        document.getElementById('score-text').innerText = `You scored ${score}/30 (${percent}%).`;
+        document.getElementById('final-stats').innerText = `You answered ${score} out of 30 questions correctly (${percent}%).`;
 
         if (percent >= 80) {
-            document.getElementById('pass-content').classList.remove('hidden');
-            document.getElementById('cert-info').innerText = `${studentData.sClass} (${studentData.sNo}) ${studentData.sName}`;
-            document.getElementById('unique-code').innerText = generateCode();
+            document.getElementById('pass-ui').classList.remove('hidden');
+            document.getElementById('unique-code').innerText = "COND-" + Math.random().toString(36).substring(2, 10).toUpperCase();
         } else {
-            document.getElementById('fail-content').classList.remove('hidden');
+            document.getElementById('fail-ui').classList.remove('hidden');
         }
     }
 
-    function generateCode() {
-        const prefix = studentData.sClass.substring(0,2).toUpperCase();
-        const random = Math.random().toString(36).substring(2, 7).toUpperCase();
-        return `${prefix}-${studentData.sNo}-${random}`;
-    }
+    // Allow "Enter" key to submit/next
+    document.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') handleSubmit();
+    });
+
+    init();
 </script>
 
 </body>
