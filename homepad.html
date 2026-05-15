@@ -3,17 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Midnight Dashboard</title>
+    <title>Midnight Command Center</title>
     <style>
         :root {
             --bg: #000000;
-            --glass: rgba(28, 28, 30, 0.7);
+            --glass: rgba(28, 28, 30, 0.8);
             --border: rgba(255, 255, 255, 0.1);
             --accent: #FF9F0A; 
             --text: #FFFFFF;
         }
-
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body, html {
             margin: 0; padding: 0;
@@ -22,146 +20,131 @@
             background-color: var(--bg);
             color: var(--text);
             overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
 
-        /* Burn-in Protection Container */
         #main-wrapper {
-            width: 100%;
-            height: 100%;
-            padding: 30px;
+            width: 100%; height: 100%;
+            padding: 25px;
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr 1.2fr; /* Slightly wider calendar side */
             grid-template-rows: auto 1fr;
             gap: 20px;
-            transition: transform 0.5s ease-in-out; /* For the pixel shift */
+            transition: all 0.5s ease-in-out;
         }
 
-        /* Header: Time & Date */
-        header {
-            grid-column: span 2;
-            text-align: left;
-            padding-left: 10px;
-            margin-bottom: 10px;
-        }
+        header { grid-column: span 2; padding-left: 10px; }
+        #time { font-size: 6.5rem; font-weight: 700; letter-spacing: -3px; margin: 0; }
+        #date { font-size: 1.8rem; color: var(--accent); font-weight: 500; margin-top: -5px; text-transform: uppercase; }
 
-        #time { font-size: 6rem; font-weight: 700; letter-spacing: -3px; margin: 0; line-height: 1; }
-        #date { font-size: 1.8rem; color: var(--accent); font-weight: 500; margin-top: 5px; text-transform: uppercase; letter-spacing: 2px; }
-
-        /* Glass Cards */
         .card {
             background: var(--glass);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
             border: 1px solid var(--border);
-            border-radius: 28px;
-            padding: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
-        }
-
-        /* Weather Card */
-        .weather-container {
-            grid-column: 1;
-        }
-
-        /* Calendar Card */
-        .calendar-container {
-            grid-column: 2;
-            grid-row: 2;
-        }
-
-        /* Routine/Task Card (fills remaining space) */
-        .task-container {
-            grid-column: 1;
-            grid-row: 2;
-        }
-
-        iframe { 
-            width: 100%; 
-            height: 100%; 
-            border: none; 
-            border-radius: 18px; 
-            /* Inverts Google's white to a Dark Mode look */
-            filter: invert(0.9) hue-rotate(180deg) brightness(0.8); 
-        }
-
-        h3 { font-size: 1rem; color: var(--accent); margin-top: 0; text-transform: uppercase; letter-spacing: 1px; }
-
-        .task-item {
+            border-radius: 30px;
+            padding: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
             display: flex;
-            justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            flex-direction: column;
         }
-        .task-item:last-child { border: none; }
+
+        /* Weather Section */
+        .weather-container { grid-column: 1; min-height: 150px; }
+
+        /* Task Section */
+        .task-container { grid-column: 1; grid-row: 2; }
+        h3 { font-size: 1.1rem; color: var(--accent); margin-top: 0; text-transform: uppercase; letter-spacing: 2px; }
+        .task-item { display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+
+        /* Calendar Section */
+        .calendar-container { grid-column: 2; grid-row: 1 / span 2; position: relative; overflow: hidden; }
+        iframe { 
+            width: 100%; height: 100%; border: none; border-radius: 20px; 
+            filter: invert(0.92) hue-rotate(180deg) brightness(0.9) contrast(1.1);
+            background: white;
+        }
+
+        /* Pulse Animation for Burn-In Protection */
+        @keyframes breathe {
+            0% { opacity: 1; }
+            50% { opacity: 0.85; }
+            100% { opacity: 1; }
+        }
+        .burn-protect { animation: breathe 10s ease-in-out infinite; }
     </style>
 </head>
 <body>
 
-<div id="main-wrapper">
+<div id="main-wrapper" class="burn-protect">
     <header>
         <p id="time">00:00</p>
-        <p id="date">LOADING DATE</p>
+        <p id="date">LOADING...</p>
     </header>
 
     <div class="card weather-container">
-        <a class="weatherwidget-io" href="https://forecast7.com/en/22d28114d16/hong-kong-island/" data-label_1="HONG KONG" data-theme="orange" data-basecolor="#1c1c1e" data-accent="rgba(255, 255, 255, 0)" >HONG KONG</a>
-        <script>
-        !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src='https://weatherwidget.io/js/widget.min.js';fjs.parentNode.insertBefore(js,fjs);}}(document,'script','weatherwidget-io-js');
-        </script>
+        <a class="weatherwidget-io" href="https://forecast7.com/en/22d28114d16/hong-kong-island/" data-label_1="HONG KONG" data-theme="orange" data-basecolor="#1c1c1e" >HONG KONG</a>
     </div>
 
     <div class="card task-container">
-        <h3>Daily Focus</h3>
-        <div class="task-item"><span>Laundry</span><b>Bed Linens</b></div>
-        <div class="task-item"><span>Cleaning</span><b>Kitchen Deep Clean</b></div>
-        <div class="task-item"><span>Plants</span><b>Water Balcony</b></div>
-        <div class="task-item"><span>Status</span><b id="burn-status" style="color:rgba(255,255,255,0.3)">Protection Active</b></div>
+        <h3>Routine</h3>
+        <div class="task-item"><span>Laundry</span><b>Wash Bedding</b></div>
+        <div class="task-item"><span>Cleaning</span><b>Vacuum Rooms</b></div>
+        <div class="task-item"><span>Kitchen</span><b>Clean Fridge</b></div>
     </div>
 
     <div class="card calendar-container">
-        <!-- 2-Day Agenda View via Google Calendar -->
-        <iframe src="https://calendar.google.com/calendar/embed?src=896001db082e5071015413796c2ba5363d9bc130c4efd91880ec39031a724d54%40group.calendar.google.com&ctz=Asia%2FHong_Kong&mode=AGENDA&showTitle=0&showNav=0&showDate=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0"></iframe>
+        <iframe id="calendar-frame" src=""></iframe>
     </div>
 </div>
 
 <script>
-    // 1. Clock and Date Logic
+    // 1. Your unique Calendar URL
+    const CALENDAR_URL = "https://calendar.google.com/calendar/embed?src=896001db082e5071015413796c2ba5363d9bc130c4efd91880ec39031a724d54%40group.calendar.google.com&ctz=Asia%2FHong_Kong&mode=AGENDA&showTitle=0&showNav=0&showDate=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0";
+
+    // 2. Function to Refresh Calendar specifically
+    function refreshCalendar() {
+        const frame = document.getElementById('calendar-frame');
+        // Adds a unique 'cache-buster' timestamp (?t=123456) so it never loads an old version
+        const cacheBuster = "&t=" + new Date().getTime();
+        frame.src = CALENDAR_URL + cacheBuster;
+        console.log("Calendar synced at " + new Date().toLocaleTimeString());
+    }
+
+    // 3. Clock & Date
     function updateClock() {
         var now = new Date();
-        var h = now.getHours();
-        var m = now.getMinutes();
+        var h = now.getHours(), m = now.getMinutes();
         var ampm = h >= 12 ? 'PM' : 'AM';
         h = h % 12 || 12;
         m = m < 10 ? '0'+m : m;
         document.getElementById('time').innerText = h + ":" + m + " " + ampm;
-        
-        var options = { weekday: 'long', month: 'short', day: 'numeric' };
-        document.getElementById('date').innerText = now.toLocaleDateString('en-US', options);
+        document.getElementById('date').innerText = now.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
     }
-    setInterval(updateClock, 1000);
-    updateClock();
 
-    // 2. Anti-Burn-In Pixel Shifter
-    // Shifts the entire UI by 1-3 pixels every 30 minutes
-    function preventBurnIn() {
+    // 4. Pixel Shifter (Burn-in)
+    function shiftPixels() {
         const wrapper = document.getElementById('main-wrapper');
-        const x = Math.floor(Math.random() * 5) - 2; // -2 to +2 pixels
-        const y = Math.floor(Math.random() * 5) - 2; 
+        const x = Math.floor(Math.random() * 4) - 2; 
+        const y = Math.floor(Math.random() * 4) - 2; 
         wrapper.style.transform = `translate(${x}px, ${y}px)`;
-        
-        console.log("Anti-Burn-In: Shifted UI to prevent static pixel fatigue.");
     }
-    
-    // Initial run and then every 30 mins (1800000ms)
-    setInterval(preventBurnIn, 1800000);
 
-    // 3. Hourly Page Refresh (Ensures Calendar & Weather Stay Current)
-    setInterval(() => {
-        location.reload();
-    }, 3600000);
+    // --- INITIALIZE & INTERVALS ---
+    
+    // Run immediately
+    updateClock();
+    refreshCalendar();
+
+    // Intervals
+    setInterval(updateClock, 1000);             // Update clock every second
+    setInterval(refreshCalendar, 900000);       // Refresh Calendar every 15 minutes
+    setInterval(shiftPixels, 1800000);          // Shift pixels every 30 minutes
+    
+    // Full Page Reload every 6 hours to clear iPad memory leaks
+    setInterval(() => { location.reload(); }, 21600000);
+
+    // Weather Script
+    !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src='https://weatherwidget.io/js/widget.min.js';fjs.parentNode.insertBefore(js,fjs);}}(document,'script','weatherwidget-io-js');
 </script>
 
 </body>
