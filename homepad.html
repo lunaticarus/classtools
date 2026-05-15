@@ -7,7 +7,7 @@
     <style>
         :root {
             --bg: #000000;
-            --glass: rgba(28, 28, 30, 0.8);
+            --glass: rgba(28, 28, 30, 0.7);
             --border: rgba(255, 255, 255, 0.1);
             --accent: #FF9F0A; 
             --text: #FFFFFF;
@@ -24,93 +24,95 @@
 
         #main-wrapper {
             width: 100%; height: 100%;
-            padding: 25px;
+            padding: 40px;
             display: grid;
-            grid-template-columns: 1fr 1.2fr; /* Slightly wider calendar side */
+            grid-template-columns: 1fr 1.5fr; /* Clock & Weather on left, Calendar on right */
             grid-template-rows: auto 1fr;
-            gap: 20px;
-            transition: all 0.5s ease-in-out;
+            gap: 40px;
+            transition: transform 0.5s ease-in-out;
         }
 
-        header { grid-column: span 2; padding-left: 10px; }
-        #time { font-size: 6.5rem; font-weight: 700; letter-spacing: -3px; margin: 0; }
-        #date { font-size: 1.8rem; color: var(--accent); font-weight: 500; margin-top: -5px; text-transform: uppercase; }
+        /* Left Column: Time and Weather */
+        .left-col {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            gap: 20px;
+        }
 
-        .card {
+        #time { font-size: 7.5rem; font-weight: 700; letter-spacing: -4px; margin: 0; line-height: 0.9; }
+        #date { font-size: 2rem; color: var(--accent); font-weight: 500; margin-bottom: 30px; text-transform: uppercase; letter-spacing: 2px; }
+
+        /* Weather: No Border / Transparent */
+        .weather-wrap {
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        /* Right Column: Calendar Glass Card */
+        .calendar-container {
+            grid-row: span 2;
             background: var(--glass);
             backdrop-filter: blur(40px);
             -webkit-backdrop-filter: blur(40px);
             border: 1px solid var(--border);
-            border-radius: 30px;
-            padding: 24px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
-            display: flex;
-            flex-direction: column;
+            border-radius: 32px;
+            padding: 15px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+            overflow: hidden;
         }
 
-        /* Weather Section */
-        .weather-container { grid-column: 1; min-height: 150px; }
-
-        /* Task Section */
-        .task-container { grid-column: 1; grid-row: 2; }
-        h3 { font-size: 1.1rem; color: var(--accent); margin-top: 0; text-transform: uppercase; letter-spacing: 2px; }
-        .task-item { display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-
-        /* Calendar Section */
-        .calendar-container { grid-column: 2; grid-row: 1 / span 2; position: relative; overflow: hidden; }
         iframe { 
             width: 100%; height: 100%; border: none; border-radius: 20px; 
-            filter: invert(0.92) hue-rotate(180deg) brightness(0.9) contrast(1.1);
-            background: white;
+            /* High-end dark mode inversion for Google Calendar */
+            filter: invert(0.92) hue-rotate(180deg) brightness(0.85) contrast(1.1);
         }
 
-        /* Pulse Animation for Burn-In Protection */
+        /* Subtle Breathing Animation for Burn-In Protection */
         @keyframes breathe {
             0% { opacity: 1; }
-            50% { opacity: 0.85; }
+            50% { opacity: 0.88; }
             100% { opacity: 1; }
         }
-        .burn-protect { animation: breathe 10s ease-in-out infinite; }
+        .burn-protect { animation: breathe 12s ease-in-out infinite; }
     </style>
 </head>
 <body>
 
 <div id="main-wrapper" class="burn-protect">
-    <header>
-        <p id="time">00:00</p>
-        <p id="date">LOADING...</p>
-    </header>
+    
+    <div class="left-col">
+        <header>
+            <p id="time">00:00</p>
+            <p id="date">LOADING...</p>
+        </header>
 
-    <div class="card weather-container">
-        <a class="weatherwidget-io" href="https://forecast7.com/en/22d28114d16/hong-kong-island/" data-label_1="HONG KONG" data-theme="orange" data-basecolor="#1c1c1e" >HONG KONG</a>
+        <div class="weather-wrap">
+            <!-- YOUR NEW WEATHER CODE: NO BORDER, 3 DAYS, DARK THEME -->
+            <a class="weatherwidget-io" href="https://forecast7.com/en/22d28114d16/hong-kong-island/" data-label_1="HONG KONG" data-days="3" data-theme="dark" >HONG KONG</a>
+            <script>
+            !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src='https://weatherwidget.io/js/widget.min.js';fjs.parentNode.insertBefore(js,fjs);}}(document,'script','weatherwidget-io-js');
+            </script>
+        </div>
     </div>
 
-    <div class="card task-container">
-        <h3>Routine</h3>
-        <div class="task-item"><span>Laundry</span><b>Wash Bedding</b></div>
-        <div class="task-item"><span>Cleaning</span><b>Vacuum Rooms</b></div>
-        <div class="task-item"><span>Kitchen</span><b>Clean Fridge</b></div>
-    </div>
-
-    <div class="card calendar-container">
+    <div class="calendar-container">
         <iframe id="calendar-frame" src=""></iframe>
     </div>
+
 </div>
 
 <script>
-    // 1. Your unique Calendar URL
     const CALENDAR_URL = "https://calendar.google.com/calendar/embed?src=896001db082e5071015413796c2ba5363d9bc130c4efd91880ec39031a724d54%40group.calendar.google.com&ctz=Asia%2FHong_Kong&mode=AGENDA&showTitle=0&showNav=0&showDate=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0";
 
-    // 2. Function to Refresh Calendar specifically
+    // Update Calendar with Cache Buster
     function refreshCalendar() {
         const frame = document.getElementById('calendar-frame');
-        // Adds a unique 'cache-buster' timestamp (?t=123456) so it never loads an old version
         const cacheBuster = "&t=" + new Date().getTime();
         frame.src = CALENDAR_URL + cacheBuster;
-        console.log("Calendar synced at " + new Date().toLocaleTimeString());
     }
 
-    // 3. Clock & Date
+    // Update Clock and Date
     function updateClock() {
         var now = new Date();
         var h = now.getHours(), m = now.getMinutes();
@@ -118,33 +120,30 @@
         h = h % 12 || 12;
         m = m < 10 ? '0'+m : m;
         document.getElementById('time').innerText = h + ":" + m + " " + ampm;
-        document.getElementById('date').innerText = now.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+        
+        var options = { weekday: 'long', month: 'short', day: 'numeric' };
+        document.getElementById('date').innerText = now.toLocaleDateString('en-US', options);
     }
 
-    // 4. Pixel Shifter (Burn-in)
+    // Burn-in Pixel Shifter
     function shiftPixels() {
         const wrapper = document.getElementById('main-wrapper');
-        const x = Math.floor(Math.random() * 4) - 2; 
-        const y = Math.floor(Math.random() * 4) - 2; 
+        const x = Math.floor(Math.random() * 6) - 3; // -3 to +3px
+        const y = Math.floor(Math.random() * 6) - 3; 
         wrapper.style.transform = `translate(${x}px, ${y}px)`;
     }
 
-    // --- INITIALIZE & INTERVALS ---
-    
-    // Run immediately
+    // Run on startup
     updateClock();
     refreshCalendar();
 
-    // Intervals
-    setInterval(updateClock, 1000);             // Update clock every second
-    setInterval(refreshCalendar, 900000);       // Refresh Calendar every 15 minutes
-    setInterval(shiftPixels, 1800000);          // Shift pixels every 30 minutes
+    // Set intervals
+    setInterval(updateClock, 1000);              // Clock: 1s
+    setInterval(refreshCalendar, 900000);        // Calendar Sync: 15min
+    setInterval(shiftPixels, 1800000);           // Burn-in protection: 30min
     
-    // Full Page Reload every 6 hours to clear iPad memory leaks
-    setInterval(() => { location.reload(); }, 21600000);
-
-    // Weather Script
-    !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src='https://weatherwidget.io/js/widget.min.js';fjs.parentNode.insertBefore(js,fjs);}}(document,'script','weatherwidget-io-js');
+    // Page Refresh: Every 12 hours for memory stability
+    setInterval(() => { location.reload(); }, 43200000);
 </script>
 
 </body>
