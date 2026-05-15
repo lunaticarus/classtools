@@ -35,9 +35,7 @@
         }
 
         /* 1. TOP SECTION: TIME & DATE */
-        .header-section {
-            text-align: center;
-        }
+        .header-section { text-align: center; }
         #time { font-size: 8rem; font-weight: 700; letter-spacing: -5px; margin: 0; }
         #date { font-size: 2rem; color: var(--accent); font-weight: 500; margin-top: -10px; text-transform: uppercase; }
 
@@ -58,11 +56,9 @@
         }
 
         /* 3. BOTTOM SECTION: WEATHER */
-        .weather-section {
-            padding: 0 10px;
-        }
+        .weather-section { padding: 0 10px; }
 
-        /* 4. FOOTER: INDONESIA BAR */
+        /* 4. FOOTER: INDONESIA BAR (SURABAYA) */
         footer {
             height: 60px;
             background: rgba(15, 15, 15, 0.8);
@@ -78,11 +74,7 @@
         }
         footer b { color: var(--text); font-weight: 600; margin-left: 5px; }
 
-        /* Burn-in Animation */
-        @keyframes breathe {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.85; }
-        }
+        @keyframes breathe { 0%, 100% { opacity: 1; } 50% { opacity: 0.85; } }
         .burn-protect { animation: breathe 15s ease-in-out infinite; }
     </style>
 </head>
@@ -99,14 +91,14 @@
     </div>
 
     <div class="weather-section">
-        <a class="weatherwidget-io" href="https://forecast7.com/en/22d28114d16/hong-kong-island/" data-label_1="HONG KONG" data-days="3" data-theme="dark" >HONG KONG</a>
+        <a class="weatherwidget-io" href="https://forecast7.com/en/22d28114d16/hong-kong-island/" data-label_1="HONG KONG" data-days="3" data-theme="dark">HONG KONG</a>
     </div>
 </div>
 
 <footer>
-    <span>JKT: <b id="jkt-time">--:--</b></span>
-    <span>Weather: <b>30°C Partly Cloudy</b></span>
-    <span>Rate: <b>1 HKD = 2,248 IDR</b></span>
+    <span>SUB: <b id="sub-time">--:--</b></span>
+    <span>Weather: <b>31°C Partly Sunny</b></span>
+    <span>Rate: <b>1 HKD = 2,249 IDR</b></span>
 </footer>
 
 <script>
@@ -128,9 +120,9 @@
         document.getElementById('time').innerText = `${h}:${m} ${ampm}`;
         document.getElementById('date').innerText = now.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
 
-        // Jakarta Time (UTC+7)
-        const jktOptions = { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit', hour12: false };
-        document.getElementById('jkt-time').innerText = now.toLocaleTimeString('en-GB', jktOptions);
+        // Surabaya Time (UTC+7)
+        const subOptions = { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit', hour12: false };
+        document.getElementById('sub-time').innerText = now.toLocaleTimeString('en-GB', subOptions);
     }
 
     function shiftPixels() {
@@ -142,12 +134,10 @@
 
     updateClocks();
     refreshCalendar();
-
     setInterval(updateClocks, 1000);
     setInterval(refreshCalendar, 900000);
     setInterval(shiftPixels, 1800000);
     
-    // Auto-refresh weather script
     !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src='https://weatherwidget.io/js/widget.min.js';fjs.parentNode.insertBefore(js,fjs);}}(document,'script','weatherwidget-io-js');
 </script>
 
