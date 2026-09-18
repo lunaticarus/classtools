@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scoreboard</title>
     <style>
+        #appVersion { position: fixed; right: 8px; bottom: 35px; font-size: 9px; color: rgba(0,0,0,0.25); pointer-events: none; z-index: 2000; }
+
         :root {
             /* Persistent Light Aesthetic */
             --system-blue: #007aff;
@@ -438,5 +440,6 @@
 
         window.onload = init;
     </script>
+    <div id="appVersion" aria-hidden="true">Made with ❤️ by Icarus Lai</div>
 </body>
 </html>
