@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Vocab</title>
     <style>
         :root {
@@ -11,128 +11,231 @@
             --system-red: #ff3b30;
             --system-gray-bg: #f5f5f7;
             --system-card-bg: #ffffff;
-            --system-border: #d2d2d7;
+            --system-btn-grey: #efeff4;
+            --system-btn-active: #d1d1d6;
             --text-primary: #1d1d1f;
             --text-secondary: #86868b;
             --text-tertiary: #a1a1a6;
-            --mode-active: #424245;
-            --radius: 12px;
+            --radius: 20px;
         }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
             background-color: var(--system-gray-bg);
             color: var(--text-primary);
             margin: 0;
-            padding: 100px 20px 140px 20px;
+            padding: 100px 20px 100px 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
+            min-height: 100vh;
             -webkit-font-smoothing: antialiased;
         }
 
-        h1 { font-weight: 600; font-size: 22px; letter-spacing: -0.5px; position: fixed; top: 20px; left: 30px; margin: 0; z-index: 100; }
+        /* Glassmorphic Header */
+        header {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 74px;
+            background: rgba(245, 245, 247, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 900;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
 
-        .top-nav { position: fixed; top: 25px; right: 30px; display: flex; gap: 24px; z-index: 100; }
+        header::after {
+            content: "";
+            position: absolute;
+            bottom: -20px; left: 0; right: 0;
+            height: 20px;
+            background: linear-gradient(to bottom, rgba(245, 245, 247, 0.8), transparent);
+            pointer-events: none;
+        }
 
-        .minimal-btn { background: none; border: none; color: var(--text-tertiary); font-size: 13px; cursor: pointer; padding: 5px; transition: all 0.2s ease; }
-        .minimal-btn:hover { color: var(--text-primary); }
+        h1 { font-weight: 600; font-size: 24px; margin: 0; letter-spacing: -0.5px; }
 
-        /* QR Modal */
+        .top-nav { display: flex; gap: 16px; align-items: center; }
+
+        .minimal-btn {
+            background: none; border: none; color: var(--text-secondary);
+            font-size: 14px; font-weight: 500; cursor: pointer; padding: 6px 10px;
+            border-radius: 8px; transition: all 0.2s ease;
+        }
+        .minimal-btn:hover { color: var(--text-primary); background: rgba(0,0,0,0.04); }
+
+        /* QR Overlay / Modal */
         #qrOverlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            background: rgba(0,0,0,0.4); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
             z-index: 2000; align-items: center; justify-content: center;
         }
         .qr-modal {
-            background: white; padding: 30px; border-radius: 28px; text-align: center;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.2); width: 280px;
+            background: var(--system-card-bg); padding: 30px; border-radius: var(--radius); text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15); width: 300px; animation: fadeIn 0.3s ease;
         }
         .qr-modal img { width: 200px; height: 200px; margin-bottom: 20px; border-radius: 12px; }
-        .qr-modal p { font-size: 14px; font-weight: 600; color: var(--text-secondary); margin-bottom: 20px; }
-        
+        .qr-modal p { font-size: 15px; font-weight: 600; color: var(--text-primary); margin-bottom: 20px; }
         .modal-actions { display: flex; flex-direction: column; gap: 10px; width: 100%; }
 
-        /* Mode Hub & Status */
-        .mode-hub { position: fixed; bottom: 30px; left: 30px; display: flex; flex-direction: column-reverse; align-items: flex-start; z-index: 1000; }
-        .mode-trigger { font-weight: 700; color: var(--mode-active); cursor: pointer; font-size: 14px; padding: 5px 0; user-select: none; }
-        .mode-options { display: none; flex-direction: column; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 8px; border-radius: 14px; border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 8px 32px rgba(0,0,0,0.12); margin-bottom: 12px; min-width: 160px; }
-        .mode-options.show { display: flex; }
-        .mode-link { font-size: 13px; color: var(--text-primary); cursor: pointer; padding: 8px 12px; border-radius: 8px; transition: 0.2s; }
-        .mode-link:hover { background: var(--mode-active); color: white; }
-        .status-counter { position: fixed; bottom: 35px; right: 30px; font-weight: 700; color: var(--mode-active); font-size: 14px; z-index: 100; pointer-events: none; }
-        
-        .container { width: 100%; max-width: 700px; display: none; }
-        .container.active { display: block; }
-        
-        /* Edit Row */
-        .vocab-row { display: grid; grid-template-columns: 44px 1fr 1fr 44px; background: var(--system-card-bg); margin-bottom: 8px; border-radius: var(--radius); border: 1px solid rgba(0,0,0,0.02); }
-        textarea { padding: 18px 12px; border: none; font-size: 15px; outline: none; background: transparent; color: var(--text-primary); font-family: inherit; resize: none; overflow: hidden; line-height: 1.4; width: 100%; box-sizing: border-box; }
-        .zh-input { border-left: 1px solid #f8f8f8; color: var(--text-secondary); }
-
-        /* Flashcard 3D Flip */
-        .card-scene {
-            width: 100%; max-width: 600px; height: 320px;
-            perspective: 1000px; margin: 0 auto;
+        /* Floating Mode Hub */
+        .mode-hub {
+            position: fixed; bottom: 25px; left: 30px;
+            display: flex; flex-direction: column-reverse; align-items: flex-start; z-index: 1000;
         }
+        .mode-trigger {
+            background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            padding: 8px 16px; border-radius: 18px; border: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08); font-weight: 600; color: var(--text-primary);
+            cursor: pointer; font-size: 13px; user-select: none; transition: transform 0.1s ease;
+        }
+        .mode-trigger:active { transform: scale(0.96); }
+        .mode-options {
+            display: none; flex-direction: column; background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            padding: 6px; border-radius: 16px; border: 1px solid rgba(0,0,0,0.08);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12); margin-bottom: 12px; min-width: 170px;
+        }
+        .mode-options.show { display: flex; animation: fadeIn 0.2s ease; }
+        .mode-link {
+            font-size: 13px; font-weight: 500; color: var(--text-primary);
+            cursor: pointer; padding: 10px 12px; border-radius: 10px; transition: 0.15s;
+        }
+        .mode-link:hover { background: var(--system-blue); color: white; }
+
+        .status-counter {
+            position: fixed; bottom: 30px; right: 30px;
+            font-weight: 600; color: var(--text-secondary); font-size: 13px;
+            z-index: 100; pointer-events: none;
+        }
+
+        /* Main Container */
+        .container { width: 100%; max-width: 600px; display: none; animation: fadeIn 0.4s ease; }
+        .container.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Vocab Row (Edit Mode) */
+        .vocab-row {
+            display: grid; grid-template-columns: 44px 1fr 1fr 44px; align-items: center;
+            background: var(--system-card-bg); margin-bottom: 10px; border-radius: 16px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.03); overflow: hidden;
+        }
+        textarea {
+            padding: 16px 12px; border: none; font-size: 15px; outline: none;
+            background: transparent; color: var(--text-primary); font-family: inherit;
+            resize: none; overflow: hidden; line-height: 1.4; width: 100%; box-sizing: border-box;
+        }
+        .zh-input { border-left: 1px solid #f2f2f7; color: var(--text-secondary); }
+
+        /* Flashcard Mode */
+        .card-scene { width: 100%; height: 320px; perspective: 1000px; margin: 0 auto; }
         .card-inner {
-            position: relative; width: 100%; height: 100%;
-            text-align: center; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative; width: 100%; height: 100%; text-align: center;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
             transform-style: preserve-3d; cursor: pointer;
         }
         .card-inner.is-flipped { transform: rotateY(180deg); }
-        
         .card-face {
             position: absolute; width: 100%; height: 100%;
             -webkit-backface-visibility: hidden; backface-visibility: hidden;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            border-radius: 24px; background: var(--system-card-bg);
-            box-shadow: 0 10px 40px rgba(0,0,0,0.04);
-            padding: 40px; box-sizing: border-box; font-size: 32px; font-weight: 500;
+            border-radius: var(--radius); background: var(--system-card-bg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.04); padding: 40px; box-sizing: border-box;
+            font-size: 32px; font-weight: 600; color: var(--text-primary);
         }
-        .card-back { transform: rotateY(180deg); }
-        
-        .card-audio-trigger { position: absolute; top: 20px; right: 20px; color: #d2d2d7; transition: color 0.2s; padding: 10px; z-index: 10; }
-        .card-audio-trigger:hover { color: var(--mode-active); }
+        .card-back { transform: rotateY(180deg); color: var(--text-secondary); }
+        .card-audio-trigger {
+            position: absolute; top: 20px; right: 20px; color: var(--text-tertiary);
+            transition: color 0.2s; padding: 10px; z-index: 10;
+        }
+        .card-audio-trigger:hover { color: var(--system-blue); }
 
-        /* Spelling/Buttons */
-        .card-controls { margin-top: 40px; display: flex; justify-content: center; gap: 20px; align-items: center; }
-        .shuffle-label { font-size: 13px; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; gap: 8px; }
-        input[type="checkbox"] { accent-color: var(--mode-active); cursor: pointer; }
-        .spell-row { background: var(--system-card-bg); padding: 12px 18px; border-radius: var(--radius); margin-bottom: 10px; display: flex; align-items: center; gap: 15px; }
-        .spell-translation { width: 35%; font-size: 15px; color: var(--text-secondary); }
-        .spell-input { flex: 1; padding: 12px; border: 1px solid var(--system-gray-bg); border-radius: 10px; outline: none; font-family: inherit; font-size: 15px; }
-        .spell-input.wrong { border-color: var(--system-red); color: var(--system-red); background: #fff8f8; }
-        .score-box { background: var(--mode-active); color: white; padding: 16px; border-radius: 16px; margin-bottom: 25px; text-align: center; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .icon-btn { display: flex; align-items: center; justify-content: center; cursor: pointer; color: #d2d2d7; }
-        .audio-btn:hover { color: var(--mode-active); }
+        /* Controls & Buttons */
+        .card-controls { margin-top: 30px; display: flex; justify-content: center; gap: 20px; align-items: center; }
+        .shuffle-label { font-size: 13px; font-weight: 500; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        input[type="checkbox"] { accent-color: var(--system-blue); cursor: pointer; width: 16px; height: 16px; }
+
+        .spell-row {
+            background: var(--system-card-bg); padding: 14px 20px; border-radius: 16px;
+            margin-bottom: 10px; display: flex; align-items: center; gap: 15px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+        }
+        .spell-translation { width: 35%; font-size: 15px; font-weight: 500; color: var(--text-secondary); }
+        .spell-input {
+            flex: 1; padding: 12px; border: 1px solid var(--system-btn-grey); border-radius: 12px;
+            outline: none; font-family: inherit; font-size: 15px; background: #fafafa; transition: all 0.2s;
+        }
+        .spell-input:focus { border-color: var(--system-blue); background: #ffffff; }
+        .spell-input.wrong { border-color: var(--system-red); color: var(--system-red); background: #fffcfc; }
+
+        .score-box {
+            background: var(--system-card-bg); color: var(--system-green); padding: 20px;
+            border-radius: var(--radius); margin-bottom: 20px; text-align: center;
+            font-size: 20px; font-weight: 700; box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+        }
+
+        .icon-btn { display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-tertiary); transition: color 0.2s; }
+        .audio-btn:hover { color: var(--system-blue); }
         .del-btn:hover { color: var(--system-red); }
-        .apple-btn { background: var(--text-primary); color: white; border: none; padding: 12px 30px; border-radius: 22px; font-weight: 600; cursor: pointer; font-size: 14px; transition: all 0.2s; }
-        .hint { margin-top: 40px; text-align: center; font-size: 12px; color: var(--text-tertiary); opacity: 0.8; }
+
+        .apple-btn {
+            background: var(--system-btn-grey); color: var(--text-primary); border: none;
+            padding: 12px 24px; border-radius: 24px; font-weight: 600; cursor: pointer;
+            font-size: 14px; transition: all 0.2s; display: inline-flex; align-items: center;
+            justify-content: center; text-decoration: none; outline: none;
+        }
+        .apple-btn:hover { background: #e5e5ea; }
+        .apple-btn:active { transform: scale(0.98); background: var(--system-btn-active); }
+        .apple-btn.primary { background: var(--system-blue); color: white; }
+        .apple-btn.primary:hover { background: #0062cc; }
+
+        .hint { margin-top: 30px; text-align: center; font-size: 12px; color: var(--text-secondary); opacity: 0.8; }
         #fileInput { display: none; }
-        .icon { width: 16px; height: 16px; fill: currentColor; }
+        .icon { width: 18px; height: 18px; fill: currentColor; }
         .icon-large { width: 24px; height: 24px; fill: currentColor; }
+
+        #appVersion { position: fixed; right: 8px; bottom: 35px; font-size: 9px; color: rgba(0,0,0,0.25); pointer-events: none; z-index: 2000; }
+
+        @media (max-width: 600px) {
+            body { padding-left: 12px; padding-right: 12px; }
+            header { padding: 0 18px; }
+            header h1 { font-size: 20px; }
+            .top-nav { gap: 8px; }
+            .mode-hub { left: 18px; bottom: 18px; }
+            .status-counter { right: 18px; bottom: 22px; }
+        }
     </style>
 </head>
 <body>
 
-    <h1>Vocab</h1>
-
-    <nav class="top-nav">
-        <button id="resetBtn" class="minimal-btn" onclick="handleReset()">New</button>
-        <button class="minimal-btn" onclick="document.getElementById('fileInput').click()">Import</button>
-        <button class="minimal-btn" onclick="exportCSV()">Export</button>
-        <button class="minimal-btn" onclick="shareList()">Share</button>
-        <input type="file" id="fileInput" accept=".csv" onchange="importCSV(event)">
-    </nav>
+    <header>
+        <h1>Vocab</h1>
+        <nav class="top-nav">
+            <button id="resetBtn" class="minimal-btn" onclick="handleReset()">New</button>
+            <button class="minimal-btn" onclick="document.getElementById('fileInput').click()">Import</button>
+            <button class="minimal-btn" onclick="exportCSV()">Export</button>
+            <button class="minimal-btn" onclick="shareList()">Share</button>
+            <input type="file" id="fileInput" accept=".csv" onchange="importCSV(event)">
+        </nav>
+    </header>
 
     <div id="qrOverlay" onclick="this.style.display='none'">
         <div class="qr-modal" onclick="event.stopPropagation()">
             <p>Share this list</p>
             <img id="qrImage" src="" alt="QR Code">
             <div class="modal-actions">
-                <button id="copyModalBtn" class="apple-btn" onclick="copyFromModal()">Copy Link</button>
-                <button class="apple-btn" style="background:#e5e5ea; color:black" onclick="document.getElementById('qrOverlay').style.display='none'">Done</button>
+                <button id="copyModalBtn" class="apple-btn primary" onclick="copyFromModal()">Copy Link</button>
+                <button class="apple-btn" onclick="document.getElementById('qrOverlay').style.display='none'">Done</button>
             </div>
         </div>
     </div>
@@ -155,11 +258,11 @@
             </div>
         </div>
         <div class="card-controls">
-            <button class="minimal-btn" style="color:var(--text-primary)" onclick="prevCard()">← Prev</button>
+            <button class="minimal-btn" onclick="prevCard()">← Prev</button>
             <label class="shuffle-label">
                 <input type="checkbox" id="shuffleToggle" onchange="startFlashcards()"> Shuffle
             </label>
-            <button class="apple-btn" onclick="nextCard()">Next →</button>
+            <button class="apple-btn primary" onclick="nextCard()">Next →</button>
         </div>
     </div>
 
@@ -167,8 +270,8 @@
         <div id="scoreDisplay" class="score-box" style="display:none"></div>
         <div id="spellList"></div>
         <div style="display:flex; justify-content:center; gap:15px; margin-top:30px;">
-            <button id="spellSubmit" class="apple-btn" onclick="submitSpell()">Submit</button>
-            <button id="spellRestart" class="apple-btn" style="background:#e5e5ea; color:black; display:none" onclick="startSpellMode()">Restart</button>
+            <button id="spellSubmit" class="apple-btn primary" onclick="submitSpell()">Submit</button>
+            <button id="spellRestart" class="apple-btn" style="display:none" onclick="startSpellMode()">Restart</button>
         </div>
     </div>
 
@@ -182,6 +285,7 @@
     </div>
 
     <div class="status-counter" id="vocabCounter">0 Vocab Items</div>
+    <div id="appVersion">v1.0 | Made with ❤️ by Icarus Lai</div>
 
     <script>
         const vocabList = document.getElementById('vocabList');
@@ -248,7 +352,7 @@
 
         function showCard() { 
             const cardInner = document.getElementById('flashcard');
-            cardInner.classList.remove('is-flipped'); // Always start unflipped
+            cardInner.classList.remove('is-flipped');
             document.getElementById('frontText').innerText = flashData[flashIdx].en; 
             document.getElementById('backText').innerText = flashData[flashIdx].zh; 
             document.querySelectorAll('.card-audio-trigger').forEach(el => el.innerHTML = audioIconLarge);
@@ -304,7 +408,7 @@
                 const idx = input.dataset.idx;
                 const userVal = input.value.trim().toLowerCase();
                 const correctVal = spellSessionData[idx].en.toLowerCase();
-                if (userVal === correctVal) { score++; input.style.borderColor = "#34c759"; }
+                if (userVal === correctVal) { score++; input.style.borderColor = "var(--system-green)"; }
                 else { input.classList.add('wrong'); input.value = `${userVal || '??'} → ${spellSessionData[idx].en}`; }
                 input.disabled = true;
             });
@@ -362,7 +466,7 @@
 
         function handleReset() { if(confirm("Clear all items?")) { vocabList.innerHTML = ""; localStorage.removeItem('appleVocabData'); addRow(true); } }
         function exportCSV() { let csv = "Item,Translation\n"; getRawData().forEach(i => csv += `"${i.en}","${i.zh}"\n`); const blob = new Blob([csv], {type:'text/csv'}); const url = window.URL.createObjectURL(blob); const a = document.createElement('a'); a.href=url; a.download='vocab.csv'; a.click(); }
-        function importCSV(e) { const f = e.target.files[0]; if(!f) return; const r = new FileReader(); r.onload = (ev) => { const lines = ev.target.result.split('\n').slice(1); vocabList.innerHTML = ""; lines.forEach(l => { const [en, zh] = l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); if(en) addRow(false, en.replace(/"/g,"").trim(), zh?zh.replace(/"/g,"").trim():""); }); saveToCache(); }; r.readAsText(f); }
+        function importCSV(e) { const f = e.target.files[0]; if(!f) return; const r = new FileReader(); r.onload = (ev) => { const lines = ev.target.result.split('\n').slice(1); vocabList.innerHTML = ""; lines.forEach(l => { const [en, zh] = l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*\$)/); if(en) addRow(false, en.replace(/"/g,"").trim(), zh?zh.replace(/"/g,"").trim():""); }); saveToCache(); }; r.readAsText(f); }
 
         function shareList() {
             const data = getRawData().map(i=>[i.en, i.zh]);
@@ -374,8 +478,8 @@
             const qrImg = document.getElementById('qrImage');
             qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(lastGeneratedUrl)}`;
             document.getElementById('qrOverlay').style.display = 'flex';
-            document.getElementById('copyModalBtn').innerText = "Copy Link";
-            document.getElementById('copyModalBtn').style.background = "var(--text-primary)";
+            const btn = document.getElementById('copyModalBtn');
+            btn.innerText = "Copy Link";
             navigator.clipboard.writeText(lastGeneratedUrl);
         }
 
@@ -383,8 +487,7 @@
             navigator.clipboard.writeText(lastGeneratedUrl).then(() => {
                 const btn = document.getElementById('copyModalBtn');
                 btn.innerText = "Copied!";
-                btn.style.background = "var(--system-green)";
-                setTimeout(() => { btn.innerText = "Copy Link"; btn.style.background = "var(--text-primary)"; }, 2000);
+                setTimeout(() => { btn.innerText = "Copy Link"; }, 2000);
             });
         }
 
