@@ -77,7 +77,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Floating Bottom Dock (Action Controls) */
+        /* Desktop Floating Bottom Dock */
         .bottom-dock {
             position: fixed;
             bottom: 24px;
@@ -124,9 +124,69 @@
             margin: 0 2px;
         }
 
+        /* Mobile Actions Container & Trigger */
+        .mobile-actions-hub {
+            display: none;
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1050;
+        }
+
+        .mobile-actions-trigger {
+            background: var(--system-blue);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 22px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(0, 122, 255, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            outline: none;
+            transition: transform 0.1s ease;
+        }
+        .mobile-actions-trigger:active { transform: scale(0.95); }
+
+        .mobile-actions-menu {
+            display: none;
+            position: absolute;
+            bottom: 45px;
+            left: 50%;
+            transform: translateX(-50%);
+            flex-direction: column;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            padding: 6px;
+            border-radius: 18px;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            box-shadow: 0 12px 36px rgba(0,0,0,0.15);
+            min-width: 160px;
+        }
+        .mobile-actions-menu.show { display: flex; animation: fadeIn 0.2s ease; }
+
+        .mobile-menu-item {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-primary);
+            cursor: pointer;
+            padding: 10px 14px;
+            border-radius: 12px;
+            transition: 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .mobile-menu-item:hover { background: var(--system-blue); color: white; }
+
         /* Class Selector Floating Menu (Bottom-Left) */
         .mode-hub {
-            position: fixed; bottom: 28px; left: 30px;
+            position: fixed; bottom: 24px; left: 24px;
             z-index: 1100;
         }
         .mode-trigger {
@@ -215,7 +275,7 @@
         .points-btn:active { transform: scale(0.92); }
 
         .status-counter {
-            position: fixed; bottom: 33px; right: 30px;
+            position: fixed; bottom: 28px; right: 24px;
             font-weight: 600; color: var(--text-secondary); font-size: 13px;
             z-index: 100; pointer-events: none;
         }
@@ -234,16 +294,19 @@
         }
         .apple-btn-full:hover { background: #0062cc; }
 
-        #appVersion { position: fixed; right: 8px; bottom: 8px; font-size: 9px; color: rgba(0,0,0,0.25); pointer-events: none; z-index: 2000; }
+        #appVersion { position: fixed; right: 8px; bottom: 6px; font-size: 9px; color: rgba(0,0,0,0.25); pointer-events: none; z-index: 2000; }
 
+        /* Media Query: Narrow Screens / Phones */
         @media (max-width: 600px) {
             body { padding-left: 12px; padding-right: 12px; }
             header { padding: 0 18px; }
             header h1 { font-size: 20px; }
             .mode-hub { left: 16px; bottom: 20px; }
-            .status-counter { display: none; } /* Hide counter on tiny mobile screens to avoid overlap */
-            .bottom-dock { width: calc(100% - 32px); justify-content: space-between; padding: 4px 6px; }
-            .dock-btn { padding: 10px 10px; font-size: 12px; }
+            .status-counter { right: 16px; bottom: 26px; }
+            
+            /* Hide wide desktop dock and show compact mobile actions menu */
+            .bottom-dock { display: none !important; }
+            .mobile-actions-hub { display: block; }
         }
     </style>
 </head>
@@ -270,7 +333,7 @@
         <div id="studentContainer"></div>
     </div>
 
-    <!-- Simplified Floating Dock (Bottom-Center) -->
+    <!-- Wide Desktop Dock -->
     <div id="scoreboardActions" class="bottom-dock hidden">
         <button class="dock-btn primary" onclick="pickRandomNoRepeat()">
             🎲 <span id="noRepeatBtn">Cycle 0/0</span>
@@ -282,6 +345,20 @@
         <button class="dock-btn" style="color:var(--system-red)" onclick="resetScores()">Reset</button>
     </div>
 
+    <!-- Mobile Compact Actions Menu -->
+    <div id="mobileActionsHub" class="mobile-actions-hub hidden">
+        <button class="mobile-actions-trigger" onclick="toggleMobileActions()">Actions ⚡</button>
+        <div class="mobile-actions-menu" id="mobileActionsMenu">
+            <div class="mobile-menu-item" onclick="pickRandomNoRepeat(); toggleMobileActions();">
+                <span>🎲 Cycle</span> <span id="noRepeatMobileBtn" style="opacity:0.6; font-size:11px;">0/0</span>
+            </div>
+            <div class="mobile-menu-item" onclick="pickRandom(); toggleMobileActions();">Random</div>
+            <div class="mobile-menu-item" id="sortMobileBtn" onclick="cycleSort(); toggleMobileActions();">Order ⇅</div>
+            <div class="mobile-menu-item" onclick="awardAll(1); toggleMobileActions();">+1 All</div>
+            <div class="mobile-menu-item" style="color:var(--system-red)" onclick="resetScores(); toggleMobileActions();">Reset</div>
+        </div>
+    </div>
+
     <!-- Class Switcher (Bottom-Left) -->
     <div class="mode-hub">
         <div class="mode-trigger" id="currentClassLabel" onclick="toggleModeMenu()">Select Class</div>
@@ -289,6 +366,7 @@
     </div>
 
     <div class="status-counter" id="presenceCounter">0 Present</div>
+    <div id="appVersion">v1.0 | Made with ❤️ by Icarus Lai</div>
 
     <script>
         let state = { classes: [], lastSelectedIndex: null, lastSortMode: 'original' };
@@ -321,7 +399,14 @@
         }
 
         function toggleSetup() { document.getElementById('setupArea').classList.toggle('open'); }
-        function toggleModeMenu() { document.getElementById('tabsContainer').classList.toggle('show'); }
+        function toggleModeMenu() { 
+            document.getElementById('tabsContainer').classList.toggle('show'); 
+            document.getElementById('mobileActionsMenu').classList.remove('show');
+        }
+        function toggleMobileActions() { 
+            document.getElementById('mobileActionsMenu').classList.toggle('show'); 
+            document.getElementById('tabsContainer').classList.remove('show');
+        }
 
         function addClass() {
             const nameField = document.getElementById('className');
@@ -340,7 +425,6 @@
             toggleSetup(); sync(); renderTabs();
         }
 
-        // Single toggle button to cycle sort modes cleanly (Order -> A-Z -> Rank)
         function cycleSort() {
             const modes = ['original', 'alpha', 'score'];
             const nextIdx = (modes.indexOf(state.lastSortMode) + 1) % modes.length;
@@ -355,13 +439,19 @@
 
             // Sort button label update
             const sortBtn = document.getElementById('sortBtn');
-            if(state.lastSortMode === 'alpha') sortBtn.innerText = "A-Z ⇅";
-            else if(state.lastSortMode === 'score') sortBtn.innerText = "Rank ⇅";
-            else sortBtn.innerText = "Order ⇅";
+            const sortMobileBtn = document.getElementById('sortMobileBtn');
+            let sortLabel = "Order ⇅";
+            if(state.lastSortMode === 'alpha') sortLabel = "A-Z ⇅";
+            else if(state.lastSortMode === 'score') sortLabel = "Rank ⇅";
+            
+            if(sortBtn) sortBtn.innerText = sortLabel;
+            if(sortMobileBtn) sortMobileBtn.innerText = sortLabel;
 
             const presentStudents = activeClass.students.filter(s => !s.absent);
             const pickedCount = (activeClass.pickedIds || []).length;
+            
             document.getElementById('noRepeatBtn').innerText = `Cycle ${pickedCount}/${presentStudents.length}`;
+            document.getElementById('noRepeatMobileBtn').innerText = `${pickedCount}/${presentStudents.length}`;
             document.getElementById('presenceCounter').innerText = `${presentStudents.length} Present`;
             document.getElementById('currentClassLabel').innerText = activeClass.name;
 
@@ -481,6 +571,7 @@
             if (state.classes.length === 0) {
                 document.getElementById('studentContainer').innerHTML = '<div class="empty-state">No classes found.<br>Tap "Add Class" in the top bar to start.</div>';
                 document.getElementById('scoreboardActions').classList.add('hidden');
+                document.getElementById('mobileActionsHub').classList.add('hidden');
                 document.getElementById('currentClassLabel').innerText = "No Classes";
                 return;
             }
@@ -502,6 +593,7 @@
             state.lastSelectedIndex = index; 
             document.getElementById('tabsContainer').classList.remove('show');
             document.getElementById('scoreboardActions').classList.remove('hidden');
+            document.getElementById('mobileActionsHub').classList.remove('hidden');
             sync(); renderStudents(); 
         }
 
