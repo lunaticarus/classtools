@@ -27,7 +27,7 @@
             background-color: var(--system-gray-bg);
             color: var(--text-primary);
             margin: 0;
-            padding: 95px 20px 110px 20px;
+            padding: 95px 20px 120px 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -35,7 +35,7 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* Clean Glassmorphic Header */
+        /* Clean Glassmorphic Fixed Header */
         header {
             position: fixed;
             top: 0; left: 0; right: 0;
@@ -48,6 +48,7 @@
             align-items: center;
             justify-content: space-between;
             padding: 0 30px;
+            border-bottom: 1px solid rgba(0,0,0,0.04);
         }
 
         header::after {
@@ -77,10 +78,32 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* Frosted Glass Bottom Blur Bar */
+        .footer-blur-bar {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            height: 80px;
+            background: rgba(245, 245, 247, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 850;
+            pointer-events: none;
+            border-top: 1px solid rgba(0,0,0,0.04);
+        }
+
+        .footer-blur-bar::before {
+            content: "";
+            position: absolute;
+            top: -20px; left: 0; right: 0;
+            height: 20px;
+            background: linear-gradient(to top, rgba(245, 245, 247, 0.85), transparent);
+            pointer-events: none;
+        }
+
         /* Desktop Floating Bottom Dock */
         .bottom-dock {
             position: fixed;
-            bottom: 24px;
+            bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 1000;
@@ -124,11 +147,11 @@
             margin: 0 2px;
         }
 
-        /* Mobile Actions Container & Trigger */
+        /* Mobile Actions Hub */
         .mobile-actions-hub {
             display: none;
             position: fixed;
-            bottom: 24px;
+            bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 1050;
@@ -155,11 +178,11 @@
         .mobile-actions-menu {
             display: none;
             position: absolute;
-            bottom: 45px;
+            bottom: 48px;
             left: 50%;
             transform: translateX(-50%);
             flex-direction: column;
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
             padding: 6px;
@@ -186,19 +209,19 @@
 
         /* Class Selector Floating Menu (Bottom-Left) */
         .mode-hub {
-            position: fixed; bottom: 24px; left: 24px;
+            position: fixed; bottom: 20px; left: 24px;
             z-index: 1100;
         }
         .mode-trigger {
-            background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             padding: 8px 16px; border-radius: 18px; border: 1px solid rgba(0,0,0,0.08);
             box-shadow: 0 4px 16px rgba(0,0,0,0.08); font-weight: 600; color: var(--text-primary);
             cursor: pointer; font-size: 13px; user-select: none; transition: transform 0.1s ease;
         }
         .mode-trigger:active { transform: scale(0.96); }
         .mode-options {
-            display: none; position: absolute; bottom: 45px; left: 0;
-            flex-direction: column; background: rgba(255, 255, 255, 0.9);
+            display: none; position: absolute; bottom: 48px; left: 0;
+            flex-direction: column; background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             padding: 6px; border-radius: 16px; border: 1px solid rgba(0,0,0,0.08);
             box-shadow: 0 8px 32px rgba(0,0,0,0.12); min-width: 180px;
@@ -275,9 +298,9 @@
         .points-btn:active { transform: scale(0.92); }
 
         .status-counter {
-            position: fixed; bottom: 28px; right: 24px;
+            position: fixed; bottom: 25px; right: 24px;
             font-weight: 600; color: var(--text-secondary); font-size: 13px;
-            z-index: 100; pointer-events: none;
+            z-index: 900; pointer-events: none;
         }
 
         .hidden { display: none !important; }
@@ -294,15 +317,15 @@
         }
         .apple-btn-full:hover { background: #0062cc; }
 
-        #appVersion { position: fixed; right: 8px; bottom: 6px; font-size: 9px; color: rgba(0,0,0,0.25); pointer-events: none; z-index: 2000; }
+        #appVersion { position: fixed; right: 8px; bottom: 4px; font-size: 9px; color: rgba(0,0,0,0.25); pointer-events: none; z-index: 2000; }
 
         /* Media Query: Narrow Screens / Phones */
         @media (max-width: 600px) {
             body { padding-left: 12px; padding-right: 12px; }
             header { padding: 0 18px; }
             header h1 { font-size: 20px; }
-            .mode-hub { left: 16px; bottom: 20px; }
-            .status-counter { right: 16px; bottom: 26px; }
+            .mode-hub { left: 16px; bottom: 18px; }
+            .status-counter { right: 16px; bottom: 23px; }
             
             /* Hide wide desktop dock and show compact mobile actions menu */
             .bottom-dock { display: none !important; }
@@ -332,6 +355,9 @@
 
         <div id="studentContainer"></div>
     </div>
+
+    <!-- Frosted Glass Bottom Blur Overlay -->
+    <div class="footer-blur-bar"></div>
 
     <!-- Wide Desktop Dock -->
     <div id="scoreboardActions" class="bottom-dock hidden">
