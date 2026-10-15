@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Vocab - Liquid Glass Edition</title>
+    <style>
+        :root {
+            --system-blue: #007aff;
+            --system-green: #34c759;
+            --system-red: #ff3b30;
+            --system-gray-bg: #f5f5f7;
+            --system-card-bg: rgba(255, 255, 255, 0.72);
+            --system-btn-grey: rgba(0, 0, 0, 0.05);
+            --system-btn-active: rgba(0, 0, 0, 0.12);
+            --text-primary: #1d1d1f;
+            --text-secondary: #6e6e73;
+            --text-tertiary: #86868b;
+            --radius: 22px;
+
+            /* Liquid Glass Shaders & Specular Variables */
+            --glass-bg: rgba(255, 255, 255, 0.58);
+            --glass-border: rgba(255, 255, 255, 0.65);
+            --glass-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.8), inset 0 -1px 2px rgba(0, 0, 0, 0.05);
+            --glass-shine: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0) 100%);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", sans-serif;
+            background-color: #f0f1f5;
+            color: var(--text-primary);
+            margin: 0;
+            padding: 100px 20px 120px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Ambient Liquid Mesh Canvas */
+        #liquidCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            pointer-events: none;
+            filter: blur(40px);
+            opacity: 0.85;
+        }
+
+        /* Glassmorphic Header with Liquid Optics */
+        header {
+            position: fixed;
+            top: 16px; 
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 32px);
+            max-width: 760px;
+            height: 64px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(28px) saturate(190%);
+            -webkit-backdrop-filter: blur(28px) saturate(190%);
+            z-index: 900;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            transition: all 0.3s ease;
+        }
+
+        h1 { 
+            font-weight: 700; 
+            font-size: 22px; 
+            margin: 0; 
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #1d1d1f 0%, #434345 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .top-nav { display: flex; gap: 8px; align-items: center; }
+
+        .minimal-btn {
+            background: rgba(255, 255, 255, 0.4); 
+            border: 1px solid rgba(255, 255, 255, 0.6); 
+            color: var(--text-primary);
+            font-size: 13px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            padding: 8px 14px;
+            border-radius: 12px; 
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03), inset 0 1px 1px rgba(255,255,255,0.7);
+        }
+        .minimal-btn:hover { 
+            background: rgba(255, 255, 255, 0.75); 
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06), inset 0 1px 1px rgba(255,255,255,0.9);
+        }
+        .minimal-btn:active { transform: scale(0.96); }
+
+        /* Liquid Glass Bottom Overlay Bar */
+        .footer-blur-bar {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            height: 90px;
+            background: linear-gradient(to top, rgba(245, 245, 247, 0.75), transparent);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            z-index: 850;
+            pointer-events: none;
+            mask-image: linear-gradient(to top, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
+            -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
+        }
+
+        /* QR Overlay / Modal */
+        #qrOverlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.25); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            z-index: 2000; align-items: center; justify-content: center;
+        }
+        .qr-modal {
+            background: rgba(255, 255, 255, 0.82); 
+            backdrop-filter: blur(32px) saturate(200%);
+            -webkit-backdrop-filter: blur(32px) saturate(200%);
+            padding: 30px; border-radius: var(--radius); text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 24px 60px rgba(0,0,0,0.18), inset 0 1px 2px rgba(255,255,255,0.9); 
+            width: 310px; animation: modalPop 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .qr-modal img { width: 200px; height: 200px; margin-bottom: 20px; border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+        .qr-modal p { font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 20px; }
+        .modal-actions { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+
+        @keyframes modalPop {
+            from { opacity: 0; transform: scale(0.92) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        /* Floating Liquid Mode Hub */
+        .mode-hub {
+            position: fixed; bottom: 24px; left: 24px;
+            display: flex; flex-direction: column-reverse; align-items: flex-start; z-index: 1000;
+        }
+        .mode-trigger {
+            background: var(--glass-bg); 
+            backdrop-filter: blur(24px) saturate(180%); 
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            padding: 10px 20px; border-radius: 22px; 
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow); font-weight: 600; color: var(--text-primary);
+            cursor: pointer; font-size: 14px; user-select: none; 
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .mode-trigger:hover { background: rgba(255, 255, 255, 0.8); transform: translateY(-2px); }
+        .mode-trigger:active { transform: scale(0.95); }
+        
+        .mode-options {
+            display: none; flex-direction: column; 
+            background: rgba(255, 255, 255, 0.78);
+            backdrop-filter: blur(30px) saturate(190%); 
+            -webkit-backdrop-filter: blur(30px) saturate(190%);
+            padding: 8px; border-radius: 20px; 
+            border: 1px solid rgba(255,255,255,0.8);
+            box-shadow: 0 16px 40px rgba(0,0,0,0.12), inset 0 1px 1px rgba(255,255,255,0.8); 
+            margin-bottom: 12px; min-width: 180px; gap: 4px;
+        }
+        .mode-options.show { display: flex; animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
+        .mode-link {
+            font-size: 13.5px; font-weight: 600; color: var(--text-primary);
+            cursor: pointer; padding: 10px 14px; border-radius: 12px; transition: 0.18s ease;
+        }
+        .mode-link:hover { background: var(--system-blue); color: white; }
+
+        .status-counter {
+            position: fixed; bottom: 28px; right: 24px;
+            font-weight: 600; color: var(--text-secondary); font-size: 13px;
+            z-index: 900; pointer-events: none;
+            background: rgba(255, 255, 255, 0.4);
+            padding: 6px 14px; border-radius: 20px;
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+        }
+
+        /* Main Container */
+        .container { width: 100%; max-width: 620px; display: none; animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .container.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Vocab Row (Edit Mode) - Liquid Glass Cards */
+        .vocab-row {
+            display: grid; grid-template-columns: 44px 1fr 1fr 44px; align-items: center;
+            background: var(--glass-bg); 
+            backdrop-filter: blur(20px) saturate(160%);
+            -webkit-backdrop-filter: blur(20px) saturate(160%);
+            margin-bottom: 12px; border-radius: 18px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 24px -6px rgba(0,0,0,0.04), inset 0 1px 1px rgba(255, 255, 255, 0.7); 
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+        .vocab-row:focus-within {
+            border-color: rgba(0, 122, 255, 0.4);
+            box-shadow: 0 10px 30px -4px rgba(0, 122, 255, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.9);
+            transform: translateY(-1px);
+        }
+        textarea {
+            padding: 16px 12px; border: none; font-size: 15px; outline: none;
+            background: transparent; color: var(--text-primary); font-family: inherit;
+            resize: none; overflow: hidden; line-height: 1.4; width: 100%; box-sizing: border-box;
+            font-weight: 500;
+        }
+        .zh-input { border-left: 1px solid rgba(0,0,0,0.05); color: var(--text-secondary); }
+
+        /* Liquid Refractive Flashcard Mode */
+        .card-scene { width: 100%; height: 340px; perspective: 1200px; margin: 10px auto 0 auto; }
+        .card-inner {
+            position: relative; width: 100%; height: 100%; text-align: center;
+            transition: transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transform-style: preserve-3d; cursor: pointer;
+        }
+        .card-inner.is-flipped { transform: rotateY(180deg); }
+        .card-face {
+            position: absolute; width: 100%; height: 100%;
+            -webkit-backface-visibility: hidden; backface-visibility: hidden;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            border-radius: var(--radius); 
+            background: rgba(255, 255, 255, 0.68);
+            backdrop-filter: blur(36px) saturate(200%);
+            -webkit-backdrop-filter: blur(36px) saturate(200%);
+            border: 1px solid rgba(255, 255, 255, 0.85);
+            box-shadow: 0 20px 50px -10px rgba(0,0,0,0.1), inset 0 1px 2px rgba(255,255,255,0.9), inset 0 -2px 4px rgba(0,0,0,0.03); 
+            padding: 40px; box-sizing: border-box;
+            font-size: 34px; font-weight: 700; color: var(--text-primary);
+            letter-spacing: -0.5px;
+        }
+        .card-face::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: var(--radius);
+            background: var(--glass-shine);
+            pointer-events: none;
+        }
+        .card-back { transform: rotateY(180deg); color: var(--text-secondary); }
+        .card-audio-trigger {
+            position: absolute; top: 20px; right: 20px; color: var(--text-tertiary);
+            transition: all 0.2s; padding: 10px; z-index: 10;
+            background: rgba(255,255,255,0.4); border-radius: 50%;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.6);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .card-audio-trigger:hover { color: var(--system-blue); transform: scale(1.08); background: rgba(255,255,255,0.8); }
+
+        /* Controls & Buttons */
+        .card-controls { margin-top: 30px; display: flex; justify-content: center; gap: 20px; align-items: center; }
+        .shuffle-label { font-size: 13.5px; font-weight: 600; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; gap: 8px; user-select: none; }
+        input[type="checkbox"] { accent-color: var(--system-blue); cursor: pointer; width: 18px; height: 18px; }
+
+        .spell-row {
+            background: var(--glass-bg); 
+            backdrop-filter: blur(20px) saturate(160%);
+            -webkit-backdrop-filter: blur(20px) saturate(160%);
+            padding: 14px 20px; border-radius: 18px;
+            border: 1px solid var(--glass-border);
+            margin-bottom: 12px; display: flex; align-items: center; gap: 15px;
+            box-shadow: 0 6px 20px -4px rgba(0,0,0,0.03), inset 0 1px 1px rgba(255,255,255,0.7);
+        }
+        .spell-translation { width: 35%; font-size: 15px; font-weight: 600; color: var(--text-secondary); }
+        .spell-input {
+            flex: 1; padding: 12px 16px; border: 1px solid rgba(0,0,0,0.08); border-radius: 12px;
+            outline: none; font-family: inherit; font-size: 15px; background: rgba(255,255,255,0.6); 
+            transition: all 0.2s; color: var(--text-primary); font-weight: 500;
+        }
+        .spell-input:focus { border-color: var(--system-blue); background: rgba(255,255,255,0.95); box-shadow: 0 0 0 3px rgba(0,122,255,0.15); }
+        .spell-input.wrong { border-color: var(--system-red); color: var(--system-red); background: rgba(255, 59, 48, 0.05); }
+
+        .score-box {
+            background: rgba(52, 199, 89, 0.12); color: #1e7e34; padding: 20px;
+            border-radius: var(--radius); margin-bottom: 20px; text-align: center;
+            font-size: 20px; font-weight: 700; border: 1px solid rgba(52, 199, 89, 0.2);
+            backdrop-filter: blur(12px); box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+        }
+
+        .icon-btn { display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-tertiary); transition: all 0.2s ease; }
+        .audio-btn:hover { color: var(--system-blue); transform: scale(1.1); }
+        .del-btn:hover { color: var(--system-red); transform: scale(1.1); }
+
+        .apple-btn {
+            background: rgba(0, 0, 0, 0.05); 
+            color: var(--text-primary); border: 1px solid rgba(255, 255, 255, 0.6);
+            padding: 12px 26px; border-radius: 24px; font-weight: 600; cursor: pointer;
+            font-size: 14px; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); 
+            display: inline-flex; align-items: center; justify-content: center; 
+            text-decoration: none; outline: none;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03), inset 0 1px 1px rgba(255,255,255,0.8);
+        }
+        .apple-btn:hover { background: rgba(255, 255, 255, 0.8); transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,0,0,0.06); }
+        .apple-btn:active { transform: scale(0.97); }
+        .apple-btn.primary { 
+            background: linear-gradient(135deg, #007aff 0%, #0056b3 100%); 
+            color: white; border: none;
+            box-shadow: 0 6px 20px rgba(0, 122, 255, 0.35), inset 0 1px 1px rgba(255,255,255,0.3);
+        }
+        .apple-btn.primary:hover { 
+            background: linear-gradient(135deg, #0088ff 0%, #0062cc 100%); 
+            box-shadow: 0 8px 24px rgba(0, 122, 255, 0.45), inset 0 1px 1px rgba(255,255,255,0.4);
+        }
+
+        .hint { margin-top: 30px; text-align: center; font-size: 13px; color: var(--text-secondary); opacity: 0.9; font-weight: 500; }
+        #fileInput { display: none; }
+        .icon { width: 18px; height: 18px; fill: currentColor; }
+        .icon-large { width: 24px; height: 24px; fill: currentColor; }
+
+        #appVersion { position: fixed; right: 12px; bottom: 6px; font-size: 10px; font-weight: 500; color: rgba(0,0,0,0.35); pointer-events: none; z-index: 2000; }
+
+        @media (max-width: 600px) {
+            body { padding-left: 12px; padding-right: 12px; padding-top: 90px; }
+            header { width: calc(100% - 24px); padding: 0 16px; top: 12px; }
+            header h1 { font-size: 19px; }
+            .top-nav { gap: 6px; }
+            .minimal-btn { padding: 6px 10px; font-size: 12px; }
+            .mode-hub { left: 16px; bottom: 18px; }
+            .status-counter { right: 16px; bottom: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Liquid Fluid WebGL Ambient Background Canvas -->
+    <canvas id="liquidCanvas"></canvas>
+
+    <header>
+        <h1>Vocab</h1>
+        <nav class="top-nav">
+            <button id="resetBtn" class="minimal-btn" onclick="handleReset()">New</button>
+            <button class="minimal-btn" onclick="document.getElementById('fileInput').click()">Import</button>
+            <button class="minimal-btn" onclick="exportCSV()">Export</button>
+            <button class="minimal-btn" onclick="shareList()">Share</button>
+            <input type="file" id="fileInput" accept=".csv" onchange="importCSV(event)">
+        </nav>
+    </header>
+
+    <div id="qrOverlay" onclick="this.style.display='none'">
+        <div class="qr-modal" onclick="event.stopPropagation()">
+            <p>Share this list</p>
+            <img id="qrImage" src="" alt="QR Code">
+            <div class="modal-actions">
+                <button id="copyModalBtn" class="apple-btn primary" onclick="copyFromModal()">Copy Link</button>
+                <button class="apple-btn" onclick="document.getElementById('qrOverlay').style.display='none'">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="editContainer" class="container active">
+        <div id="vocabList"></div>
+        <div class="hint"><b>Enter/Tab</b> Next Item &nbsp; • &nbsp; <b>Arrows</b> Move Field &nbsp; • &nbsp; <b>Esc</b> Speak</div>
+    </div>
+
+    <div id="flashContainer" class="container">
+        <div class="card-scene">
+            <div class="card-inner" id="flashcard" onclick="flipCard()">
+                <div class="card-face card-front">
+                    <div class="card-audio-trigger" onclick="playCardAudio(event)"></div>
+                    <span id="frontText">...</span>
+                </div>
+                <div class="card-face card-back">
+                    <span id="backText">...</span>
+                </div>
+            </div>
+        </div>
+        <div class="card-controls">
+            <button class="minimal-btn" onclick="prevCard()">← Prev</button>
+            <label class="shuffle-label">
+                <input type="checkbox" id="shuffleToggle" onchange="startFlashcards()"> Shuffle
+            </label>
+            <button class="apple-btn primary" onclick="nextCard()">Next →</button>
+        </div>
+    </div>
+
+    <div id="spellContainer" class="container">
+        <div id="scoreDisplay" class="score-box" style="display:none"></div>
+        <div id="spellList"></div>
+        <div style="display:flex; justify-content:center; gap:15px; margin-top:30px;">
+            <button id="spellSubmit" class="apple-btn primary" onclick="submitSpell()">Submit</button>
+            <button id="spellRestart" class="apple-btn" style="display:none" onclick="startSpellMode()">Restart</button>
+        </div>
+    </div>
+
+    <!-- Frosted Glass Bottom Blur Overlay -->
+    <div class="footer-blur-bar"></div>
+
+    <div class="mode-hub">
+        <div class="mode-trigger" id="modeTrigger" onclick="toggleModeMenu()">Edit Mode</div>
+        <div class="mode-options" id="modeOptions">
+            <div class="mode-link" onclick="switchMode('edit')">Edit Mode</div>
+            <div class="mode-link" onclick="switchMode('flash')">Flashcard Mode</div>
+            <div class="mode-link" onclick="switchMode('spell')">Spell Mode</div>
+        </div>
+    </div>
+
+    <div class="status-counter" id="vocabCounter">0 Vocab Items</div>
+    <div id="appVersion">v1.20 | Liquid Glass Edition</div>
+
+    <script>
+        /* Ambient Liquid Mesh Canvas Animation */
+        const canvas = document.getElementById('liquidCanvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        
+        function resizeCanvas() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        const blobs = [
+            { x: 0.2, y: 0.3, r: 0.4, color: 'rgba(120, 180, 255, 0.7)', vx: 0.0005, vy: 0.0007 },
+            { x: 0.8, y: 0.2, r: 0.45, color: 'rgba(215, 170, 255, 0.75)', vx: -0.0006, vy: 0.0004 },
+            { x: 0.5, y: 0.7, r: 0.5, color: 'rgba(255, 195, 210, 0.7)', vx: 0.0004, vy: -0.0005 },
+            { x: 0.3, y: 0.8, r: 0.35, color: 'rgba(160, 230, 245, 0.65)', vx: -0.0003, vy: -0.0006 }
+        ];
+
+        function animateBlobs() {
+            ctx.clearRect(0, 0, width, height);
+            blobs.forEach(b => {
+                b.x += b.vx;
+                b.y += b.vy;
+
+                if (b.x < 0 || b.x > 1) b.vx *= -1;
+                if (b.y < 0 || b.y > 1) b.vy *= -1;
+
+                const grad = ctx.createRadialGradient(
+                    b.x * width, b.y * height, 0,
+                    b.x * width, b.y * height, b.r * Math.max(width, height)
+                );
+                grad.addColorStop(0, b.color);
+                grad.addColorStop(1, 'rgba(240, 241, 245, 0)');
+
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.arc(b.x * width, b.y * height, b.r * Math.max(width, height), 0, Math.PI * 2);
+                ctx.fill();
+            });
+            requestAnimationFrame(animateBlobs);
+        }
+        animateBlobs();
+
+        /* Vocabulary App Logic */
+        const vocabList = document.getElementById('vocabList');
+        let currentMode = 'edit';
+        let flashData = [];
+        let flashIdx = 0;
+        let lastGeneratedUrl = "";
+
+        const audioIcon = `<svg class="icon" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>`;
+        const audioIconLarge = `<svg class="icon-large" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>`;
+        const deleteIcon = `<svg class="icon" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>`;
+
+        function updateStatus() {
+            const count = document.querySelectorAll('.vocab-row').length;
+            const hasData = Array.from(document.querySelectorAll('.en-input')).some(i => i.value.trim() !== "");
+            const actualCount = hasData ? count : 0;
+            document.getElementById('vocabCounter').innerText = `${actualCount} Vocab Item${actualCount !== 1 ? 's' : ''}`;
+            let label = "Edit Mode";
+            if(currentMode === 'flash') label = "Flashcard Mode";
+            if(currentMode === 'spell') label = "Spell Mode";
+            document.getElementById('modeTrigger').innerText = label;
+        }
+
+        function toggleModeMenu() { document.getElementById('modeOptions').classList.toggle('show'); }
+
+        function switchMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
+            document.getElementById('modeOptions').classList.remove('show');
+            if(mode === 'edit') document.getElementById('editContainer').classList.add('active');
+            else if(mode === 'flash') { document.getElementById('flashContainer').classList.add('active'); startFlashcards(); }
+            else if(mode === 'spell') { document.getElementById('spellContainer').classList.add('active'); startSpellMode(); }
+            updateStatus();
+        }
+
+        function getRawData() {
+            const data = [];
+            document.querySelectorAll('.vocab-row').forEach(row => {
+                const en = row.querySelector('.en-input').value.trim();
+                const zh = row.querySelector('.zh-input').value.trim();
+                if (en) data.push({ en, zh });
+            });
+            return data;
+        }
+
+        function saveToCache() {
+            const data = getRawData().map(i => [i.en, i.zh]);
+            localStorage.setItem('appleVocabData', JSON.stringify(data));
+            updateStatus();
+        }
+
+        /* Flashcard Logic */
+        function startFlashcards() {
+            flashData = getRawData();
+            if (flashData.length === 0) { 
+                document.getElementById('frontText').innerText = "Empty List"; 
+                document.getElementById('backText').innerText = "Add items in Edit Mode";
+                return; 
+            }
+            if (document.getElementById('shuffleToggle').checked) flashData = [...flashData].sort(() => Math.random() - 0.5);
+            flashIdx = 0; 
+            showCard();
+        }
+
+        function showCard() { 
+            const cardInner = document.getElementById('flashcard');
+            cardInner.classList.remove('is-flipped');
+            document.getElementById('frontText').innerText = flashData[flashIdx].en; 
+            document.getElementById('backText').innerText = flashData[flashIdx].zh; 
+            document.querySelectorAll('.card-audio-trigger').forEach(el => el.innerHTML = audioIconLarge);
+        }
+
+        function flipCard() { 
+            if (flashData.length === 0) return; 
+            document.getElementById('flashcard').classList.toggle('is-flipped');
+        }
+
+        function playCardAudio(e) { 
+            e.stopPropagation(); 
+            if (flashData[flashIdx]) speak(flashData[flashIdx].en); 
+        }
+
+        function nextCard() { 
+            if (flashData.length === 0) return; 
+            flashIdx = (flashIdx + 1) % flashData.length; 
+            showCard(); 
+        }
+
+        function prevCard() { 
+            if (flashData.length === 0) return; 
+            flashIdx = (flashIdx - 1 + flashData.length) % flashData.length; 
+            showCard(); 
+        }
+
+        /* Spelling Mode Logic */
+        let spellSessionData = [];
+        function startSpellMode() {
+            const raw = getRawData();
+            if (raw.length === 0) return;
+            spellSessionData = [...raw].sort(() => Math.random() - 0.5);
+            const listEl = document.getElementById('spellList');
+            listEl.innerHTML = "";
+            document.getElementById('scoreDisplay').style.display = "none";
+            document.getElementById('spellRestart').style.display = "none";
+            document.getElementById('spellSubmit').style.display = "block";
+            spellSessionData.forEach((item, i) => {
+                const row = document.createElement('div');
+                row.className = "spell-row";
+                row.innerHTML = `<div class="icon-btn audio-btn" onclick="speak('${item.en.replace(/'/g, "\\'")}')">${audioIcon}</div>
+                    <div class="spell-translation">${item.zh}</div>
+                    <input type="text" class="spell-input" data-idx="${i}" placeholder="Type English...">`;
+                listEl.appendChild(row);
+            });
+        }
+
+        function submitSpell() {
+            const inputs = document.querySelectorAll('.spell-input');
+            let score = 0;
+            inputs.forEach(input => {
+                const idx = input.dataset.idx;
+                const userVal = input.value.trim().toLowerCase();
+                const correctVal = spellSessionData[idx].en.toLowerCase();
+                if (userVal === correctVal) { score++; input.style.borderColor = "var(--system-green)"; }
+                else { input.classList.add('wrong'); input.value = `${userVal || '??'} → ${spellSessionData[idx].en}`; }
+                input.disabled = true;
+            });
+            document.getElementById('scoreDisplay').innerText = `Result: ${score} / ${spellSessionData.length}`;
+            document.getElementById('scoreDisplay').style.display = "block";
+            document.getElementById('spellSubmit').style.display = "none";
+            document.getElementById('spellRestart').style.display = "block";
+        }
+
+        function autoResize(el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }
+        function speak(text) { if (!text) return; window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = 'en-US'; u.rate = 0.9; window.speechSynthesis.speak(u); }
+
+        function createRow(en = "", zh = "") {
+            const row = document.createElement('div');
+            row.className = 'vocab-row';
+            row.innerHTML = `<div class="icon-btn audio-btn">${audioIcon}</div>
+                <textarea class="en-input" placeholder="Vocab Item" rows="1">${en}</textarea>
+                <textarea class="zh-input" placeholder="Translation" rows="1">${zh}</textarea>
+                <div class="icon-btn del-btn">${deleteIcon}</div>`;
+            const enInput = row.querySelector('.en-input');
+            const zhInput = row.querySelector('.zh-input');
+            row.querySelector('.audio-btn').onclick = () => speak(enInput.value);
+            row.querySelector('.del-btn').onclick = () => { if(document.querySelectorAll('.vocab-row').length > 1) { row.remove(); saveToCache(); } else { enInput.value=""; zhInput.value=""; saveToCache(); } };
+            enInput.addEventListener('blur', async () => {
+                if(!enInput.value.trim() && !zhInput.value.trim() && document.querySelectorAll('.vocab-row').length > 1) { row.remove(); saveToCache(); return; }
+                if(enInput.value && !zhInput.value) {
+                    zhInput.value = "...";
+                    try {
+                        const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=zh-TW&dt=t&q=${encodeURIComponent(enInput.value)}`);
+                        const d = await res.json(); zhInput.value = d[0][0][0]; autoResize(zhInput); saveToCache();
+                    } catch(e) { zhInput.value = ""; }
+                }
+            });
+            [enInput, zhInput].forEach(el => el.oninput = () => { autoResize(el); saveToCache(); });
+            enInput.onkeydown = (e) => {
+                if(e.key === 'Escape') { speak(enInput.value); e.preventDefault(); }
+                if(e.key === 'Enter' || e.key === 'Tab') { e.preventDefault(); const next = row.nextElementSibling?.querySelector('.en-input'); if(next) next.focus(); else if(enInput.value) addRow(true); }
+                if(e.key === 'ArrowRight') zhInput.focus();
+                if(e.key === 'ArrowDown') row.nextElementSibling?.querySelector('.en-input')?.focus();
+                if(e.key === 'ArrowUp') row.previousElementSibling?.querySelector('.en-input')?.focus();
+            };
+            zhInput.onkeydown = (e) => {
+                if(e.key === 'ArrowLeft') enInput.focus();
+                if(e.key === 'ArrowDown') row.nextElementSibling?.querySelector('.zh-input')?.focus();
+                if(e.key === 'ArrowUp') row.previousElementSibling?.querySelector('.zh-input')?.focus();
+            };
+            setTimeout(() => { autoResize(enInput); autoResize(zhInput); }, 0);
+            return row;
+        }
+
+        function addRow(focus = false, en = "", zh = "") {
+            const row = createRow(en, zh);
+            vocabList.appendChild(row);
+            if(focus) setTimeout(() => row.querySelector('.en-input').focus(), 10);
+            saveToCache();
+        }
+
+        function handleReset() { 
+            if(confirm("Clear all items?")) { 
+                vocabList.innerHTML = ""; 
+                localStorage.removeItem('appleVocabData'); 
+                addRow(true); 
+            } 
+        }
+
+        function exportCSV() { 
+            let csv = "Item,Translation\n"; 
+            getRawData().forEach(i => csv += `"${i.en}","${i.zh}"\n`); 
+            const blob = new Blob([csv], {type:'text/csv'}); 
+            const url = window.URL.createObjectURL(blob); 
+            const a = document.createElement('a'); 
+            a.href=url; 
+            a.download='vocab.csv'; 
+            a.click(); 
+        }
+
+        function importCSV(e) { 
+            const f = e.target.files[0]; 
+            if(!f) return; 
+            const r = new FileReader(); 
+            r.onload = (ev) => { 
+                const lines = ev.target.result.split('\n').slice(1); 
+                vocabList.innerHTML = ""; 
+                lines.forEach(l => { 
+                    const [en, zh] = l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*\$)/); 
+                    if(en) addRow(false, en.replace(/"/g,"").trim(), zh?zh.replace(/"/g,"").trim():""); 
+                }); 
+                saveToCache(); 
+            }; 
+            r.readAsText(f); 
+        }
+
+        function shareList() {
+            const data = getRawData().map(i=>[i.en, i.zh]);
+            if (data.length === 0) { alert("Add some vocab first!"); return; }
+            const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+            const url = new URL(window.location.origin + window.location.pathname);
+            url.searchParams.set('list', encoded);
+            lastGeneratedUrl = url.href;
+            const qrImg = document.getElementById('qrImage');
+            qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(lastGeneratedUrl)}`;
+            document.getElementById('qrOverlay').style.display = 'flex';
+            const btn = document.getElementById('copyModalBtn');
+            btn.innerText = "Copy Link";
+            document.execCommand('copy');
+        }
+
+        function copyFromModal() {
+            document.execCommand('copy');
+            const btn = document.getElementById('copyModalBtn');
+            btn.innerText = "Copied!";
+            setTimeout(() => { btn.innerText = "Copy Link"; }, 2000);
+        }
+
+        const cached = localStorage.getItem('appleVocabData');
+        const params = new URLSearchParams(window.location.search);
+        if(params.get('list')) {
+            try {
+                const d = JSON.parse(decodeURIComponent(escape(atob(params.get('list')))));
+                if (d.length > 0) d.forEach(i => addRow(false, i[0], i[1]));
+                else addRow(true);
+                window.history.replaceState({}, '', window.location.pathname);
+            } catch(e) { addRow(true); }
+        } else if(cached) {
+            try {
+                const d = JSON.parse(cached);
+                if (d.length > 0) d.forEach(i => addRow(false, i[0], i[1]));
+                else addRow(true);
+            } catch(e) { addRow(true); }
+        } else { addRow(true); }
+        updateStatus();
+    </script>
+</body>
+</html>
