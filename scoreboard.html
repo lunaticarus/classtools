@@ -179,16 +179,6 @@
             transform: translateY(-1px);
         }
         .dock-btn:active { transform: scale(0.95); }
-        .dock-btn.primary { 
-            background: linear-gradient(135deg, #007aff 0%, #0056b3 100%); 
-            color: white; 
-            border: none;
-            box-shadow: 0 6px 20px rgba(0, 122, 255, 0.35), inset 0 1px 1px rgba(255,255,255,0.3);
-        }
-        .dock-btn.primary:hover { 
-            background: linear-gradient(135deg, #0088ff 0%, #0062cc 100%); 
-            box-shadow: 0 8px 24px rgba(0, 122, 255, 0.45);
-        }
 
         .dock-divider {
             width: 1px;
@@ -478,7 +468,7 @@
 
     <!-- Wide Desktop Dock -->
     <div id="scoreboardActions" class="bottom-dock hidden">
-        <button class="dock-btn primary" onclick="pickRandomNoRepeat()">
+        <button class="dock-btn" onclick="pickRandomNoRepeat()">
             🎲 <span id="noRepeatBtn">Cycle 0/0</span>
         </button>
         <button class="dock-btn" onclick="pickRandom()">Random</button>
@@ -493,9 +483,9 @@
         <button class="mobile-actions-trigger" onclick="toggleMobileActions()">Actions ⚡</button>
         <div class="mobile-actions-menu" id="mobileActionsMenu">
             <div class="mobile-menu-item" onclick="pickRandomNoRepeat(); toggleMobileActions();">
-                <span>🎲 Cycle</span> <span id="noRepeatMobileBtn" style="opacity:0.6; font-size:11px;">0/0</span>
+                <span>🎲 </span> <span id="noRepeatMobileBtn" style="opacity:0.6; font-size:11px;">0/0</span>
             </div>
-            <div class="mobile-menu-item" onclick="pickRandom(); toggleMobileActions();">Random</div>
+            <div class="mobile-menu-item" onclick="pickRandom(); toggleMobileActions();">🎲 Random</div>
             <div class="mobile-menu-item" id="sortMobileBtn" onclick="cycleSort(); toggleMobileActions();">Order ⇅</div>
             <div class="mobile-menu-item" onclick="awardAll(1); toggleMobileActions();">+1 All</div>
             <div class="mobile-menu-item" style="color:var(--system-red)" onclick="resetScores(); toggleMobileActions();">Reset</div>
@@ -701,7 +691,7 @@
             
             document.getElementById('noRepeatBtn').innerText = `Cycle ${pickedCount}/${presentStudents.length}`;
             document.getElementById('noRepeatMobileBtn').innerText = `${pickedCount}/${presentStudents.length}`;
-            document.getElementById('presenceCounter').innerText = `${presentStudents.length} Present`;
+            document.getElementById('presenceCounter').innerText = `\${presentStudents.length} Present`;
             document.getElementById('currentClassLabel').innerText = activeClass.name;
 
             const uniquePositiveScores = [...new Set(activeClass.students.map(s => s.score))].filter(s => s > 0).sort((a,b) => b-a);
@@ -721,141 +711,10 @@
             container.innerHTML = students.map(s => `
                 <div id="student-${s.id}" class="student-row ${s.absent ? 'absent' : ''}">
                     <button class="attendance-toggle" onclick="toggleAbsent(${s.id}, event)">${s.absent ? '◦' : '●'}</button>
-                    <div class="student-info" onclick="updateScore(${s.id}, 1)">
-                        <span class="medal">${getMedal(s.score)}</span>
-                        <span class="student-name">${s.name}</span>
+                    <div class="student-info" onclick="updateScore(\${s.id}, 1)">
+                        <span class="medal">\${getMedal(s.score)}</span>
+                        <span class="student-name">\${s.name}</span>
                     </div>
                     <div class="score-box">
-                        <button class="points-btn" onclick="updateScore(${s.id}, -1, event)">−</button>
-                        <span class="score-display" onclick="editScore(${s.id}, event)">${s.score}</span>
-                        <button class="points-btn" onclick="updateScore(${s.id}, 1, event)">+</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function updateScore(studentId, delta, event = null) {
-            if(event) event.stopPropagation();
-            const student = state.classes[state.lastSelectedIndex].students.find(s => s.id === studentId);
-            if (student) { 
-                student.score += delta; 
-                playSound(delta > 0 ? 'up' : 'down');
-                sync(); renderStudents(); 
-            }
-        }
-
-        function editScore(studentId, event) {
-            event.stopPropagation();
-            const student = state.classes[state.lastSelectedIndex].students.find(s => s.id === studentId);
-            const val = prompt(`Update score for ${student.name}:`, student.score);
-            if (val !== null && !isNaN(val)) {
-                student.score = parseInt(val);
-                sync(); renderStudents();
-            }
-        }
-
-        function toggleAbsent(studentId, event) {
-            event.stopPropagation();
-            const activeClass = state.classes[state.lastSelectedIndex];
-            const student = activeClass.students.find(s => s.id === studentId);
-            if (student) { 
-                student.absent = !student.absent; 
-                activeClass.pickedIds = (activeClass.pickedIds || []).filter(id => id !== studentId);
-                sync(); renderStudents(); 
-            }
-        }
-
-        function pickRandom() {
-            const activeClass = state.classes[state.lastSelectedIndex];
-            const present = activeClass.students.filter(s => !s.absent);
-            if (present.length === 0) return;
-            const winner = present[Math.floor(Math.random() * present.length)];
-            highlightStudent(winner.id);
-        }
-
-        function pickRandomNoRepeat() {
-            const activeClass = state.classes[state.lastSelectedIndex];
-            const present = activeClass.students.filter(s => !s.absent);
-            if (present.length === 0) return;
-            
-            if (!activeClass.pickedIds) activeClass.pickedIds = [];
-            let available = present.filter(s => !activeClass.pickedIds.includes(s.id));
-            
-            if (available.length === 0) {
-                activeClass.pickedIds = [];
-                available = present;
-            }
-            
-            const winner = available[Math.floor(Math.random() * available.length)];
-            activeClass.pickedIds.push(winner.id);
-            sync(); renderStudents(); highlightStudent(winner.id);
-        }
-
-        function highlightStudent(id) {
-            const row = document.getElementById(`student-${id}`);
-            if(!row) return;
-            document.querySelectorAll('.student-row').forEach(r => r.classList.remove('highlighted'));
-            row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            row.classList.add('highlighted');
-            setTimeout(() => row.classList.remove('highlighted'), 10000);
-        }
-
-        function awardAll(delta) {
-            state.classes[state.lastSelectedIndex].students.forEach(s => { if(!s.absent) s.score += delta; });
-            playSound('up'); sync(); renderStudents();
-        }
-
-        function resetScores() {
-            if (confirm("Reset all scores for this class?")) {
-                const activeClass = state.classes[state.lastSelectedIndex];
-                activeClass.students.forEach(s => s.score = 0);
-                activeClass.pickedIds = []; 
-                sync(); renderStudents();
-            }
-        }
-
-        function renderTabs() {
-            const container = document.getElementById('tabsContainer');
-            container.innerHTML = "";
-            if (state.classes.length === 0) {
-                document.getElementById('studentContainer').innerHTML = '<div class="empty-state">No classes found.<br>Tap "Add Class" in the top bar to start.</div>';
-                document.getElementById('scoreboardActions').classList.add('hidden');
-                document.getElementById('mobileActionsHub').classList.add('hidden');
-                document.getElementById('currentClassLabel').innerText = "No Classes";
-                return;
-            }
-            state.classes.forEach((cls, i) => {
-                const link = document.createElement('div');
-                link.className = `mode-link`;
-                link.innerHTML = `<span>${cls.name}</span> <span onclick="deleteClass(${i}, event)" style="opacity:0.4; padding:2px 6px;">×</span>`;
-                link.onclick = (e) => { if (e.target.innerText !== '×') selectClass(i); };
-                container.appendChild(link);
-            });
-            if (state.lastSelectedIndex !== null && state.classes[state.lastSelectedIndex]) {
-                selectClass(state.lastSelectedIndex);
-            } else if(state.classes.length > 0) {
-                selectClass(0);
-            }
-        }
-
-        function selectClass(index) { 
-            state.lastSelectedIndex = index; 
-            document.getElementById('tabsContainer').classList.remove('show');
-            document.getElementById('scoreboardActions').classList.remove('hidden');
-            document.getElementById('mobileActionsHub').classList.remove('hidden');
-            sync(); renderStudents(); 
-        }
-
-        function deleteClass(index, event) {
-            event.stopPropagation();
-            if (confirm("Delete this class?")) {
-                state.classes.splice(index, 1);
-                state.lastSelectedIndex = state.classes.length > 0 ? 0 : null;
-                sync(); renderTabs();
-            }
-        }
-
-        window.onload = init;
-    </script>
-</body>
-</html>
+                        <button class="points-btn" onclick="updateScore(\${s.id}, -1, event)">−</button>
+                        <span class="score-display
