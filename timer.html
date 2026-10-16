@@ -149,11 +149,29 @@
             position: relative;
             margin-top: 10px;
             cursor: pointer;
-            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), padding 0.3s ease;
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
 
         .timer-card:hover {
             transform: scale(1.01);
+        }
+
+        /* Flashing Alert Animation when time is up */
+        .timer-card.flashing-alert {
+            animation: glassPulse 0.8s infinite alternate ease-in-out;
+        }
+
+        @keyframes glassPulse {
+            0% {
+                background: rgba(255, 59, 48, 0.28);
+                border-color: rgba(255, 59, 48, 0.8);
+                box-shadow: 0 20px 60px rgba(255, 59, 48, 0.35), inset 0 1px 2px rgba(255, 255, 255, 0.9);
+            }
+            100% {
+                background: rgba(255, 149, 0, 0.32);
+                border-color: rgba(255, 149, 0, 0.9);
+                box-shadow: 0 20px 60px rgba(255, 149, 0, 0.45), inset 0 1px 2px rgba(255, 255, 255, 0.9);
+            }
         }
 
         .timer-ring-wrapper {
@@ -466,7 +484,7 @@
     </header>
 
     <div class="container">
-        <div class="timer-card" onclick="toggleFocusMode()" title="Click to toggle Full-Screen Focus Mode">
+        <div class="timer-card" id="timerCard" onclick="handleCardClick()" title="Click to toggle Full-Screen Focus Mode or clear alert">
             <div class="timer-ring-wrapper">
                 <svg class="progress-ring" viewBox="0 0 120 120">
                     <circle class="progress-ring-bg" cx="60" cy="60" r="52" fill="transparent" />
@@ -505,7 +523,7 @@
         </div>
     </div>
 
-    <div id="appVersion">v2.0 | Liquid Glass Edition</div>
+    <div id="appVersion">v2.1 | Liquid Glass Edition</div>
 
     <!-- Set Time Modal -->
     <div id="modalOverlay" onclick="closeSetModal()">
@@ -591,6 +609,7 @@
         let timerInterval = null;
         let soundEnabled = true;
         let isFocusMode = false;
+        let isAlertFlashing = false;
 
         const STORE_KEY_RECENTS = 'teacherTimer_recents_v1';
         const ringPath = document.getElementById('progressRingPath');
@@ -607,7 +626,6 @@
                 if (audioCtx.state === 'suspended') { audioCtx.resume(); }
                 const now = audioCtx.currentTime;
                 
-                // Triple crescendo chime sequence (E5, G#5, B5, E6) repeated twice
                 const chimePattern = [
                     { time: 0.0, freqs: [659.25, 830.61] },
                     { time: 0.3, freqs: [830.61, 987.77] },
@@ -624,7 +642,6 @@
                         osc.type = 'sine';
                         osc.frequency.setValueAtTime(freq, now + note.time);
                         
-                        // Louder gain level (0.4)
                         gain.gain.setValueAtTime(0, now + note.time);
                         gain.gain.linearRampToValueAtTime(0.4, now + note.time + 0.04);
                         gain.gain.exponentialRampToValueAtTime(0.0001, now + note.time + 0.9);
@@ -637,6 +654,24 @@
                     });
                 });
             } catch(e) {}
+        }
+
+        function triggerFlashingAlert() {
+            isAlertFlashing = true;
+            document.getElementById('timerCard').classList.add('flashing-alert');
+        }
+
+        function clearFlashingAlert() {
+            isAlertFlashing = false;
+            document.getElementById('timerCard').classList.remove('flashing-alert');
+        }
+
+        function handleCardClick() {
+            if (isAlertFlashing) {
+                clearFlashingAlert();
+            } else {
+                toggleFocusMode();
+            }
         }
 
         function formatTime(totalSec) {
@@ -682,6 +717,10 @@
         function toggleTimer() {
             if (audioCtx.state === 'suspended') { audioCtx.resume(); }
 
+            if (isAlertFlashing) {
+                clearFlashingAlert();
+            }
+
             if (isRunning) {
                 pauseTimer();
             } else {
@@ -692,6 +731,7 @@
         function startTimer() {
             if (mode === 'countdown' && remainingSeconds <= 0) return;
             
+            clearFlashingAlert();
             isRunning = true;
             document.getElementById('startBtnText').innerText = "Pause";
             document.getElementById('startMobileText').innerText = "⏸ Pause";
@@ -704,6 +744,7 @@
                         if (remainingSeconds === 0) {
                             pauseTimer();
                             playLoudChime();
+                            triggerFlashingAlert();
                         }
                     }
                 } else {
@@ -724,6 +765,7 @@
         }
 
         function resetTimer() {
+            clearFlashingAlert();
             pauseTimer();
             remainingSeconds = initialSeconds;
             countUpSeconds = 0;
@@ -742,6 +784,7 @@
 
         function switchMode(newMode) {
             mode = newMode;
+            clearFlashingAlert();
             pauseTimer();
             
             document.getElementById('modeNavBtn').innerText = mode === 'countdown' ? 'Mode: Count Down' : 'Mode: Count Up';
@@ -787,6 +830,7 @@
 
         /* Set Time Modal & Recents Storage */
         function openSetModal() {
+            clearFlashingAlert();
             pauseTimer();
             renderRecents();
             
