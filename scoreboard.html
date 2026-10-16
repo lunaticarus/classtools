@@ -91,9 +91,21 @@
             background: linear-gradient(135deg, #1d1d1f 0%, #434345 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            flex-shrink: 0;
         }
 
-        .top-nav { display: flex; gap: 8px; align-items: center; }
+        .top-nav { 
+            display: flex; 
+            gap: 8px; 
+            align-items: center; 
+            overflow-x: auto; 
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 2px;
+            scrollbar-width: none;
+        }
+        .top-nav::-webkit-scrollbar {
+            display: none;
+        }
 
         .minimal-btn {
             background: rgba(255, 255, 255, 0.4); 
@@ -107,6 +119,7 @@
             transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
             backdrop-filter: blur(10px);
             box-shadow: 0 2px 8px rgba(0,0,0,0.03), inset 0 1px 1px rgba(255,255,255,0.7);
+            white-space: nowrap;
         }
         .minimal-btn:hover { 
             background: rgba(255, 255, 255, 0.78); 
@@ -456,6 +469,9 @@
     <header>
         <h1>Scoreboard</h1>
         <nav class="top-nav">
+            <button class="minimal-btn" id="cloudSyncBtn" onclick="pushToCloud()">☁️ Push</button>
+            <button class="minimal-btn" id="cloudLoadBtn" onclick="pullFromCloud()">☁️ Pull</button>
+            <div style="width: 1px; height: 16px; background: rgba(0,0,0,0.2); margin: 0 4px;"></div>
             <button class="minimal-btn" onclick="toggleSetup()">Add Class</button>
             <button class="minimal-btn" onclick="downloadData()">Backup</button>
             <button class="minimal-btn" onclick="document.getElementById('fileInput').click()">Load</button>
@@ -510,7 +526,7 @@
     </div>
 
     <div class="status-counter" id="presenceCounter">0 Present</div>
-    <div id="appVersion">v2.1 | Liquid Glass Edition</div>
+    <div id="appVersion">v2.2 | Cloud Sync Edition</div>
 
     <script>
         /* Ambient Liquid Mesh Canvas Animation */
@@ -581,6 +597,54 @@
         }
 
         function sync() { localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
+
+        const CLOUD_API_URL = 'https://script.google.com/macros/s/AKfycbyBmq-YXH01cMTE3-pmgZvKl9iojmE15KCeZFBqETHKoJELsROZ-p-Ihk9WmFbD09i3/exec';
+
+        async function pushToCloud() {
+            const btn = document.getElementById('cloudSyncBtn');
+            btn.innerText = 'Syncing...';
+            
+            try {
+                await fetch(CLOUD_API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(state)
+                });
+                btn.innerText = '☁️ Saved';
+                setTimeout(() => btn.innerText = '☁️ Push', 2000);
+            } catch (error) {
+                console.error('Cloud save failed', error);
+                btn.innerText = '⚠️ Error';
+                setTimeout(() => btn.innerText = '☁️ Push', 2000);
+            }
+        }
+
+        async function pullFromCloud() {
+            const btn = document.getElementById('cloudLoadBtn');
+            btn.innerText = 'Loading...';
+            
+            try {
+                const response = await fetch(CLOUD_API_URL);
+                const cloudData = await response.json();
+                
+                if (Object.keys(cloudData).length > 0) {
+                    state = cloudData;
+                    sync(); // Update local storage with the new cloud data
+                    renderTabs();
+                    if(state.lastSelectedIndex !== null && state.classes[state.lastSelectedIndex]) {
+                        renderStudents();
+                    }
+                    btn.innerText = '☁️ Loaded';
+                    setTimeout(() => btn.innerText = '☁️ Pull', 2000);
+                } else {
+                    btn.innerText = '☁️ Empty';
+                    setTimeout(() => btn.innerText = '☁️ Pull', 2000);
+                }
+            } catch (error) {
+                console.error('Cloud load failed', error);
+                btn.innerText = '⚠️ Error';
+                setTimeout(() => btn.innerText = '☁️ Pull', 2000);
+            }
+        }
         
         function init() {
             const saved = localStorage.getItem(STORE_KEY);
