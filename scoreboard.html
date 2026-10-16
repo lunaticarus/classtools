@@ -9,6 +9,7 @@
             --system-blue: #007aff;
             --system-green: #34c759;
             --system-red: #ff3b30;
+            --system-orange: #ff9500;
             --system-gray-bg: #f5f5f7;
             --system-card-bg: rgba(255, 255, 255, 0.65);
             --system-btn-grey: rgba(0, 0, 0, 0.05);
@@ -77,10 +78,6 @@
             border: none;
             box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.08);
             transition: all 0.3s ease;
-        }
-
-        header::after {
-            display: none;
         }
 
         h1 { 
@@ -319,10 +316,6 @@
             box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.08);
             width: 100%;
         }
-        .setup-area::before, .setup-area::after {
-            display: none !important;
-            content: none !important;
-        }
         .setup-area.open { padding: 24px; max-height: 520px; margin-bottom: 20px; }
         
         input, textarea {
@@ -429,11 +422,52 @@
             transform: translateY(-1px);
             box-shadow: 0 10px 28px rgba(0, 122, 255, 0.45);
         }
-        .apple-btn-full:active { transform: scale(0.98); }
+
+        /* Modal & Group Generator Styles */
+        #modalOverlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.25); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            z-index: 2000; align-items: center; justify-content: center;
+        }
+        .group-modal {
+            background: rgba(255, 255, 255, 0.84); 
+            backdrop-filter: blur(36px) saturate(200%);
+            -webkit-backdrop-filter: blur(36px) saturate(200%);
+            padding: 28px 24px; border-radius: 26px;
+            border: 1px solid rgba(255, 255, 255, 0.85);
+            box-shadow: 0 24px 60px rgba(0,0,0,0.18), inset 0 1px 2px rgba(255,255,255,0.9); 
+            width: 90%; max-width: 520px; max-height: 85vh; display: flex; flex-direction: column;
+            animation: modalPop 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .group-modal h2 { font-size: 20px; font-weight: 700; margin-bottom: 16px; text-align: center; }
+        
+        .group-controls {
+            display: flex; gap: 8px; margin-bottom: 16px; align-items: center; justify-content: center; background: rgba(0,0,0,0.04); padding: 6px; border-radius: 16px;
+        }
+        .group-mode-btn {
+            flex: 1; padding: 8px 12px; border-radius: 12px; font-size: 13px; font-weight: 600; border: none; background: transparent; cursor: pointer; transition: all 0.2s; color: var(--text-secondary);
+        }
+        .group-mode-btn.active { background: rgba(255,255,255,0.9); color: var(--text-primary); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+
+        .group-input-row { display: flex; gap: 10px; align-items: center; margin-bottom: 18px; justify-content: center; }
+        .group-number-input { width: 75px; text-align: center; font-size: 16px; font-weight: 700; padding: 8px 10px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.1); background: rgba(255,255,255,0.7); outline: none; }
+
+        .group-results-scroll { overflow-y: auto; flex: 1; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; padding: 4px; margin-bottom: 18px; }
+        .group-card {
+            background: rgba(255, 255, 255, 0.65); border: 1px solid var(--glass-border); border-radius: 18px; padding: 14px;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .group-card-header { display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 14px; color: var(--system-blue); margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .group-member-list { font-size: 13.5px; font-weight: 500; color: var(--text-primary); line-height: 1.5; list-style: none; }
+
+        .award-group-btn {
+            background: rgba(0, 122, 255, 0.1); color: var(--system-blue); border: 1px solid rgba(0, 122, 255, 0.2);
+            padding: 4px 8px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+        }
+        .award-group-btn:hover { background: var(--system-blue); color: white; }
 
         #appVersion { position: fixed; right: 12px; bottom: 6px; font-size: 10px; font-weight: 500; color: rgba(0,0,0,0.35); pointer-events: none; z-index: 2000; }
 
-        /* Media Query: Narrow Screens / Mobile */
         @media (max-width: 600px) {
             body { padding-left: 12px; padding-right: 12px; padding-top: 90px; }
             header { width: calc(100% - 24px); padding: 0 16px; top: 12px; }
@@ -441,8 +475,6 @@
             .minimal-btn { padding: 6px 10px; font-size: 12px; }
             .mode-hub { left: 16px; bottom: 20px; }
             .status-counter { right: 16px; bottom: 22px; }
-            
-            /* Hide desktop dock & display compact mobile action button */
             .bottom-dock { display: none !important; }
             .mobile-actions-hub { display: block; }
         }
@@ -473,7 +505,7 @@
         <div id="studentContainer"></div>
     </div>
 
-    <!-- Frosted Glass Bottom Blur Overlay -->
+    <!-- Frosted Glass Bottom Overlay Bar -->
     <div class="footer-blur-bar"></div>
 
     <!-- Wide Desktop Dock -->
@@ -482,6 +514,7 @@
             🎲 <span id="noRepeatBtn">Cycle 0/0</span>
         </button>
         <button class="dock-btn" onclick="pickRandom()">Random</button>
+        <button class="dock-btn" onclick="openGroupModal()">Groups 👥</button>
         <div class="dock-divider"></div>
         <button class="dock-btn" id="sortBtn" onclick="cycleSort()">Order ⇅</button>
         <button class="dock-btn" onclick="awardAll(1)">+1 All</button>
@@ -496,6 +529,7 @@
                 <span>🎲 Cycle</span> <span id="noRepeatMobileBtn" style="opacity:0.6; font-size:11px;">0/0</span>
             </div>
             <div class="mobile-menu-item" onclick="pickRandom(); toggleMobileActions();">Random</div>
+            <div class="mobile-menu-item" onclick="openGroupModal(); toggleMobileActions();">Groups 👥</div>
             <div class="mobile-menu-item" id="sortMobileBtn" onclick="cycleSort(); toggleMobileActions();">Order ⇅</div>
             <div class="mobile-menu-item" onclick="awardAll(1); toggleMobileActions();">+1 All</div>
             <div class="mobile-menu-item" style="color:var(--system-red)" onclick="resetScores(); toggleMobileActions();">Reset</div>
@@ -509,7 +543,31 @@
     </div>
 
     <div class="status-counter" id="presenceCounter">0 Present</div>
-    <div id="appVersion">v2.3 | Cloud Sync Edition</div>
+    <div id="appVersion">v2.4 | Groups Edition</div>
+
+    <!-- Random Group Generator Modal -->
+    <div id="modalOverlay" onclick="closeGroupModal()">
+        <div class="group-modal" onclick="event.stopPropagation()">
+            <h2>Random Group Generator</h2>
+            
+            <div class="group-controls">
+                <button id="btnGroupCountMode" class="group-mode-btn active" onclick="setGroupCalcMode('count')">By Number of Groups</button>
+                <button id="btnGroupSizeMode" class="group-mode-btn" onclick="setGroupCalcMode('size')">By Students per Group</button>
+            </div>
+
+            <div class="group-input-row">
+                <span id="groupInputLabel" style="font-size:14px; font-weight:600;">Number of Groups:</span>
+                <input type="number" id="groupTargetInput" class="group-number-input" min="1" value="4">
+                <button class="minimal-btn" style="background:var(--system-blue); color:white; border:none;" onclick="generateGroups()">Shuffle 🔀</button>
+            </div>
+
+            <div id="groupResultsContainer" class="group-results-scroll">
+                <!-- Generated Group Cards Injected Here -->
+            </div>
+
+            <button class="apple-btn-full" style="background:rgba(0,0,0,0.06); color:var(--text-primary); box-shadow:none;" onclick="closeGroupModal()">Close</button>
+        </div>
+    </div>
 
     <script>
         /* Ambient Liquid Mesh Canvas Animation */
@@ -534,9 +592,7 @@
         function animateBlobs() {
             ctx.clearRect(0, 0, width, height);
             blobs.forEach(b => {
-                b.x += b.vx;
-                b.y += b.vy;
-
+                b.x += b.vx; b.y += b.vy;
                 if (b.x < 0 || b.x > 1) b.vx *= -1;
                 if (b.y < 0 || b.y > 1) b.vy *= -1;
 
@@ -559,9 +615,10 @@
         /* Scoreboard Application Logic */
         let state = { classes: [], lastSelectedIndex: null, lastSortMode: 'original' };
         const STORE_KEY = 'teacherApp_v7_light_only';
-        
-        // --- Cloud Sync Setup ---
         const API_URL = "https://script.google.com/macros/s/AKfycbyBmq-YXH01cMTE3-pmgZvKl9iojmE15KCeZFBqETHKoJELsROZ-p-Ihk9WmFbD09i3/exec";
+
+        let currentGroupMode = 'count'; // 'count' or 'size'
+        let generatedGroupsData = [];
 
         async function saveToCloud() {
             const teacherId = prompt("Enter your unique Teacher ID to save:");
@@ -577,7 +634,6 @@
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify({ teacherId: teacherId, state: state })
                 });
-                
                 const result = await response.json();
                 if (result.status === 'success') {
                     alert("Scoreboard saved successfully to the cloud!");
@@ -585,7 +641,6 @@
                     alert("Error saving: " + result.message);
                 }
             } catch(e) {
-                console.error(e);
                 alert("Network error. Could not connect to the cloud.");
             } finally {
                 btn.innerText = origText;
@@ -603,18 +658,16 @@
             try {
                 const response = await fetch(`${API_URL}?teacherId=${encodeURIComponent(teacherId)}`);
                 const result = await response.json();
-                
                 if (result.status === 'success') {
                     state = result.data;
                     state.lastSelectedIndex = state.classes.length > 0 ? 0 : null;
-                    sync(); // Save the newly loaded state to local storage
-                    renderTabs(); // Re-render the UI with the loaded data
+                    sync();
+                    renderTabs();
                     alert("Scoreboard loaded successfully!");
                 } else {
                     alert(result.message);
                 }
             } catch(e) {
-                console.error(e);
                 alert("Network error. Could not connect to the cloud.");
             } finally {
                 btn.innerText = origText;
@@ -686,7 +739,6 @@
             const activeClass = state.classes[state.lastSelectedIndex];
             if(!activeClass) return;
 
-            // Sort button label update
             const sortBtn = document.getElementById('sortBtn');
             const sortMobileBtn = document.getElementById('sortMobileBtn');
             let sortLabel = "Order ⇅";
@@ -819,43 +871,3 @@
             container.innerHTML = "";
             if (state.classes.length === 0) {
                 document.getElementById('studentContainer').innerHTML = '<div class="empty-state">No classes found.<br>Tap "Add Class" in the top bar to start.</div>';
-                document.getElementById('scoreboardActions').classList.add('hidden');
-                document.getElementById('mobileActionsHub').classList.add('hidden');
-                document.getElementById('currentClassLabel').innerText = "No Classes";
-                return;
-            }
-            state.classes.forEach((cls, i) => {
-                const link = document.createElement('div');
-                link.className = `mode-link`;
-                link.innerHTML = `<span>${cls.name}</span> <span onclick="deleteClass(${i}, event)" style="opacity:0.4; padding:2px 6px;">×</span>`;
-                link.onclick = (e) => { if (e.target.innerText !== '×') selectClass(i); };
-                container.appendChild(link);
-            });
-            if (state.lastSelectedIndex !== null && state.classes[state.lastSelectedIndex]) {
-                selectClass(state.lastSelectedIndex);
-            } else if(state.classes.length > 0) {
-                selectClass(0);
-            }
-        }
-
-        function selectClass(index) { 
-            state.lastSelectedIndex = index; 
-            document.getElementById('tabsContainer').classList.remove('show');
-            document.getElementById('scoreboardActions').classList.remove('hidden');
-            document.getElementById('mobileActionsHub').classList.remove('hidden');
-            sync(); renderStudents(); 
-        }
-
-        function deleteClass(index, event) {
-            event.stopPropagation();
-            if (confirm("Delete this class?")) {
-                state.classes.splice(index, 1);
-                state.lastSelectedIndex = state.classes.length > 0 ? 0 : null;
-                sync(); renderTabs();
-            }
-        }
-
-        window.onload = init;
-    </script>
-</body>
-</html>
