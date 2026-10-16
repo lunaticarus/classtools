@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Scoreboard - Liquid Glass Edition</title>
+    <title>Scoreboard</title>
     <style>
         :root {
             --system-blue: #007aff;
@@ -479,8 +479,8 @@
 
     <!-- Wide Desktop Dock -->
     <div id="scoreboardActions" class="bottom-dock hidden">
-        <button class="dock-btn primary" onclick="pickRandomNoRepeat()">
-            🎲 <span id="noRepeatBtn">Cycle 0/0</span>
+        <button class="dock-btn" onclick="pickRandomNoRepeat()">
+            🎲 <span id="noRepeatBtn"> 0/0</span>
         </button>
         <button class="dock-btn" onclick="pickRandom()">Random</button>
         <div class="dock-divider"></div>
@@ -494,7 +494,7 @@
         <button class="mobile-actions-trigger" onclick="toggleMobileActions()">Actions ⚡</button>
         <div class="mobile-actions-menu" id="mobileActionsMenu">
             <div class="mobile-menu-item" onclick="pickRandomNoRepeat(); toggleMobileActions();">
-                <span>🎲 Cycle</span> <span id="noRepeatMobileBtn" style="opacity:0.6; font-size:11px;">0/0</span>
+                <span>🎲 </span> <span id="noRepeatMobileBtn" style="opacity:0.6; font-size:11px;">0/0</span>
             </div>
             <div class="mobile-menu-item" onclick="pickRandom(); toggleMobileActions();">Random</div>
             <div class="mobile-menu-item" id="sortMobileBtn" onclick="cycleSort(); toggleMobileActions();">Order ⇅</div>
