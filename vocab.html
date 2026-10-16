@@ -421,11 +421,11 @@
     </div>
 
     <div class="status-counter" id="vocabCounter">0 Vocab Items</div>
-    <div id="appVersion">v2.3 | Cloud Sync Edition</div>
+    <div id="appVersion">v2.4 | Version Fork Edition</div>
 
     <script>
         /* REPLACE THIS URL WITH YOUR GOOGLE APPS SCRIPT WEB APP URL */
-        const API_URL = "https://script.google.com/macros/s/AKfycbzP-a4wulSmMV2wi9kq4Y8TnA8FYCo7N3wn5YE0kk7TPC01PMQglDeeL_LGrj6fIUX1Dw/exec";
+        const API_URL = "YOUR_GAS_WEB_APP_URL_HERE";
         
         let currentListId = null;
 
@@ -520,7 +520,7 @@
             updateStatus();
         }
 
-        /* --- Cloud Storage Logic --- */
+        /* --- Cloud Storage Logic (Always Forking) --- */
         async function saveToCloud() {
             const data = getRawData();
             if (data.length === 0) return alert("List is empty! Add some vocabulary first.");
@@ -533,7 +533,7 @@
                 const res = await fetch(API_URL, {
                     method: 'POST',
                     headers: {'Content-Type': 'text/plain;charset=utf-8'},
-                    body: JSON.stringify({ listId: currentListId, vocab: data })
+                    body: JSON.stringify({ vocab: data })
                 });
                 const result = await res.json();
                 
@@ -541,7 +541,7 @@
                     currentListId = result.listId;
                     updateRecentLists(currentListId);
                     saveToCache(); 
-                    alert("Saved! Your List ID is: " + currentListId);
+                    alert("List saved! Generated new List ID: " + currentListId);
                 } else {
                     alert("Error saving: " + result.message);
                 }
@@ -712,7 +712,7 @@
             row.querySelector('.audio-btn').onclick = () => speak(enInput.value);
             row.querySelector('.del-btn').onclick = () => { if(document.querySelectorAll('.vocab-row').length > 1) { row.remove(); saveToCache(); } else { enInput.value=""; zhInput.value=""; saveToCache(); } };
             
-            // Bulk Paste Handler (Excel / Word / Google Sheets / Plain Text)
+            // Bulk Paste Handler
             enInput.addEventListener('paste', (e) => {
                 const pasteData = (e.clipboardData || window.clipboardData).getData('text');
                 
