@@ -12,60 +12,59 @@
             --system-orange: #ff9500;
             --system-gray-bg: #f5f5f7;
             --system-card-bg: rgba(255, 255, 255, 0.65);
-            --system-btn-grey: rgba(0, 0, 0, 0.05);
-            --system-btn-active: rgba(0, 0, 0, 0.12);
-            --system-border: rgba(255, 255, 255, 0.65);
+            --system-border: rgba(255, 255, 255, 0.7);
             --text-primary: #1d1d1f;
             --text-secondary: #6e6e73;
             --text-tertiary: #86868b;
-            --radius: 22px;
+            --radius: 24px;
 
-            /* Liquid Glass Optics & Specular Highlights */
+            /* Liquid Glass Optics */
             --glass-bg: rgba(255, 255, 255, 0.58);
-            --glass-border: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.75);
             --glass-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.8), inset 0 -1px 2px rgba(0, 0, 0, 0.05);
-            --glass-shine: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0) 100%);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html, body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden; /* Lock viewport to prevent vertical scroll */
+            position: fixed;
+        }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", sans-serif;
             background-color: #f0f1f5;
             color: var(--text-primary);
-            margin: 0;
-            padding: 100px 20px 130px 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-height: 100vh;
+            justify-content: center;
             -webkit-font-smoothing: antialiased;
-            overflow-x: hidden;
-            position: relative;
+            user-select: none;
         }
 
-        /* Ambient Liquid Mesh Canvas */
+        /* Ambient Canvas */
         #liquidCanvas {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
             z-index: -1;
             pointer-events: none;
             filter: blur(42px);
             opacity: 0.85;
         }
 
-        /* Refractive Fixed Header */
+        /* Refractive Header with Flat Icon Buttons */
         header {
             position: fixed;
             top: 16px; 
             left: 50%;
             transform: translateX(-50%);
             width: calc(100% - 32px);
-            max-width: 760px;
-            height: 64px;
+            max-width: 680px;
+            height: 58px;
             background: var(--glass-bg);
             backdrop-filter: blur(28px) saturate(190%);
             -webkit-backdrop-filter: blur(28px) saturate(190%);
@@ -73,7 +72,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 24px;
+            padding: 0 18px;
             border-radius: 20px;
             border: 1px solid var(--glass-border);
             box-shadow: var(--glass-shadow);
@@ -88,51 +87,44 @@
 
         h1 { 
             font-weight: 700; 
-            font-size: 22px; 
-            margin: 0; 
+            font-size: 20px; 
             letter-spacing: -0.5px;
             background: linear-gradient(135deg, #1d1d1f 0%, #434345 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        .top-nav { display: flex; gap: 8px; align-items: center; }
+        .top-nav { display: flex; gap: 6px; align-items: center; }
 
-        .minimal-btn {
-            background: rgba(255, 255, 255, 0.4); 
-            border: 1px solid rgba(255, 255, 255, 0.6); 
+        /* Minimal Flat Icon Buttons */
+        .icon-nav-btn {
+            background: rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.6);
             color: var(--text-primary);
-            font-size: 13px; 
-            font-weight: 600; 
-            cursor: pointer; 
-            padding: 8px 14px;
-            border-radius: 12px; 
-            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.03), inset 0 1px 1px rgba(255,255,255,0.7);
+            width: 40px; height: 40px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            outline: none;
         }
-        .minimal-btn:hover { 
-            background: rgba(255, 255, 255, 0.78); 
+        .icon-nav-btn:hover {
+            background: rgba(255, 255, 255, 0.8);
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.06), inset 0 1px 1px rgba(255,255,255,0.9);
         }
-        .minimal-btn:active { transform: scale(0.96); }
+        .icon-nav-btn:active { transform: scale(0.94); }
+        .icon-nav-btn svg { width: 19px; height: 19px; fill: currentColor; }
 
+        /* Timer Main Card Container */
         .container { 
-            width: 100%; 
-            max-width: 620px; 
+            width: calc(100% - 32px); 
+            max-width: 580px; 
             display: flex;
             flex-direction: column;
             align-items: center;
-            animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
+            justify-content: center;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Large Display Glass Card */
         .timer-card {
             width: 100%;
             background: var(--glass-bg);
@@ -141,22 +133,18 @@
             border: 1px solid var(--glass-border);
             border-radius: var(--radius);
             box-shadow: var(--glass-shadow);
-            padding: 45px 20px;
+            padding: clamp(24px, 5vh, 45px) 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            position: relative;
-            margin-top: 10px;
             cursor: pointer;
             transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
 
-        .timer-card:hover {
-            transform: scale(1.01);
-        }
+        .timer-card:hover { transform: scale(1.01); }
 
-        /* Flashing Alert Animation when time is up */
+        /* Continuous Flashing Glass Alert */
         .timer-card.flashing-alert {
             animation: glassPulse 0.8s infinite alternate ease-in-out;
         }
@@ -176,8 +164,8 @@
 
         .timer-ring-wrapper {
             position: relative;
-            width: 290px;
-            height: 290px;
+            width: clamp(210px, 32vh, 280px);
+            height: clamp(210px, 32vh, 280px);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -186,18 +174,13 @@
         .progress-ring {
             transform: rotate(-90deg);
             transform-origin: 50% 50%;
-            width: 100%;
-            height: 100%;
+            width: 100%; height: 100%;
         }
 
-        .progress-ring-bg {
-            stroke: rgba(0, 0, 0, 0.05);
-            stroke-width: 10;
-        }
-
+        .progress-ring-bg { stroke: rgba(0, 0, 0, 0.05); stroke-width: 9; }
         .progress-ring-path {
             stroke: var(--system-blue);
-            stroke-width: 10;
+            stroke-width: 9;
             stroke-linecap: round;
             transition: stroke-dashoffset 0.3s linear, stroke 0.4s ease;
         }
@@ -211,44 +194,24 @@
         }
 
         .time-text {
-            font-size: 64px;
+            font-size: clamp(48px, 8vh, 66px);
             font-weight: 700;
             letter-spacing: -1.5px;
             color: var(--text-primary);
             font-variant-numeric: tabular-nums;
-            user-select: none;
             line-height: 1;
         }
 
         .mode-label-text {
-            margin-top: 10px;
-            font-size: 13px;
-            font-weight: 600;
+            margin-top: 8px;
+            font-size: 12px;
+            font-weight: 700;
             color: var(--text-tertiary);
             text-transform: uppercase;
             letter-spacing: 1.2px;
         }
 
-        /* Frosted Glass Bottom Overlay Bar */
-        .footer-blur-bar {
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            height: 90px;
-            background: linear-gradient(to top, rgba(245, 245, 247, 0.75), transparent);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            z-index: 850;
-            pointer-events: none;
-            mask-image: linear-gradient(to top, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
-            -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
-            transition: opacity 0.3s ease;
-        }
-
-        .footer-blur-bar.hidden-ui {
-            opacity: 0;
-        }
-
-        /* Refractive Bottom Dock for Desktop and Mobile */
+        /* Bottom Floating Dock */
         .bottom-dock {
             position: fixed;
             bottom: 24px;
@@ -257,7 +220,7 @@
             z-index: 1000;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             background: rgba(255, 255, 255, 0.68);
             backdrop-filter: blur(30px) saturate(190%);
             -webkit-backdrop-filter: blur(30px) saturate(190%);
@@ -278,10 +241,10 @@
             background: transparent;
             color: var(--text-primary);
             border: 1px solid transparent;
-            padding: 10px 20px;
+            padding: 9px 18px;
             border-radius: 20px;
             font-weight: 600;
-            font-size: 14px;
+            font-size: 13.5px;
             cursor: pointer;
             transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
             white-space: nowrap;
@@ -299,8 +262,7 @@
         .dock-btn:active { transform: scale(0.95); }
         .dock-btn.primary { 
             background: linear-gradient(135deg, #007aff 0%, #0056b3 100%); 
-            color: white; 
-            border: none;
+            color: white; border: none;
             box-shadow: 0 6px 20px rgba(0, 122, 255, 0.35), inset 0 1px 1px rgba(255,255,255,0.3);
         }
         .dock-btn.primary:hover { 
@@ -308,28 +270,23 @@
             box-shadow: 0 8px 24px rgba(0, 122, 255, 0.45);
         }
 
-        .dock-divider {
-            width: 1px;
-            height: 22px;
-            background: rgba(0, 0, 0, 0.1);
-            margin: 0 2px;
-        }
+        .dock-divider { width: 1px; height: 22px; background: rgba(0, 0, 0, 0.1); margin: 0 2px; }
 
-        /* Action Modal (Set Time) */
+        /* Action Modal */
         #modalOverlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: rgba(0,0,0,0.25); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             z-index: 2000; align-items: center; justify-content: center;
         }
         .action-modal {
-            background: rgba(255, 255, 255, 0.82); 
+            background: rgba(255, 255, 255, 0.84); 
             backdrop-filter: blur(32px) saturate(200%);
             -webkit-backdrop-filter: blur(32px) saturate(200%);
             padding: 26px 24px; border-radius: var(--radius); text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.85);
             box-shadow: 0 24px 60px rgba(0,0,0,0.18), inset 0 1px 2px rgba(255,255,255,0.9); 
-            width: 340px; max-width: calc(100vw - 32px);
-            animation: modalPopCenter 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            width: 320px; max-width: calc(100vw - 32px);
+            animation: modalPopCenter 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         @keyframes modalPopCenter {
@@ -337,91 +294,47 @@
             to { opacity: 1; transform: scale(1) translateY(0); }
         }
 
-        .action-modal p { font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 16px; }
+        .action-modal p { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 14px; }
         
+        /* Quick Presets Grid */
+        .preset-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 16px;
+        }
+        .preset-pill {
+            background: rgba(0,0,0,0.04); border: 1px solid rgba(255,255,255,0.6);
+            padding: 9px 0; border-radius: 12px; font-weight: 700; font-size: 13px;
+            color: var(--text-primary); cursor: pointer; transition: all 0.2s;
+        }
+        .preset-pill:hover { background: rgba(0, 122, 255, 0.12); color: var(--system-blue); border-color: rgba(0,122,255,0.3); }
+
         .time-inputs { display: flex; gap: 8px; justify-content: center; align-items: center; margin-bottom: 18px; }
-        .time-field-group { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-        .time-field-group span { font-size: 11px; font-weight: 700; color: var(--text-tertiary); }
+        .time-field-group { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+        .time-field-group span { font-size: 10px; font-weight: 700; color: var(--text-tertiary); }
 
         .modal-time-input {
-            width: 68px; padding: 12px 6px; border-radius: 14px; border: 1px solid rgba(0,0,0,0.1);
-            font-size: 20px; font-weight: 700; text-align: center;
+            width: 64px; padding: 10px 4px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.1);
+            font-size: 19px; font-weight: 700; text-align: center;
             background: rgba(255,255,255,0.6); outline: none; transition: all 0.2s;
             color: var(--text-primary); font-variant-numeric: tabular-nums;
         }
         .modal-time-input:focus { border-color: var(--system-blue); background: rgba(255,255,255,0.95); box-shadow: 0 0 0 3px rgba(0,122,255,0.15); }
 
-        /* Quick Preset Buttons */
-        .preset-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin-bottom: 16px;
-        }
-
-        .preset-pill {
-            background: rgba(0, 0, 0, 0.04);
-            border: 1px solid rgba(0, 0, 0, 0.06);
-            padding: 9px 4px;
-            border-radius: 12px;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-primary);
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .preset-pill:hover {
-            background: rgba(0, 122, 255, 0.12);
-            border-color: rgba(0, 122, 255, 0.3);
-            color: var(--system-blue);
-            transform: translateY(-1px);
-        }
-        .preset-pill:active { transform: scale(0.95); }
-
-        .recent-item {
-            padding: 9px 12px; background: rgba(0,0,0,0.03); margin-bottom: 6px; 
-            border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 13px;
-            transition: all 0.2s; border: 1px solid transparent;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .recent-item:hover { background: rgba(0, 122, 255, 0.1); border-color: rgba(0, 122, 255, 0.2); color: var(--system-blue); }
-
         .apple-btn {
             background: rgba(0, 0, 0, 0.05); 
             color: var(--text-primary); border: 1px solid rgba(255, 255, 255, 0.6);
-            padding: 12px 24px; border-radius: 20px; font-weight: 600; cursor: pointer;
-            font-size: 14px; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); 
-            display: inline-flex; align-items: center; justify-content: center; 
-            text-decoration: none; outline: none; width: 100%;
-            backdrop-filter: blur(16px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03), inset 0 1px 1px rgba(255,255,255,0.8);
+            padding: 11px 20px; border-radius: 18px; font-weight: 600; cursor: pointer;
+            font-size: 13.5px; transition: all 0.2s; 
+            display: inline-flex; align-items: center; justify-content: center; outline: none; width: 100%;
         }
-        .apple-btn:hover { background: rgba(255, 255, 255, 0.8); transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,0,0,0.06); }
-        .apple-btn:active { transform: scale(0.97); }
+        .apple-btn:hover { background: rgba(255, 255, 255, 0.8); }
         .apple-btn.primary { 
             background: linear-gradient(135deg, #007aff 0%, #0056b3 100%); 
             color: white; border: none;
-            box-shadow: 0 6px 20px rgba(0, 122, 255, 0.35), inset 0 1px 1px rgba(255,255,255,0.3);
-        }
-        .apple-btn.primary:hover { 
-            background: linear-gradient(135deg, #0088ff 0%, #0062cc 100%); 
-            box-shadow: 0 8px 24px rgba(0, 122, 255, 0.45);
+            box-shadow: 0 6px 20px rgba(0, 122, 255, 0.35);
         }
 
         .hidden { display: none !important; }
         #appVersion { position: fixed; right: 12px; bottom: 6px; font-size: 10px; font-weight: 500; color: rgba(0,0,0,0.35); pointer-events: none; z-index: 2000; }
-
-        /* Media Query: Mobile */
-        @media (max-width: 600px) {
-            body { padding-left: 12px; padding-right: 12px; padding-top: 90px; }
-            header { width: calc(100% - 24px); padding: 0 16px; top: 12px; }
-            header h1 { font-size: 19px; }
-            .minimal-btn { padding: 6px 10px; font-size: 12px; }
-            .timer-ring-wrapper { width: 240px; height: 240px; }
-            .time-text { font-size: 52px; }
-            .bottom-dock { padding: 6px 10px; gap: 4px; }
-            .dock-btn { padding: 9px 14px; font-size: 13px; }
-        }
     </style>
 </head>
 <body>
@@ -432,8 +345,14 @@
     <header id="appHeader">
         <h1>Timer</h1>
         <nav class="top-nav">
-            <button class="minimal-btn" id="modeNavBtn" onclick="toggleMode()">Mode</button>
-            <button class="minimal-btn" id="soundToggleBtn" onclick="toggleSound()">Sound: On</button>
+            <!-- Mode Toggle Flat Icon Button -->
+            <button class="icon-nav-btn" id="modeNavBtn" onclick="toggleMode()" title="Toggle Timer Mode (Count Down / Count Up)">
+                <svg viewBox="0 0 24 24"><path d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3L21 9z"/></svg>
+            </button>
+            <!-- Mute/Sound Flat Icon Button -->
+            <button class="icon-nav-btn" id="soundToggleBtn" onclick="toggleSound()" title="Toggle Mute Sound">
+                <svg id="soundIcon" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+            </button>
         </nav>
     </header>
 
@@ -452,10 +371,7 @@
         </div>
     </div>
 
-    <!-- Frosted Bottom Blur Overlay -->
-    <div class="footer-blur-bar" id="footerBlurBar"></div>
-
-    <!-- Bottom Dock -->
+    <!-- Floating Bottom Dock (Universal) -->
     <div id="dockActions" class="bottom-dock">
         <button id="startBtn" class="dock-btn primary" onclick="toggleTimer()">
             ▶ <span id="startBtnText">Start</span>
@@ -465,43 +381,38 @@
         <button class="dock-btn" id="dockSetBtn" onclick="openSetModal()">Set</button>
     </div>
 
-    <div id="appVersion">v2.2 | Liquid Glass Edition</div>
+    <div id="appVersion">v2.2 | Zero-Scroll Glass Edition</div>
 
     <!-- Set Time Modal -->
     <div id="modalOverlay" onclick="closeSetModal()">
         <div class="action-modal" onclick="event.stopPropagation()">
             <p>Set Countdown Time</p>
             
-            <!-- Quick Preset Options -->
+            <!-- Quick Presets -->
             <div class="preset-grid">
-                <button class="preset-pill" onclick="applyPreset(1)">1 min</button>
-                <button class="preset-pill" onclick="applyPreset(2)">2 min</button>
-                <button class="preset-pill" onclick="applyPreset(5)">5 min</button>
-                <button class="preset-pill" onclick="applyPreset(10)">10 min</button>
-                <button class="preset-pill" onclick="applyPreset(15)">15 min</button>
-                <button class="preset-pill" onclick="applyPreset(30)">30 min</button>
+                <div class="preset-pill" onclick="applyQuickPreset(60)">1m</div>
+                <div class="preset-pill" onclick="applyQuickPreset(120)">2m</div>
+                <div class="preset-pill" onclick="applyQuickPreset(300)">5m</div>
+                <div class="preset-pill" onclick="applyQuickPreset(600)">10m</div>
+                <div class="preset-pill" onclick="applyQuickPreset(900)">15m</div>
+                <div class="preset-pill" onclick="applyQuickPreset(1800)">30m</div>
             </div>
 
-            <!-- Custom Input Fields -->
             <div class="time-inputs">
                 <div class="time-field-group">
                     <input type="number" id="inputHours" class="modal-time-input" min="0" max="23" placeholder="00" value="00">
                     <span>HRS</span>
                 </div>
-                <span style="font-weight: 700; font-size: 18px; color: var(--text-tertiary); align-self: flex-start; margin-top: 10px;">:</span>
+                <span style="font-weight: 700; font-size: 18px; color: var(--text-tertiary); margin-top: 6px;">:</span>
                 <div class="time-field-group">
                     <input type="number" id="inputMins" class="modal-time-input" min="0" max="59" placeholder="05" value="05">
                     <span>MIN</span>
                 </div>
-                <span style="font-weight: 700; font-size: 18px; color: var(--text-tertiary); align-self: flex-start; margin-top: 10px;">:</span>
+                <span style="font-weight: 700; font-size: 18px; color: var(--text-tertiary); margin-top: 6px;">:</span>
                 <div class="time-field-group">
                     <input type="number" id="inputSecs" class="modal-time-input" min="0" max="59" placeholder="00" value="00">
                     <span>SEC</span>
                 </div>
-            </div>
-
-            <div id="recentTimersContainer" style="margin-bottom:14px; text-align:left;">
-                <!-- Recent timer presets injected here -->
             </div>
 
             <div style="display:flex; flex-direction:column; gap:8px;">
@@ -555,8 +466,8 @@
         animateBlobs();
 
         /* Timer Application Logic */
-        let mode = 'countdown'; // 'countdown' or 'countup'
-        let initialSeconds = 300; // Default 5 minutes
+        let mode = 'countdown'; 
+        let initialSeconds = 300; 
         let remainingSeconds = 300;
         let countUpSeconds = 0;
         let isRunning = false;
@@ -565,14 +476,12 @@
         let isFocusMode = false;
         let isAlertFlashing = false;
 
-        const STORE_KEY_RECENTS = 'teacherTimer_recents_v1';
         const ringPath = document.getElementById('progressRingPath');
         const ringRadius = 52;
         const circumference = 2 * Math.PI * ringRadius;
-
         ringPath.style.strokeDasharray = `${circumference} ${circumference}`;
 
-        // Louder & Longer Multi-Pulse Alarm Sound via Web Audio API
+        // Acoustic Web Audio API Alarm
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playLoudChime() {
             if (!soundEnabled) return;
@@ -634,9 +543,7 @@
             const secs = totalSec % 60;
 
             const pad = (num) => String(num).padStart(2, '0');
-            if (hrs > 0) {
-                return `${pad(hrs)}:${pad(mins)}:${pad(secs)}`;
-            }
+            if (hrs > 0) return `${pad(hrs)}:${pad(mins)}:${pad(secs)}`;
             return `${pad(mins)}:${pad(secs)}`;
         }
 
@@ -649,7 +556,6 @@
                 const offset = circumference - (progress * circumference);
                 ringPath.style.strokeDashoffset = isNaN(offset) ? 0 : offset;
                 
-                // Color Phase Shifts
                 if (remainingSeconds === 0 && initialSeconds > 0) {
                     ringPath.style.stroke = 'var(--system-red)';
                 } else if (remainingSeconds <= 15) {
@@ -660,7 +566,6 @@
                     ringPath.style.stroke = 'var(--system-blue)';
                 }
             } else {
-                // Count Up Mode
                 timeDisplay.innerText = formatTime(countUpSeconds);
                 const spinProgress = (countUpSeconds % 60) / 60;
                 ringPath.style.strokeDashoffset = circumference - (spinProgress * circumference);
@@ -671,15 +576,10 @@
         function toggleTimer() {
             if (audioCtx.state === 'suspended') { audioCtx.resume(); }
 
-            if (isAlertFlashing) {
-                clearFlashingAlert();
-            }
+            if (isAlertFlashing) clearFlashingAlert();
 
-            if (isRunning) {
-                pauseTimer();
-            } else {
-                startTimer();
-            }
+            if (isRunning) pauseTimer();
+            else startTimer();
         }
 
         function startTimer() {
@@ -726,7 +626,10 @@
 
         function toggleSound() {
             soundEnabled = !soundEnabled;
-            document.getElementById('soundToggleBtn').innerText = `Sound: ${soundEnabled ? 'On' : 'Off'}`;
+            const iconPath = soundEnabled 
+                ? 'M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z'
+                : 'M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z';
+            document.getElementById('soundIcon').innerHTML = `<path d="${iconPath}"/>`;
         }
 
         function toggleMode() {
@@ -739,10 +642,8 @@
             clearFlashingAlert();
             pauseTimer();
             
-            document.getElementById('modeNavBtn').innerText = mode === 'countdown' ? 'Mode' : 'Mode';
             document.getElementById('modeDisplay').innerText = mode === 'countdown' ? 'Count Down' : 'Count Up';
             
-            // Show/Hide "Set Time" based on Mode
             const setElements = [
                 document.getElementById('dockSetDivider'),
                 document.getElementById('dockSetBtn')
@@ -762,8 +663,7 @@
             isFocusMode = !isFocusMode;
             const elements = [
                 document.getElementById('appHeader'),
-                document.getElementById('dockActions'),
-                document.getElementById('footerBlurBar')
+                document.getElementById('dockActions')
             ];
 
             elements.forEach(el => {
@@ -774,11 +674,10 @@
             });
         }
 
-        /* Set Time Modal & Recents Storage */
+        /* Set Time Modal */
         function openSetModal() {
             clearFlashingAlert();
             pauseTimer();
-            renderRecents();
             
             const hrs = Math.floor(initialSeconds / 3600);
             const mins = Math.floor((initialSeconds % 3600) / 60);
@@ -795,10 +694,8 @@
             document.getElementById('modalOverlay').style.display = 'none';
         }
 
-        function applyPreset(minutes) {
-            const totalSecs = minutes * 60;
-            initialSeconds = totalSecs;
-            saveRecentTimer(totalSecs);
+        function applyQuickPreset(sec) {
+            initialSeconds = sec;
             if (mode !== 'countdown') switchMode('countdown');
             else resetTimer();
             closeSetModal();
@@ -812,41 +709,9 @@
             const total = (hrs * 3600) + (mins * 60) + secs;
             if (total > 0) {
                 initialSeconds = total;
-                saveRecentTimer(total);
                 if (mode !== 'countdown') switchMode('countdown');
                 else resetTimer();
             }
-            closeSetModal();
-        }
-
-        function saveRecentTimer(totalSecs) {
-            let recents = JSON.parse(localStorage.getItem(STORE_KEY_RECENTS) || '[]');
-            recents = recents.filter(s => s !== totalSecs);
-            recents.unshift(totalSecs);
-            if (recents.length > 3) recents.pop();
-            localStorage.setItem(STORE_KEY_RECENTS, JSON.stringify(recents));
-        }
-
-        function renderRecents() {
-            const recents = JSON.parse(localStorage.getItem(STORE_KEY_RECENTS) || '[]');
-            const container = document.getElementById('recentTimersContainer');
-            
-            if (recents.length > 0) {
-                container.innerHTML = `<p style="font-size:11px; font-weight:700; color:var(--text-secondary); margin-bottom:6px;">RECENT TIMERS:</p>` + 
-                    recents.map(sec => `
-                        <div class="recent-item" onclick="selectRecentPreset(${sec})">
-                            <span>Duration</span> <span>${formatTime(sec)}</span>
-                        </div>
-                    `).join('');
-            } else {
-                container.innerHTML = "";
-            }
-        }
-
-        function selectRecentPreset(sec) {
-            initialSeconds = sec;
-            if (mode !== 'countdown') switchMode('countdown');
-            else resetTimer();
             closeSetModal();
         }
 
