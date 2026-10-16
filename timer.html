@@ -248,7 +248,7 @@
             opacity: 0;
         }
 
-        /* Desktop Floating Refractive Bottom Dock */
+        /* Refractive Bottom Dock for Desktop and Mobile */
         .bottom-dock {
             position: fixed;
             bottom: 24px;
@@ -257,7 +257,7 @@
             z-index: 1000;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
             background: rgba(255, 255, 255, 0.68);
             backdrop-filter: blur(30px) saturate(190%);
             -webkit-backdrop-filter: blur(30px) saturate(190%);
@@ -278,10 +278,10 @@
             background: transparent;
             color: var(--text-primary);
             border: 1px solid transparent;
-            padding: 9px 18px;
+            padding: 10px 20px;
             border-radius: 20px;
             font-weight: 600;
-            font-size: 13.5px;
+            font-size: 14px;
             cursor: pointer;
             transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
             white-space: nowrap;
@@ -312,83 +312,10 @@
             width: 1px;
             height: 22px;
             background: rgba(0, 0, 0, 0.1);
-            margin: 0 3px;
+            margin: 0 2px;
         }
 
-        /* Mobile Actions Hub */
-        .mobile-actions-hub {
-            display: none;
-            position: fixed;
-            bottom: 24px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1050;
-            transition: all 0.3s ease;
-        }
-
-        .mobile-actions-hub.hidden-ui {
-            opacity: 0;
-            pointer-events: none;
-            transform: translate(-50%, 20px);
-        }
-
-        .mobile-actions-trigger {
-            background: linear-gradient(135deg, #007aff 0%, #0056b3 100%);
-            color: white;
-            border: none;
-            padding: 11px 22px;
-            border-radius: 24px;
-            font-weight: 600;
-            font-size: 14px;
-            cursor: pointer;
-            box-shadow: 0 10px 28px rgba(0, 122, 255, 0.4), inset 0 1px 1px rgba(255,255,255,0.3);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            outline: none;
-            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .mobile-actions-trigger:active { transform: scale(0.95); }
-
-        .mobile-actions-menu {
-            display: none;
-            position: absolute;
-            bottom: 54px;
-            left: 50%;
-            transform: translateX(-50%);
-            flex-direction: column;
-            background: rgba(255, 255, 255, 0.82);
-            backdrop-filter: blur(30px) saturate(190%);
-            -webkit-backdrop-filter: blur(30px) saturate(190%);
-            padding: 8px;
-            border-radius: 20px;
-            border: 1px solid var(--glass-border);
-            box-shadow: 0 16px 40px rgba(0,0,0,0.15), inset 0 1px 1px rgba(255,255,255,0.8);
-            min-width: 175px;
-            gap: 4px;
-        }
-        .mobile-actions-menu.show { display: flex; animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
-
-        .mobile-menu-item {
-            font-size: 13.5px;
-            font-weight: 600;
-            color: var(--text-primary);
-            cursor: pointer;
-            padding: 10px 14px;
-            border-radius: 12px;
-            transition: 0.18s ease;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .mobile-menu-item:hover { background: var(--system-blue); color: white; }
-
-        @keyframes modalPop {
-            from { opacity: 0; transform: scale(0.92) translateY(10px) translateX(-50%); }
-            to { opacity: 1; transform: scale(1) translateY(0) translateX(-50%); }
-        }
-
-        /* Action Modal (Set Time / History) */
+        /* Action Modal (Set Time) */
         #modalOverlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.25); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
@@ -398,10 +325,11 @@
             background: rgba(255, 255, 255, 0.82); 
             backdrop-filter: blur(32px) saturate(200%);
             -webkit-backdrop-filter: blur(32px) saturate(200%);
-            padding: 30px; border-radius: var(--radius); text-align: center;
+            padding: 26px 24px; border-radius: var(--radius); text-align: center;
             border: 1px solid rgba(255, 255, 255, 0.8);
             box-shadow: 0 24px 60px rgba(0,0,0,0.18), inset 0 1px 2px rgba(255,255,255,0.9); 
-            width: 330px; animation: modalPopCenter 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            width: 340px; max-width: calc(100vw - 32px);
+            animation: modalPopCenter 0.35s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         @keyframes modalPopCenter {
@@ -409,9 +337,9 @@
             to { opacity: 1; transform: scale(1) translateY(0); }
         }
 
-        .action-modal p { font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 20px; }
-        .time-inputs { display: flex; gap: 8px; justify-content: center; align-items: center; margin-bottom: 20px; }
+        .action-modal p { font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 16px; }
         
+        .time-inputs { display: flex; gap: 8px; justify-content: center; align-items: center; margin-bottom: 18px; }
         .time-field-group { display: flex; flex-direction: column; align-items: center; gap: 4px; }
         .time-field-group span { font-size: 11px; font-weight: 700; color: var(--text-tertiary); }
 
@@ -423,9 +351,36 @@
         }
         .modal-time-input:focus { border-color: var(--system-blue); background: rgba(255,255,255,0.95); box-shadow: 0 0 0 3px rgba(0,122,255,0.15); }
 
+        /* Quick Preset Buttons */
+        .preset-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .preset-pill {
+            background: rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            padding: 9px 4px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .preset-pill:hover {
+            background: rgba(0, 122, 255, 0.12);
+            border-color: rgba(0, 122, 255, 0.3);
+            color: var(--system-blue);
+            transform: translateY(-1px);
+        }
+        .preset-pill:active { transform: scale(0.95); }
+
         .recent-item {
-            padding: 10px 14px; background: rgba(0,0,0,0.04); margin-bottom: 6px; 
-            border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 13.5px;
+            padding: 9px 12px; background: rgba(0,0,0,0.03); margin-bottom: 6px; 
+            border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 13px;
             transition: all 0.2s; border: 1px solid transparent;
             display: flex; justify-content: space-between; align-items: center;
         }
@@ -464,9 +419,8 @@
             .minimal-btn { padding: 6px 10px; font-size: 12px; }
             .timer-ring-wrapper { width: 240px; height: 240px; }
             .time-text { font-size: 52px; }
-            
-            .bottom-dock { display: none !important; }
-            .mobile-actions-hub { display: block; }
+            .bottom-dock { padding: 6px 10px; gap: 4px; }
+            .dock-btn { padding: 9px 14px; font-size: 13px; }
         }
     </style>
 </head>
@@ -501,7 +455,7 @@
     <!-- Frosted Bottom Blur Overlay -->
     <div class="footer-blur-bar" id="footerBlurBar"></div>
 
-    <!-- Desktop Bottom Dock -->
+    <!-- Bottom Dock -->
     <div id="dockActions" class="bottom-dock">
         <button id="startBtn" class="dock-btn primary" onclick="toggleTimer()">
             ▶ <span id="startBtnText">Start</span>
@@ -511,42 +465,42 @@
         <button class="dock-btn" id="dockSetBtn" onclick="openSetModal()">Set</button>
     </div>
 
-    <!-- Mobile Actions Hub -->
-    <div id="mobileActionsHub" class="mobile-actions-hub">
-        <button class="mobile-actions-trigger" onclick="toggleMobileActions()">Actions ⚡</button>
-        <div class="mobile-actions-menu" id="mobileActionsMenu">
-            <div class="mobile-menu-item" onclick="toggleTimer(); toggleMobileActions();">
-                <span id="startMobileText">▶ Start</span>
-            </div>
-            <div class="mobile-menu-item" onclick="resetTimer(); toggleMobileActions();">Reset</div>
-            <div class="mobile-menu-item" id="mobileSetBtn" onclick="openSetModal(); toggleMobileActions();">Set</div>
-        </div>
-    </div>
-
-    <div id="appVersion">v2.1 | Liquid Glass Edition</div>
+    <div id="appVersion">v2.2 | Liquid Glass Edition</div>
 
     <!-- Set Time Modal -->
     <div id="modalOverlay" onclick="closeSetModal()">
         <div class="action-modal" onclick="event.stopPropagation()">
             <p>Set Countdown Time</p>
+            
+            <!-- Quick Preset Options -->
+            <div class="preset-grid">
+                <button class="preset-pill" onclick="applyPreset(1)">1 min</button>
+                <button class="preset-pill" onclick="applyPreset(2)">2 min</button>
+                <button class="preset-pill" onclick="applyPreset(5)">5 min</button>
+                <button class="preset-pill" onclick="applyPreset(10)">10 min</button>
+                <button class="preset-pill" onclick="applyPreset(15)">15 min</button>
+                <button class="preset-pill" onclick="applyPreset(30)">30 min</button>
+            </div>
+
+            <!-- Custom Input Fields -->
             <div class="time-inputs">
                 <div class="time-field-group">
                     <input type="number" id="inputHours" class="modal-time-input" min="0" max="23" placeholder="00" value="00">
                     <span>HRS</span>
                 </div>
-                <span style="font-weight: 700; font-size: 20px; color: var(--text-tertiary); align-self: flex-start; margin-top: 10px;">:</span>
+                <span style="font-weight: 700; font-size: 18px; color: var(--text-tertiary); align-self: flex-start; margin-top: 10px;">:</span>
                 <div class="time-field-group">
                     <input type="number" id="inputMins" class="modal-time-input" min="0" max="59" placeholder="05" value="05">
                     <span>MIN</span>
                 </div>
-                <span style="font-weight: 700; font-size: 20px; color: var(--text-tertiary); align-self: flex-start; margin-top: 10px;">:</span>
+                <span style="font-weight: 700; font-size: 18px; color: var(--text-tertiary); align-self: flex-start; margin-top: 10px;">:</span>
                 <div class="time-field-group">
                     <input type="number" id="inputSecs" class="modal-time-input" min="0" max="59" placeholder="00" value="00">
                     <span>SEC</span>
                 </div>
             </div>
 
-            <div id="recentTimersContainer" style="margin-bottom:16px; text-align:left;">
+            <div id="recentTimersContainer" style="margin-bottom:14px; text-align:left;">
                 <!-- Recent timer presets injected here -->
             </div>
 
@@ -734,7 +688,6 @@
             clearFlashingAlert();
             isRunning = true;
             document.getElementById('startBtnText').innerText = "Pause";
-            document.getElementById('startMobileText').innerText = "⏸ Pause";
             
             timerInterval = setInterval(() => {
                 if (mode === 'countdown') {
@@ -760,7 +713,6 @@
             isRunning = false;
             clearInterval(timerInterval);
             document.getElementById('startBtnText').innerText = "Start";
-            document.getElementById('startMobileText').innerText = "▶ Start";
             updateDisplay();
         }
 
@@ -793,8 +745,7 @@
             // Show/Hide "Set Time" based on Mode
             const setElements = [
                 document.getElementById('dockSetDivider'),
-                document.getElementById('dockSetBtn'),
-                document.getElementById('mobileSetBtn')
+                document.getElementById('dockSetBtn')
             ];
             
             setElements.forEach(el => {
@@ -807,16 +758,11 @@
             resetTimer();
         }
 
-        function toggleMobileActions() {
-            document.getElementById('mobileActionsMenu').classList.toggle('show');
-        }
-
         function toggleFocusMode() {
             isFocusMode = !isFocusMode;
             const elements = [
                 document.getElementById('appHeader'),
                 document.getElementById('dockActions'),
-                document.getElementById('mobileActionsHub'),
                 document.getElementById('footerBlurBar')
             ];
 
@@ -849,6 +795,15 @@
             document.getElementById('modalOverlay').style.display = 'none';
         }
 
+        function applyPreset(minutes) {
+            const totalSecs = minutes * 60;
+            initialSeconds = totalSecs;
+            saveRecentTimer(totalSecs);
+            if (mode !== 'countdown') switchMode('countdown');
+            else resetTimer();
+            closeSetModal();
+        }
+
         function applySetTime() {
             const hrs = parseInt(document.getElementById('inputHours').value) || 0;
             const mins = parseInt(document.getElementById('inputMins').value) || 0;
@@ -868,7 +823,7 @@
             let recents = JSON.parse(localStorage.getItem(STORE_KEY_RECENTS) || '[]');
             recents = recents.filter(s => s !== totalSecs);
             recents.unshift(totalSecs);
-            if (recents.length > 4) recents.pop();
+            if (recents.length > 3) recents.pop();
             localStorage.setItem(STORE_KEY_RECENTS, JSON.stringify(recents));
         }
 
