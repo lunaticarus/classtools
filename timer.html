@@ -478,7 +478,7 @@
     <header id="appHeader">
         <h1>Timer</h1>
         <nav class="top-nav">
-            <button class="minimal-btn" id="modeNavBtn" onclick="toggleMode()">Mode: Count Down</button>
+            <button class="minimal-btn" id="modeNavBtn" onclick="toggleMode()">Mode</button>
             <button class="minimal-btn" id="soundToggleBtn" onclick="toggleSound()">Sound: On</button>
         </nav>
     </header>
@@ -508,7 +508,7 @@
         </button>
         <button class="dock-btn" onclick="resetTimer()">Reset</button>
         <div class="dock-divider" id="dockSetDivider"></div>
-        <button class="dock-btn" id="dockSetBtn" onclick="openSetModal()">Set Time</button>
+        <button class="dock-btn" id="dockSetBtn" onclick="openSetModal()">Set</button>
     </div>
 
     <!-- Mobile Actions Hub -->
@@ -787,7 +787,7 @@
             clearFlashingAlert();
             pauseTimer();
             
-            document.getElementById('modeNavBtn').innerText = mode === 'countdown' ? 'Mode: Count Down' : 'Mode: Count Up';
+            document.getElementById('modeNavBtn').innerText = mode === 'countdown' ? 'Mode' : 'Mode';
             document.getElementById('modeDisplay').innerText = mode === 'countdown' ? 'Count Down' : 'Count Up';
             
             // Show/Hide "Set Time" based on Mode
