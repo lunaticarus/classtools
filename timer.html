@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Timer</title>
+    <style>
+        :root {
+            --system-blue: #007aff;
+            --system-green: #34c759;
+            --system-red: #ff3b30;
+            --system-orange: #ff9500;
+            --system-gray-bg: #f5f5f7;
+            --system-card-bg: rgba(255, 255, 255, 0.65);
+            --system-btn-grey: rgba(0, 0, 0, 0.05);
+            --system-btn-active: rgba(0, 0, 0, 0.12);
+            --system-border: rgba(255, 255, 255, 0.65);
+            --text-primary: #1d1d1f;
+            --text-secondary: #6e6e73;
+            --text-tertiary: #86868b;
+            --radius: 22px;
+
+            /* Liquid Glass Optics & Specular Highlights */
+            --glass-bg: rgba(255, 255, 255, 0.58);
+            --glass-border: rgba(255, 255, 255, 0.7);
+            --glass-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.8), inset 0 -1px 2px rgba(0, 0, 0, 0.05);
+            --glass-shine: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0) 100%);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", sans-serif;
+            background-color: #f0f1f5;
+            color: var(--text-primary);
+            margin: 0;
+            padding: 100px 20px 130px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Ambient Liquid Mesh Canvas */
+        #liquidCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            pointer-events: none;
+            filter: blur(42px);
+            opacity: 0.85;
+        }
+
+        /* Refractive Fixed Header */
+        header {
+            position: fixed;
+            top: 16px; 
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 32px);
+            max-width: 760px;
+            height: 64px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(28px) saturate(190%);
+            -webkit-backdrop-filter: blur(28px) saturate(190%);
+            z-index: 900;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            transition: all 0.3s ease;
+        }
+
+        h1 { 
+            font-weight: 700; 
+            font-size: 22px; 
+            margin: 0; 
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #1d1d1f 0%, #434345 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .top-nav { display: flex; gap: 8px; align-items: center; }
+
+        .minimal-btn {
+            background: rgba(255, 255, 255, 0.4); 
+            border: 1px solid rgba(255, 255, 255, 0.6); 
+            color: var(--text-primary);
+            font-size: 13px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            padding: 8px 14px;
+            border-radius: 12px; 
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03), inset 0 1px 1px rgba(255,255,255,0.7);
+        }
+        .minimal-btn:hover { 
+            background: rgba(255, 255, 255, 0.78); 
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06), inset 0 1px 1px rgba(255,255,255,0.9);
+        }
+        .minimal-btn:active { transform: scale(0.96); }
+
+        .container { 
+            width: 100%; 
+            max-width: 620px; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Large Display Glass Card */
+        .timer-card {
+            width: 100%;
+            background: var(--glass-bg);
+            backdrop-filter: blur(36px) saturate(200%);
+            -webkit-backdrop-filter: blur(36px) saturate(200%);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius);
+            box-shadow: var(--glass-shadow);
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin-top: 10px;
+        }
+
+        .timer-ring-wrapper {
+            position: relative;
+            width: 280px;
+            height: 280px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .progress-ring {
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+            width: 100%;
+            height: 100%;
+        }
+
+        .progress-ring-bg {
+            stroke: rgba(0, 0, 0, 0.05);
+            stroke-width: 10;
+        }
+
+        .progress-ring-path {
+            stroke: var(--system-blue);
+            stroke-width: 10;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.3s linear, stroke 0.3s ease;
+        }
+
+        .digital-display {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .time-text {
+            font-size: 62px;
+            font-weight: 700;
+            letter-spacing: -1.5px;
+            color: var(--text-primary);
+            font-variant-numeric: tabular-nums;
+            user-select: none;
+            line-height: 1;
+        }
+
+        .mode-label-text {
+            margin-top: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Frosted Glass Bottom Overlay Bar */
+        .footer-blur-bar {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            height: 90px;
+            background: linear-gradient(to top, rgba(245, 245, 247, 0.75), transparent);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            z-index: 850;
+            pointer-events: none;
+            mask-image: linear-gradient(to top, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
+            -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
+        }
+
+        /* Desktop Floating Refractive Bottom Dock */
+        .bottom-dock {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.68);
+            backdrop-filter: blur(30px) saturate(190%);
+            -webkit-backdrop-filter: blur(30px) saturate(190%);
+            padding: 8px 12px;
+            border-radius: 30px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 20px 48px -10px rgba(0,0,0,0.12), inset 0 1px 1px rgba(255,255,255,0.8);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .dock-btn {
+            background: transparent;
+            color: var(--text-primary);
+            border: 1px solid transparent;
+            padding: 9px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 13.5px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            outline: none;
+        }
+        .dock-btn:hover { 
+            background: rgba(255, 255, 255, 0.65); 
+            border-color: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+            transform: translateY(-1px);
+        }
+        .dock-btn:active { transform: scale(0.95); }
+        .dock-btn.primary { 
+            background: linear-gradient(135deg, #007aff 0%, #0056b3 100%); 
+            color: white; 
+            border: none;
+            box-shadow: 0 6px 20px rgba(0, 122, 255, 0.35), inset 0 1px 1px rgba(255,255,255,0.3);
+        }
+        .dock-btn.primary:hover { 
+            background: linear-gradient(135deg, #0088ff 0%, #0062cc 100%); 
+            box-shadow: 0 8px 24px rgba(0, 122, 255, 0.45);
+        }
+
+        .dock-divider {
+            width: 1px;
+            height: 22px;
+            background: rgba(0, 0, 0, 0.1);
+            margin: 0 3px;
+        }
+
+        /* Mobile Actions Hub */
+        .mobile-actions-hub {
+            display: none;
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1050;
+        }
+
+        .mobile-actions-trigger {
+            background: linear-gradient(135deg, #007aff 0%, #0056b3 100%);
+            color: white;
+            border: none;
+            padding: 11px 22px;
+            border-radius: 24px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 10px 28px rgba(0, 122, 255, 0.4), inset 0 1px 1px rgba(255,255,255,0.3);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            outline: none;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .mobile-actions-trigger:active { transform: scale(0.95); }
+
+        .mobile-actions-menu {
+            display: none;
+            position: absolute;
+            bottom: 54px;
+            left: 50%;
+            transform: translateX(-50%);
+            flex-direction: column;
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: blur(30px) saturate(190%);
+            -webkit-backdrop-filter: blur(30px) saturate(190%);
+            padding: 8px;
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 16px 40px rgba(0,0,0,0.15), inset 0 1px 1px rgba(255,255,255,0.8);
+            min-width: 175px;
+            gap: 4px;
+        }
+        .mobile-actions-menu.show { display: flex; animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
+
+        .mobile-menu-item {
+            font-size: 13.5px;
+            font-weight: 600;
+            color: var(--text-primary);
+            cursor: pointer;
+            padding: 10px 14px;
+            border-radius: 12px;
+            transition: 0.18s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .mobile-menu-item:hover { background: var(--system-blue); color: white; }
+
+        @keyframes modalPop {
+            from { opacity: 0; transform: scale(0.92) translateY(10px) translateX(-50%); }
+            to { opacity: 1; transform: scale(1) translateY(0) translateX(-50%); }
+        }
+
+        /* Floating Mode Hub (Bottom-Left) */
+        .mode-hub {
+            position: fixed; bottom: 24px; left: 24px;
+            z-index: 1100;
+        }
+        .mode-trigger {
+            background: var(--glass-bg); 
+            backdrop-filter: blur(24px) saturate(180%); 
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            padding: 10px 20px; border-radius: 22px; 
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow); font-weight: 600; color: var(--text-primary);
+            cursor: pointer; font-size: 14px; user-select: none; 
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .mode-trigger:hover { background: rgba(255, 255, 255, 0.8); transform: translateY(-2px); }
+        .mode-trigger:active { transform: scale(0.95); }
+        
+        .mode-options {
+            display: none; position: absolute; bottom: 52px; left: 0;
+            flex-direction: column; background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: blur(30px) saturate(190%); 
+            -webkit-backdrop-filter: blur(30px) saturate(190%);
+            padding: 8px; border-radius: 20px; border: 1px solid var(--glass-border);
+            box-shadow: 0 16px 40px rgba(0,0,0,0.12), inset 0 1px 1px rgba(255,255,255,0.8); 
+            min-width: 170px; gap: 4px;
+        }
+        .mode-options.show { display: flex; animation: modalPopLeft 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
+        
+        @keyframes modalPopLeft {
+            from { opacity: 0; transform: scale(0.92) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .mode-link {
+            font-size: 13.5px; font-weight: 600; color: var(--text-primary);
+            cursor: pointer; padding: 10px 14px; border-radius: 12px; transition: 0.18s ease;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .mode-link:hover { background: var(--system-blue); color: white; }
+
+        /* Action Modal (Set Time / History) */
+        #modalOverlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.25); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            z-index: 2000; align-items: center; justify-content: center;
+        }
+        .action-modal {
+            background: rgba(255, 255, 255, 0.82); 
+            backdrop-filter: blur(32px) saturate(200%);
+            -webkit-backdrop-filter: blur(32px) saturate(200%);
+            padding: 30px; border-radius: var(--radius); text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 24px 60px rgba(0,0,0,0.18), inset 0 1px 2px rgba(255,255,255,0.9); 
+            width: 330px; animation: modalPopCenter 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes modalPopCenter {
+            from { opacity: 0; transform: scale(0.92) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .action-modal p { font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 20px; }
+        .time-inputs { display: flex; gap: 8px; justify-content: center; align-items: center; margin-bottom: 20px; }
+        
+        .time-field-group { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .time-field-group span { font-size: 11px; font-weight: 700; color: var(--text-tertiary); }
+
+        .modal-time-input {
+            width: 68px; padding: 12px 6px; border-radius: 14px; border: 1px solid rgba(0,0,0,0.1);
+            font-size: 20px; font-weight: 700; text-align: center;
+            background: rgba(255,255,255,0.6); outline: none; transition: all 0.2s;
+            color: var(--text-primary); font-variant-numeric: tabular-nums;
+        }
+        .modal-time-input:focus { border-color: var(--system-blue); background: rgba(255,255,255,0.95); box-shadow: 0 0 0 3px rgba(0,122,255,0.15); }
+
+        .recent-item {
+            padding: 10px 14px; background: rgba(0,0,0,0.04); margin-bottom: 6px; 
+            border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 13.5px;
+            transition: all 0.2s; border: 1px solid transparent;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .recent-item:hover { background: rgba(0, 122, 255, 0.1); border-color: rgba(0, 122, 255, 0.2); color: var(--system-blue); }
+
+        .apple-btn {
+            background: rgba(0, 0, 0, 0.05); 
+            color: var(--text-primary); border: 1px solid rgba(255, 255, 255, 0.6);
+            padding: 12px 24px; border-radius: 20px; font-weight: 600; cursor: pointer;
+            font-size: 14px; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); 
+            display: inline-flex; align-items: center; justify-content: center; 
+            text-decoration: none; outline: none; width: 100%;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03), inset 0 1px 1px rgba(255,255,255,0.8);
+        }
+        .apple-btn:hover { background: rgba(255, 255, 255, 0.8); transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,0,0,0.06); }
+        .apple-btn:active { transform: scale(0.97); }
+        .apple-btn.primary { 
+            background: linear-gradient(135deg, #007aff 0%, #0056b3 100%); 
+            color: white; border: none;
+            box-shadow: 0 6px 20px rgba(0, 122, 255, 0.35), inset 0 1px 1px rgba(255,255,255,0.3);
+        }
+        .apple-btn.primary:hover { 
+            background: linear-gradient(135deg, #0088ff 0%, #0062cc 100%); 
+            box-shadow: 0 8px 24px rgba(0, 122, 255, 0.45);
+        }
+
+        .status-counter {
+            position: fixed; bottom: 28px; right: 24px;
+            font-weight: 600; color: var(--text-secondary); font-size: 13px;
+            z-index: 900; pointer-events: none;
+            background: rgba(255, 255, 255, 0.4);
+            padding: 6px 14px; border-radius: 20px;
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+        }
+
+        .hidden { display: none !important; }
+        #appVersion { position: fixed; right: 12px; bottom: 6px; font-size: 10px; font-weight: 500; color: rgba(0,0,0,0.35); pointer-events: none; z-index: 2000; }
+
+        /* Media Query: Mobile */
+        @media (max-width: 600px) {
+            body { padding-left: 12px; padding-right: 12px; padding-top: 90px; }
+            header { width: calc(100% - 24px); padding: 0 16px; top: 12px; }
+            header h1 { font-size: 19px; }
+            .minimal-btn { padding: 6px 10px; font-size: 12px; }
+            .mode-hub { left: 16px; bottom: 20px; }
+            .status-counter { right: 16px; bottom: 22px; }
+            .timer-ring-wrapper { width: 230px; height: 230px; }
+            .time-text { font-size: 50px; }
+            
+            .bottom-dock { display: none !important; }
+            .mobile-actions-hub { display: block; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Ambient Liquid Canvas -->
+    <canvas id="liquidCanvas"></canvas>
+
+    <header>
+        <h1>Timer</h1>
+        <nav class="top-nav">
+            <button class="minimal-btn" onclick="openSetModal()">Set Time</button>
+            <button class="minimal-btn" id="soundToggleBtn" onclick="toggleSound()">Sound: On</button>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="timer-card">
+            <div class="timer-ring-wrapper">
+                <svg class="progress-ring" viewBox="0 0 120 120">
+                    <circle class="progress-ring-bg" cx="60" cy="60" r="52" fill="transparent" />
+                    <circle id="progressRingPath" class="progress-ring-path" cx="60" cy="60" r="52" fill="transparent" />
+                </svg>
+                <div class="digital-display">
+                    <div id="timeDisplay" class="time-text">05:00</div>
+                    <div id="modeDisplay" class="mode-label-text">Count Down</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Frosted Bottom Blur Overlay -->
+    <div class="footer-blur-bar"></div>
+
+    <!-- Desktop Bottom Dock -->
+    <div id="dockActions" class="bottom-dock">
+        <button id="startBtn" class="dock-btn primary" onclick="toggleTimer()">
+            ▶ <span id="startBtnText">Start</span>
+        </button>
+        <button class="dock-btn" onclick="resetTimer()">Reset</button>
+        <div class="dock-divider"></div>
+        <button class="dock-btn" onclick="openSetModal()">Set</button>
+    </div>
+
+    <!-- Mobile Actions Hub -->
+    <div id="mobileActionsHub" class="mobile-actions-hub">
+        <button class="mobile-actions-trigger" onclick="toggleMobileActions()">Actions ⚡</button>
+        <div class="mobile-actions-menu" id="mobileActionsMenu">
+            <div class="mobile-menu-item" onclick="toggleTimer(); toggleMobileActions();">
+                <span id="startMobileText">▶ Start</span>
+            </div>
+            <div class="mobile-menu-item" onclick="resetTimer(); toggleMobileActions();">Reset</div>
+            <div class="mobile-menu-item" onclick="openSetModal(); toggleMobileActions();">Set Time</div>
+        </div>
+    </div>
+
+    <!-- Mode Switcher (Bottom-Left) -->
+    <div class="mode-hub">
+        <div class="mode-trigger" id="currentModeLabel" onclick="toggleModeMenu()">Count Down</div>
+        <div class="mode-options" id="modeOptions">
+            <div class="mode-link" onclick="switchMode('countdown')">Count Down</div>
+            <div class="mode-link" onclick="switchMode('countup')">Count Up</div>
+        </div>
+    </div>
+
+    <!-- Status Counter (Bottom-Right) -->
+    <div class="status-counter" id="statusCounter">Ready</div>
+    <div id="appVersion">v1.0 | Liquid Glass Edition</div>
+
+    <!-- Set Time Modal -->
+    <div id="modalOverlay" onclick="closeSetModal()">
+        <div class="action-modal" onclick="event.stopPropagation()">
+            <p>Set Countdown Time</p>
+            <div class="time-inputs">
+                <div class="time-field-group">
+                    <input type="number" id="inputHours" class="modal-time-input" min="0" max="23" placeholder="00" value="00">
+                    <span>HRS</span>
+                </div>
+                <span style="font-weight: 700; font-size: 20px; color: var(--text-tertiary); align-self: flex-start; margin-top: 10px;">:</span>
+                <div class="time-field-group">
+                    <input type="number" id="inputMins" class="modal-time-input" min="0" max="59" placeholder="05" value="05">
+                    <span>MIN</span>
+                </div>
+                <span style="font-weight: 700; font-size: 20px; color: var(--text-tertiary); align-self: flex-start; margin-top: 10px;">:</span>
+                <div class="time-field-group">
+                    <input type="number" id="inputSecs" class="modal-time-input" min="0" max="59" placeholder="00" value="00">
+                    <span>SEC</span>
+                </div>
+            </div>
+
+            <div id="recentTimersContainer" style="margin-bottom:16px; text-align:left;">
+                <!-- Recent timer presets injected here -->
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                <button class="apple-btn primary" onclick="applySetTime()">Set Duration</button>
+                <button class="apple-btn" onclick="closeSetModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* Ambient Liquid Mesh Canvas Animation */
+        const canvas = document.getElementById('liquidCanvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        
+        function resizeCanvas() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        const blobs = [
+            { x: 0.25, y: 0.25, r: 0.42, color: 'rgba(120, 180, 255, 0.7)', vx: 0.0005, vy: 0.0006 },
+            { x: 0.75, y: 0.2, r: 0.48, color: 'rgba(215, 170, 255, 0.75)', vx: -0.0006, vy: 0.0004 },
+            { x: 0.5, y: 0.75, r: 0.52, color: 'rgba(255, 195, 210, 0.7)', vx: 0.0004, vy: -0.0005 },
+            { x: 0.2, y: 0.8, r: 0.38, color: 'rgba(160, 230, 245, 0.65)', vx: -0.0003, vy: -0.0006 }
+        ];
+
+        function animateBlobs() {
+            ctx.clearRect(0, 0, width, height);
+            blobs.forEach(b => {
+                b.x += b.vx; b.y += b.vy;
+                if (b.x < 0 || b.x > 1) b.vx *= -1;
+                if (b.y < 0 || b.y > 1) b.vy *= -1;
+
+                const grad = ctx.createRadialGradient(
+                    b.x * width, b.y * height, 0,
+                    b.x * width, b.y * height, b.r * Math.max(width, height)
+                );
+                grad.addColorStop(0, b.color);
+                grad.addColorStop(1, 'rgba(240, 241, 245, 0)');
+
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.arc(b.x * width, b.y * height, b.r * Math.max(width, height), 0, Math.PI * 2);
+                ctx.fill();
+            });
+            requestAnimationFrame(animateBlobs);
+        }
+        animateBlobs();
+
+        /* Timer Application Logic */
+        let mode = 'countdown'; // 'countdown' or 'countup'
+        let initialSeconds = 300; // Default 5 minutes
+        let remainingSeconds = 300;
+        let countUpSeconds = 0;
+        let isRunning = false;
+        let timerInterval = null;
+        let soundEnabled = true;
+
+        const STORE_KEY_RECENTS = 'teacherTimer_recents_v1';
+        const ringPath = document.getElementById('progressRingPath');
+        const ringRadius = 52;
+        const circumference = 2 * Math.PI * ringRadius;
+
+        ringPath.style.strokeDasharray = `${circumference} ${circumference}`;
+
+        // Audio Chime Generator via Web Audio API
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playChime() {
+            if (!soundEnabled) return;
+            try {
+                const now = audioCtx.currentTime;
+                
+                // Double soft bell chord (E5 and G#5)
+                [659.25, 830.61].forEach((freq, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, now + (idx * 0.12));
+                    
+                    gain.gain.setValueAtTime(0, now + (idx * 0.12));
+                    gain.gain.linearRampToValueAtTime(0.15, now + (idx * 0.12) + 0.05);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, now + (idx * 0.12) + 1.8);
+                    
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    
+                    osc.start(now + (idx * 0.12));
+                    osc.stop(now + (idx * 0.12) + 1.8);
+                });
+            } catch(e) {}
+        }
+
+        function formatTime(totalSec) {
+            const hrs = Math.floor(totalSec / 3600);
+            const mins = Math.floor((totalSec % 3600) / 60);
+            const secs = totalSec % 60;
+
+            const pad = (num) => String(num).padStart(2, '0');
+            if (hrs > 0) {
+                return `${pad(hrs)}:${pad(mins)}:${pad(secs)}`;
+            }
+            return `${pad(mins)}:${pad(secs)}`;
+        }
+
+        function updateDisplay() {
+            const timeDisplay = document.getElementById('timeDisplay');
+            const statusCounter = document.getElementById('statusCounter');
+
+            if (mode === 'countdown') {
+                timeDisplay.innerText = formatTime(remainingSeconds);
+                const progress = remainingSeconds / initialSeconds;
+                const offset = circumference - (progress * circumference);
+                ringPath.style.strokeDashoffset = isNaN(offset) ? 0 : offset;
+                
+                if (remainingSeconds === 0 && initialSeconds > 0) {
+                    ringPath.style.stroke = 'var(--system-red)';
+                    statusCounter.innerText = "Time's Up!";
+                } else {
+                    ringPath.style.stroke = 'var(--system-blue)';
+                    statusCounter.innerText = isRunning ? "Running" : "Paused";
+                }
+            } else {
+                // Count Up Mode
+                timeDisplay.innerText = formatTime(countUpSeconds);
+                // Continuous ring spin visualization for Stopwatch
+                const spinProgress = (countUpSeconds % 60) / 60;
+                ringPath.style.strokeDashoffset = circumference - (spinProgress * circumference);
+                ringPath.style.stroke = 'var(--system-green)';
+                statusCounter.innerText = isRunning ? "Timing..." : "Stopped";
+            }
+        }
+
+        function toggleTimer() {
+            if (audioCtx.state === 'suspended') { audioCtx.resume(); }
+
+            if (isRunning) {
+                pauseTimer();
+            } else {
+                startTimer();
+            }
+        }
+
+        function startTimer() {
+            if (mode === 'countdown' && remainingSeconds <= 0) return;
+            
+            isRunning = true;
+            document.getElementById('startBtnText').innerText = "Pause";
+            document.getElementById('startMobileText').innerText = "⏸ Pause";
+            
+            timerInterval = setInterval(() => {
+                if (mode === 'countdown') {
+                    if (remainingSeconds > 0) {
+                        remainingSeconds--;
+                        updateDisplay();
+                        if (remainingSeconds === 0) {
+                            pauseTimer();
+                            playChime();
+                        }
+                    }
+                } else {
+                    countUpSeconds++;
+                    updateDisplay();
+                }
+            }, 1000);
+            
+            updateDisplay();
+        }
+
+        function pauseTimer() {
+            isRunning = false;
+            clearInterval(timerInterval);
+            document.getElementById('startBtnText').innerText = "Start";
+            document.getElementById('startMobileText').innerText = "▶ Start";
+            updateDisplay();
+        }
+
+        function resetTimer() {
+            pauseTimer();
+            remainingSeconds = initialSeconds;
+            countUpSeconds = 0;
+            updateDisplay();
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            document.getElementById('soundToggleBtn').innerText = `Sound: ${soundEnabled ? 'On' : 'Off'}`;
+        }
+
+        function toggleModeMenu() {
+            document.getElementById('modeOptions').classList.toggle('show');
+            document.getElementById('mobileActionsMenu').classList.remove('show');
+        }
+
+        function toggleMobileActions() {
+            document.getElementById('mobileActionsMenu').classList.toggle('show');
+            document.getElementById('modeOptions').classList.remove('show');
+        }
+
+        function switchMode(newMode) {
+            mode = newMode;
+            pauseTimer();
+            
+            document.getElementById('modeOptions').classList.remove('show');
+            document.getElementById('currentModeLabel').innerText = mode === 'countdown' ? 'Count Down' : 'Count Up';
+            document.getElementById('modeDisplay').innerText = mode === 'countdown' ? 'Count Down' : 'Count Up';
+            
+            resetTimer();
+        }
+
+        /* Set Time Modal & Recents Storage */
+        function openSetModal() {
+            pauseTimer();
+            renderRecents();
+            
+            const hrs = Math.floor(initialSeconds / 3600);
+            const mins = Math.floor((initialSeconds % 3600) / 60);
+            const secs = initialSeconds % 60;
+            
+            document.getElementById('inputHours').value = String(hrs).padStart(2, '0');
+            document.getElementById('inputMins').value = String(mins).padStart(2, '0');
+            document.getElementById('inputSecs').value = String(secs).padStart(2, '0');
+            
+            document.getElementById('modalOverlay').style.display = 'flex';
+        }
+
+        function closeSetModal() {
+            document.getElementById('modalOverlay').style.display = 'none';
+        }
+
+        function applySetTime() {
+            const hrs = parseInt(document.getElementById('inputHours').value) || 0;
+            const mins = parseInt(document.getElementById('inputMins').value) || 0;
+            const secs = parseInt(document.getElementById('inputSecs').value) || 0;
+
+            const total = (hrs * 3600) + (mins * 60) + secs;
+            if (total > 0) {
+                initialSeconds = total;
+                saveRecentTimer(total);
+                if (mode !== 'countdown') switchMode('countdown');
+                else resetTimer();
+            }
+            closeSetModal();
+        }
+
+        function saveRecentTimer(totalSecs) {
+            let recents = JSON.parse(localStorage.getItem(STORE_KEY_RECENTS) || '[]');
+            recents = recents.filter(s => s !== totalSecs);
+            recents.unshift(totalSecs);
+            if (recents.length > 4) recents.pop();
+            localStorage.setItem(STORE_KEY_RECENTS, JSON.stringify(recents));
+        }
+
+        function renderRecents() {
+            const recents = JSON.parse(localStorage.getItem(STORE_KEY_RECENTS) || '[]');
+            const container = document.getElementById('recentTimersContainer');
+            
+            if (recents.length > 0) {
+                container.innerHTML = `<p style="font-size:11px; font-weight:700; color:var(--text-secondary); margin-bottom:6px;">RECENT TIMERS:</p>` + 
+                    recents.map(sec => `
+                        <div class="recent-item" onclick="selectRecentPreset(${sec})">
+                            <span>Duration</span> <span>${formatTime(sec)}</span>
+                        </div>
+                    `).join('');
+            } else {
+                container.innerHTML = "";
+            }
+        }
+
+        function selectRecentPreset(sec) {
+            initialSeconds = sec;
+            if (mode !== 'countdown') switchMode('countdown');
+            else resetTimer();
+            closeSetModal();
+        }
+
+        // Initialize
+        updateDisplay();
+    </script>
+</body>
+</html>
