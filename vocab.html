@@ -376,7 +376,7 @@
 
     <div id="editContainer" class="container active">
         <div id="vocabList"></div>
-        <div class="hint"><b>Enter/Tab</b> Next Item &nbsp; • &nbsp; <b>Arrows</b> Move Field &nbsp; • &nbsp; <b>Esc</b> Speak</div>
+        <div class="hint"><b>Paste Multiple Lines</b> Auto-creates Rows &nbsp; • &nbsp; <b>Enter/Tab</b> Next Item &nbsp; • &nbsp; <b>Esc</b> Speak</div>
     </div>
 
     <div id="flashContainer" class="container">
@@ -421,11 +421,11 @@
     </div>
 
     <div class="status-counter" id="vocabCounter">0 Vocab Items</div>
-    <div id="appVersion">v2.2 | Cloud Sync Edition</div>
+    <div id="appVersion">v2.3 | Cloud Sync Edition</div>
 
     <script>
-        /* REPLACE THIS URL WITH YOUR NEW APPS SCRIPT WEB APP URL */
-        const API_URL = "https://script.google.com/macros/s/AKfycbzP-a4wulSmMV2wi9kq4Y8TnA8FYCo7N3wn5YE0kk7TPC01PMQglDeeL_LGrj6fIUX1Dw/exec";
+        /* REPLACE THIS URL WITH YOUR GOOGLE APPS SCRIPT WEB APP URL */
+        const API_URL = "YOUR_GAS_WEB_APP_URL_HERE";
         
         let currentListId = null;
 
@@ -546,7 +546,7 @@
                     alert("Error saving: " + result.message);
                 }
             } catch(e) {
-                alert("Network error. Check your Apps Script URL.");
+                alert("Network error. Check your Apps Script URL and permissions.");
             } finally {
                 btn.innerText = orig;
             }
@@ -593,7 +593,7 @@
                     alert(result.message);
                 }
             } catch(e) {
-                alert("Network error. Check your Apps Script URL.");
+                alert("Network error. Check your Apps Script URL and permissions.");
             } finally {
                 btn.innerText = orig;
             }
@@ -615,7 +615,6 @@
                 addRow(true); 
             } 
         }
-        /* -------------------------- */
 
         /* Flashcard Logic */
         function startFlashcards() {
@@ -713,6 +712,43 @@
             row.querySelector('.audio-btn').onclick = () => speak(enInput.value);
             row.querySelector('.del-btn').onclick = () => { if(document.querySelectorAll('.vocab-row').length > 1) { row.remove(); saveToCache(); } else { enInput.value=""; zhInput.value=""; saveToCache(); } };
             
+            // Bulk Paste Handler (Excel / Word / Google Sheets / Plain Text)
+            enInput.addEventListener('paste', (e) => {
+                const pasteData = (e.clipboardData || window.clipboardData).getData('text');
+                
+                if (!pasteData || (!pasteData.includes('\n') && !pasteData.includes('\t'))) return; 
+                
+                e.preventDefault();
+                const lines = pasteData.split(/\r?\n/).filter(line => line.trim() !== '');
+                
+                lines.forEach((line, index) => {
+                    let enStr = line;
+                    let zhStr = "";
+                    
+                    if (line.includes('\t')) {
+                        const parts = line.split('\t');
+                        enStr = parts[0];
+                        zhStr = parts[1] || "";
+                    } else if (line.includes(',') && line.split(',').length === 2) {
+                        const parts = line.split(',');
+                        enStr = parts[0];
+                        zhStr = parts[1];
+                    }
+
+                    enStr = enStr.trim();
+                    zhStr = zhStr.trim();
+
+                    if (index === 0) {
+                        enInput.value = enStr;
+                        zhInput.value = zhStr;
+                        setTimeout(() => { autoResize(enInput); autoResize(zhInput); }, 0);
+                    } else {
+                        addRow(false, enStr, zhStr);
+                    }
+                });
+                saveToCache();
+            });
+
             enInput.addEventListener('blur', async () => {
                 if(!enInput.value.trim() && !zhInput.value.trim() && document.querySelectorAll('.vocab-row').length > 1) { row.remove(); saveToCache(); return; }
                 if(enInput.value && !zhInput.value) {
@@ -752,7 +788,6 @@
         if(cached) {
             try {
                 const parsed = JSON.parse(cached);
-                // Handle legacy array format or new object format
                 if (Array.isArray(parsed)) {
                     if (parsed.length > 0) parsed.forEach(i => addRow(false, i[0], i[1]));
                     else addRow(true);
