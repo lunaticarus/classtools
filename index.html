@@ -9,9 +9,6 @@
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   
   <style>
-    /* ==========================================
-       RESET & LIQUID GLASS BACKGROUND
-       ========================================== */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -34,21 +31,23 @@
       position: relative;
     }
 
-    /* Ambient Subtle Background Orbs */
+    /* Hardware Accelerated Orbs */
     .ambient-bg {
       position: fixed;
       inset: 0;
       z-index: 0;
       overflow: hidden;
       pointer-events: none;
+      transform: translateZ(0);
     }
 
     .orb {
       position: absolute;
       border-radius: 50%;
-      filter: blur(120px);
+      filter: blur(100px);
       opacity: 0.22;
       animation: float 25s ease-in-out infinite alternate;
+      will-change: transform;
     }
 
     .orb-1 {
@@ -69,14 +68,11 @@
     }
 
     @keyframes float {
-      0% { transform: translate(0, 0) scale(1); }
-      50% { transform: translate(50px, 30px) scale(1.05); }
-      100% { transform: translate(-30px, 60px) scale(0.95); }
+      0% { transform: translate3d(0, 0, 0) scale(1); }
+      50% { transform: translate3d(50px, 30px, 0) scale(1.05); }
+      100% { transform: translate3d(-30px, 60px, 0) scale(0.95); }
     }
 
-    /* ==========================================
-       CONTAINER & HEADER
-       ========================================== */
     .container {
       position: relative;
       z-index: 1;
@@ -107,7 +103,6 @@
       -webkit-text-fill-color: transparent;
     }
 
-    /* Controls Bar: Search + Category Filters */
     .controls-bar {
       display: flex;
       flex-wrap: wrap;
@@ -117,7 +112,6 @@
       width: 100%;
     }
 
-    /* Quick Search Bar */
     .search-wrapper {
       position: relative;
       width: 100%;
@@ -127,7 +121,7 @@
     .search-input {
       width: 100%;
       padding: 8px 16px 8px 38px;
-      border-radius: 12px;
+      border-radius: 14px;
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid rgba(255, 255, 255, 0.1);
       color: #fff;
@@ -140,7 +134,6 @@
     .search-input:focus {
       background: rgba(255, 255, 255, 0.09);
       border-color: rgba(255, 255, 255, 0.25);
-      box-shadow: 0 0 15px rgba(255, 255, 255, 0.05);
     }
 
     .search-wrapper i {
@@ -164,41 +157,47 @@
       border-radius: 4px;
     }
 
-    /* Category Filter Pills */
     .filter-pills {
       display: flex;
       gap: 8px;
-      background: rgba(255, 255, 255, 0.04);
-      padding: 4px;
-      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 5px;
+      border-radius: 16px;
       border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(12px);
     }
 
     .pill-btn {
+      position: relative;
       background: transparent;
-      border: none;
-      color: rgba(255, 255, 255, 0.5);
-      padding: 6px 14px;
-      font-size: 0.82rem;
+      border: 1px solid transparent;
+      color: rgba(255, 255, 255, 0.55);
+      padding: 7px 18px;
+      font-size: 0.85rem;
       font-weight: 500;
-      border-radius: 8px;
+      border-radius: 12px;
       cursor: pointer;
-      transition: all 0.2s ease;
+      outline: none;
+      transition: color 0.2s ease, transform 0.15s ease, background 0.2s ease, border-color 0.2s ease;
     }
 
     .pill-btn:hover {
-      color: rgba(255, 255, 255, 0.8);
+      color: rgba(255, 255, 255, 0.9);
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.12);
     }
 
     .pill-btn.active {
-      background: rgba(255, 255, 255, 0.12);
       color: #ffffff;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      background: rgba(255, 255, 255, 0.14);
+      border-color: rgba(255, 255, 255, 0.28);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
     }
 
-    /* ==========================================
-       DRAGGABLE GRID & GLASS CARDS
-       ========================================== */
+    .pill-btn:active {
+      transform: scale(0.95);
+    }
+
     .app-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -219,49 +218,17 @@
       overflow: hidden;
       
       background: rgba(255, 255, 255, 0.03);
-      backdrop-filter: blur(16px) saturate(140%);
-      -webkit-backdrop-filter: blur(16px) saturate(140%);
-      
+      backdrop-filter: blur(12px);
       border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 
-        0 12px 30px rgba(0, 0, 0, 0.25),
-        inset 0 1px 1px rgba(255, 255, 255, 0.15);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
 
-      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
-                  box-shadow 0.25s ease,
-                  background 0.25s ease,
-                  border-color 0.25s ease,
-                  opacity 0.2s ease;
-    }
-
-    .glass-card::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(
-        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-        rgba(255, 255, 255, 0.1) 0%,
-        transparent 60%
-      );
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      pointer-events: none;
-    }
-
-    .glass-card:hover::before {
-      opacity: 1;
+      transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
     }
 
     .glass-card:hover {
       transform: translateY(-4px);
       background: rgba(255, 255, 255, 0.07);
       border-color: rgba(255, 255, 255, 0.2);
-      box-shadow: 
-        0 20px 40px rgba(0, 0, 0, 0.35),
-        inset 0 1px 1px rgba(255, 255, 255, 0.25);
     }
 
     .glass-card.dragging {
@@ -273,10 +240,8 @@
     .glass-card.drag-over {
       border-color: rgba(255, 255, 255, 0.4);
       background: rgba(255, 255, 255, 0.1);
-      transform: scale(1.02);
     }
 
-    /* Icon Capsule with Status Dot */
     .app-icon {
       width: 58px;
       height: 58px;
@@ -288,13 +253,6 @@
       position: relative;
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
-      transition: background 0.25s ease, border-color 0.25s ease;
-    }
-
-    .glass-card:hover .app-icon {
-      background: rgba(255, 255, 255, 0.09);
-      border-color: rgba(255, 255, 255, 0.2);
     }
 
     .app-icon i {
@@ -302,7 +260,6 @@
       color: rgba(255, 255, 255, 0.85);
     }
 
-    /* Ping Status Dot */
     .status-dot {
       position: absolute;
       top: -2px;
@@ -312,7 +269,6 @@
       border-radius: 50%;
       background: #9ca3af;
       border: 2px solid #0b1120;
-      transition: background 0.3s ease;
     }
 
     .status-dot.online {
@@ -329,42 +285,7 @@
       font-weight: 500;
       color: rgba(255, 255, 255, 0.85);
       text-align: center;
-      letter-spacing: -0.1px;
       line-height: 1.3;
-    }
-
-    @media (max-width: 600px) {
-      body {
-        padding: 24px 16px;
-      }
-      header h1 {
-        font-size: 1.8rem;
-      }
-      .controls-bar {
-        flex-direction: column;
-      }
-      .search-wrapper {
-        max-width: 100%;
-      }
-      .app-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 14px;
-      }
-      .glass-card {
-        padding: 18px 12px;
-        border-radius: 16px;
-      }
-      .app-icon {
-        width: 50px;
-        height: 50px;
-        margin-bottom: 10px;
-      }
-      .app-icon i {
-        font-size: 22px;
-      }
-      .app-title {
-        font-size: 0.85rem;
-      }
     }
   </style>
 </head>
@@ -398,156 +319,72 @@
   </div>
 
   <script>
-    /* ==========================================
-       APP REGISTRY (Updated Categories & Names)
-       ========================================== */
     const DEFAULT_APPS = [
-      // Classroom Tools
-      {
-        id: 'notepad',
-        name: 'Notepad',
-        category: 'classroom',
-        iconClass: 'ph-note-pencil',
-        url: 'https://script.google.com/a/macros/lstyoungkhl.edu.hk/s/AKfycbwzSbCzx6xiE02v5FGYVa02RbukLjMXLTBN4FqMjj6Eyk4dqPUptoeld7lyHGV3c4RB7g/exec',
-        windowSize: 'width=900,height=700'
-      },
-      {
-        id: 'scoreboard',
-        name: 'Scoreboard',
-        category: 'classroom',
-        iconClass: 'ph-trophy',
-        url: 'https://lunaticarus.github.io/classtools/scoreboard.html',
-        windowSize: 'width=1000,height=700'
-      },
-      {
-        id: 'vocab',
-        name: 'Vocab',
-        category: 'classroom',
-        iconClass: 'ph-book-open-text',
-        url: 'https://lunaticarus.github.io/classtools/vocab.html',
-        windowSize: 'width=1100,height=750'
-      },
-      {
-        id: 'timer',
-        name: 'Timer',
-        category: 'classroom',
-        iconClass: 'ph-timer',
-        url: 'https://lunaticarus.github.io/classtools/timer.html',
-        windowSize: 'width=800,height=600'
-      },
-      {
-        id: 'readaloud',
-        name: 'ReadAloud',
-        category: 'classroom',
-        iconClass: 'ph-microphone',
-        url: 'https://lunaticarus.github.io/ReadAloud/',
-        windowSize: 'width=1000,height=700'
-      },
-      {
-        id: 'vocabquest',
-        name: 'VocabQuest',
-        category: 'classroom',
-        iconClass: 'ph-sword',
-        url: 'https://lunaticarus.github.io/VocabQuest/',
-        windowSize: 'width=1100,height=750'
-      },
-
-      // School Platforms
-      {
-        id: 'photoservice',
-        name: 'Photo Service Booking',
-        category: 'school',
-        iconClass: 'ph-camera',
-        url: 'https://script.google.com/a/macros/lstyoungkhl.edu.hk/s/AKfycbyy2tgpqQz82rqPVNtWhrSEYzRP-LfBkX3cKZuQkkZsMjf6nhdpKaYgvkxUFiRrETgf/exec',
-        windowSize: 'width=1000,height=750'
-      },
-      {
-        id: 'parentsday',
-        name: '家長日報到平台',
-        category: 'school',
-        iconClass: 'ph-clipboard-text',
-        url: 'https://lunaticarus.github.io/ParentsDay/',
-        windowSize: 'width=1100,height=800'
-      },
-      {
-        id: 's1briefing',
-        name: '中一入學簡介會報名',
-        category: 'school',
-        iconClass: 'ph-buildings',
-        url: 'https://lunaticarus.github.io/s1briefing/',
-        windowSize: 'width=1100,height=800'
-      },
-      {
-        id: 'openday',
-        name: '開放日集章平台',
-        category: 'school',
-        iconClass: 'ph-target',
-        url: 'https://lunaticarus.github.io/ykhl_openday/',
-        windowSize: 'width=1100,height=800'
-      }
+      { id: 'notepad', name: 'Notepad', category: 'classroom', iconClass: 'ph-note-pencil', url: 'https://script.google.com/a/macros/lstyoungkhl.edu.hk/s/AKfycbwzSbCzx6xiE02v5FGYVa02RbukLjMXLTBN4FqMjj6Eyk4dqPUptoeld7lyHGV3c4RB7g/exec', windowSize: 'width=900,height=700' },
+      { id: 'scoreboard', name: 'Scoreboard', category: 'classroom', iconClass: 'ph-trophy', url: 'https://lunaticarus.github.io/classtools/scoreboard.html', windowSize: 'width=1000,height=700' },
+      { id: 'vocab', name: 'Vocab', category: 'classroom', iconClass: 'ph-book-open-text', url: 'https://lunaticarus.github.io/classtools/vocab.html', windowSize: 'width=1100,height=750' },
+      { id: 'timer', name: 'Timer', category: 'classroom', iconClass: 'ph-timer', url: 'https://lunaticarus.github.io/classtools/timer.html', windowSize: 'width=800,height=600' },
+      { id: 'readaloud', name: 'ReadAloud', category: 'classroom', iconClass: 'ph-microphone', url: 'https://lunaticarus.github.io/ReadAloud/', windowSize: 'width=1000,height=700' },
+      { id: 'vocabquest', name: 'VocabQuest', category: 'classroom', iconClass: 'ph-sword', url: 'https://lunaticarus.github.io/VocabQuest/', windowSize: 'width=1100,height=750' },
+      { id: 'photoservice', name: 'Photo Service Booking', category: 'school', iconClass: 'ph-camera', url: 'https://script.google.com/a/macros/lstyoungkhl.edu.hk/s/AKfycbyy2tgpqQz82rqPVNtWhrSEYzRP-LfBkX3cKZuQkkZsMjf6nhdpKaYgvkxUFiRrETgf/exec', windowSize: 'width=1000,height=750' },
+      { id: 'parentsday', name: '家長日報到平台', category: 'school', iconClass: 'ph-clipboard-text', url: 'https://lunaticarus.github.io/ParentsDay/', windowSize: 'width=1100,height=800' },
+      { id: 's1briefing', name: '中一入學簡介會報名', category: 'school', iconClass: 'ph-buildings', url: 'https://lunaticarus.github.io/s1briefing/', windowSize: 'width=1100,height=800' },
+      { id: 'openday', name: '開放日集章平台', category: 'school', iconClass: 'ph-target', url: 'https://lunaticarus.github.io/ykhl_openday/', windowSize: 'width=1100,height=800' }
     ];
 
     let apps = [];
     let activeCategory = 'all';
     let draggedItem = null;
+    const statusCache = {}; // Cache host status across renders
 
-    /* ==========================================
-       POPUP WINDOW LAUNCHER (Centered)
-       ========================================== */
-    function openInNewWindow(url, sizeSpecs = 'width=1024,height=768') {
-      const dualScreenLeft = window.screenLeft !== undefined ? window.screenLeft : window.screenX;
-      const dualScreenTop = window.screenTop !== undefined ? window.screenTop : window.screenY;
+    function openInNewWindow(url, sizeSpecs) {
+      const dualLeft = window.screenLeft ?? window.screenX;
+      const dualTop = window.screenTop ?? window.screenY;
+      const width = window.innerWidth ?? screen.width;
+      const height = window.innerHeight ?? screen.height;
 
-      const screenWidth = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;
-      const screenHeight = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;
+      const left = (width / 2) - 512 + dualLeft;
+      const top = (height / 2) - 384 + dualTop;
 
-      const defaultWidth = 1024;
-      const defaultHeight = 768;
-      const left = (screenWidth / 2) - (defaultWidth / 2) + dualScreenLeft;
-      const top = (screenHeight / 2) - (defaultHeight / 2) + dualScreenTop;
-
-      const windowFeatures = `${sizeSpecs},top=${top},left=${left},resizable=yes,scrollbars=yes,status=yes,toolbar=no,menubar=no,location=no`;
-      window.open(url, '_blank', windowFeatures);
+      window.open(url, '_blank', `${sizeSpecs},top=${top},left=${left},resizable=yes,scrollbars=yes,status=yes`);
     }
 
-    /* ==========================================
-       PRE-FLIGHT HOST STATUS CHECK
-       ========================================== */
-    function checkAppStatus(appId, url) {
-      const dot = document.getElementById(`status-${appId}`);
-      if (!dot) return;
+    /* Single-run status check per session */
+    function checkAppStatusOnce(appId, url) {
+      if (statusCache[appId] !== undefined) {
+        updateStatusUI(appId, statusCache[appId]);
+        return;
+      }
 
-      fetch(url, { mode: 'no-cors', cache: 'no-cache' })
+      fetch(url, { mode: 'no-cors', cache: 'force-cache' })
         .then(() => {
-          dot.classList.remove('offline');
-          dot.classList.add('online');
+          statusCache[appId] = 'online';
+          updateStatusUI(appId, 'online');
         })
         .catch(() => {
-          dot.classList.remove('online');
-          dot.classList.add('offline');
+          statusCache[appId] = 'offline';
+          updateStatusUI(appId, 'offline');
         });
     }
 
-    /* ==========================================
-       LOCALSTORAGE ORDER MANAGEMENT
-       ========================================== */
+    function updateStatusUI(appId, state) {
+      const dot = document.getElementById(`status-${appId}`);
+      if (dot) {
+        dot.className = `status-dot ${state}`;
+      }
+    }
+
     function loadAppOrder() {
       const savedOrder = localStorage.getItem('app_hub_order');
       if (savedOrder) {
         try {
           const orderedIds = JSON.parse(savedOrder);
           const appMap = new Map(DEFAULT_APPS.map(app => [app.id, app]));
-          
-          apps = orderedIds
-            .map(id => appMap.get(id))
-            .filter(Boolean);
-
+          apps = orderedIds.map(id => appMap.get(id)).filter(Boolean);
           DEFAULT_APPS.forEach(app => {
-            if (!apps.some(a => a.id === app.id)) {
-              apps.push(app);
-            }
+            if (!apps.some(a => a.id === app.id)) apps.push(app);
           });
-        } catch (e) {
+        } catch {
           apps = [...DEFAULT_APPS];
         }
       } else {
@@ -556,13 +393,9 @@
     }
 
     function saveAppOrder() {
-      const orderIds = apps.map(app => app.id);
-      localStorage.setItem('app_hub_order', JSON.stringify(orderIds));
+      localStorage.setItem('app_hub_order', JSON.stringify(apps.map(app => app.id)));
     }
 
-    /* ==========================================
-       FILTER & CATEGORY SELECTION
-       ========================================== */
     function setCategory(category, btnElement) {
       activeCategory = category;
       document.querySelectorAll('.pill-btn').forEach(btn => btn.classList.remove('active'));
@@ -570,60 +403,41 @@
       renderLauncher(document.getElementById('searchInput').value);
     }
 
-    /* ==========================================
-       RENDER LAUNCHER GRID
-       ========================================== */
     function renderLauncher(filterQuery = '') {
       const grid = document.getElementById('app-grid');
       grid.innerHTML = '';
-
       const query = filterQuery.toLowerCase().trim();
 
       apps.forEach((app, index) => {
-        if (activeCategory !== 'all' && app.category !== activeCategory) {
-          return;
-        }
-
-        if (query && !app.name.toLowerCase().includes(query)) {
-          return;
-        }
+        if (activeCategory !== 'all' && app.category !== activeCategory) return;
+        if (query && !app.name.toLowerCase().includes(query)) return;
 
         const card = document.createElement('div');
         card.className = 'glass-card';
         card.draggable = true;
         card.dataset.index = index;
 
+        const cachedState = statusCache[app.id] || '';
+
         card.innerHTML = `
           <div class="app-icon">
-            <span class="status-dot" id="status-${app.id}"></span>
+            <span class="status-dot ${cachedState}" id="status-${app.id}"></span>
             <i class="ph ${app.iconClass}"></i>
           </div>
           <div class="app-title">${app.name}</div>
         `;
 
         let isDragging = false;
-        
         card.addEventListener('mousedown', () => { isDragging = false; });
-        card.addEventListener('mousemove', (e) => {
-          isDragging = true;
-          const rect = card.getBoundingClientRect();
-          const x = ((e.clientX - rect.left) / rect.width) * 100;
-          const y = ((e.clientY - rect.top) / rect.height) * 100;
-          card.style.setProperty('--mouse-x', `${x}%`);
-          card.style.setProperty('--mouse-y', `${y}%`);
-        });
+        card.addEventListener('mousemove', () => { isDragging = true; });
 
         card.addEventListener('click', () => {
-          if (!isDragging) {
-            openInNewWindow(app.url, app.windowSize);
-          }
+          if (!isDragging) openInNewWindow(app.url, app.windowSize);
         });
 
-        /* Drag Events */
-        card.addEventListener('dragstart', (e) => {
+        card.addEventListener('dragstart', () => {
           draggedItem = index;
           card.classList.add('dragging');
-          e.dataTransfer.effectAllowed = 'move';
         });
 
         card.addEventListener('dragend', () => {
@@ -634,7 +448,6 @@
 
         card.addEventListener('dragover', (e) => {
           e.preventDefault();
-          e.dataTransfer.dropEffect = 'move';
           card.classList.add('drag-over');
         });
 
@@ -645,7 +458,6 @@
         card.addEventListener('drop', (e) => {
           e.preventDefault();
           card.classList.remove('drag-over');
-
           const targetIndex = parseInt(card.dataset.index, 10);
           if (draggedItem !== null && draggedItem !== targetIndex) {
             const movedApp = apps.splice(draggedItem, 1)[0];
@@ -656,20 +468,13 @@
         });
 
         grid.appendChild(card);
-
-        checkAppStatus(app.id, app.url);
+        checkAppStatusOnce(app.id, app.url);
       });
     }
 
-    /* ==========================================
-       KEYBOARD SHORTCUTS & SEARCH
-       ========================================== */
     function initSearchAndShortcuts() {
       const searchInput = document.getElementById('searchInput');
-
-      searchInput.addEventListener('input', (e) => {
-        renderLauncher(e.target.value);
-      });
+      searchInput.addEventListener('input', (e) => renderLauncher(e.target.value));
 
       window.addEventListener('keydown', (e) => {
         if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
