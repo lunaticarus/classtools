@@ -3,35 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Scoreboard</title>
+    <title>Scoreboard — Liquid Glass</title>
     <style>
+        /* Liquid Glass Tokens & Principles */
         :root {
+            /* Translucent overlays & subtle glass fills */
             --glass-bg-primary: rgba(255, 255, 255, 0.15);
             --glass-bg-card: rgba(255, 255, 255, 0.12);
             --glass-bg-hover: rgba(255, 255, 255, 0.25);
             --glass-bg-input: rgba(255, 255, 255, 0.18);
             
+            /* Glass border highlights */
             --glass-border-light: rgba(255, 255, 255, 0.22);
             --glass-border-strong: rgba(255, 255, 255, 0.35);
             
+            /* Depth shadows */
             --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
             --glass-shadow-sm: 0 4px 16px 0 rgba(0, 0, 0, 0.25);
             
+            /* Typography & High-Contrast Colors */
             --text-main: #ffffff;
             --text-sub: rgba(255, 255, 255, 0.85);
             --text-muted: rgba(255, 255, 255, 0.65);
             --accent-red: #ff453a;
-            --accent-green: #30d158;
             
+            /* System Border Radius */
             --radius-container: 20px;
             --radius-element: 12px;
             --radius-full: 9999px;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+        }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: #1f1c2c;
             color: var(--text-main);
             min-height: 100vh;
@@ -44,21 +53,27 @@
             -webkit-font-smoothing: antialiased;
         }
 
+        /* Fixed Background Container for Mobile Safari compatibility */
         body::before {
             content: "";
             position: fixed;
-            top: 0; left: 0;
-            width: 100vw; height: 100vh;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
             background: linear-gradient(135deg, #1f1c2c 0%, #928dab 50%, #2c3e50 100%);
             z-index: -2;
             pointer-events: none;
             transform: translateZ(0);
         }
 
+        /* Ambient Dynamic Background Canvas */
         #liquidCanvas {
             position: fixed;
-            top: 0; left: 0;
-            width: 100vw; height: 100vh;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
             z-index: -1;
             pointer-events: none;
             filter: blur(50px);
@@ -66,6 +81,7 @@
             transform: translateZ(0);
         }
 
+        /* Glass Header Container */
         header {
             position: fixed;
             top: 16px;
@@ -87,8 +103,6 @@
             padding: 0 20px;
         }
 
-        .header-title-box { display: flex; align-items: center; gap: 8px; }
-
         h1 {
             font-size: 20px;
             font-weight: 700;
@@ -97,22 +111,13 @@
             letter-spacing: -0.3px;
         }
 
-        .sync-badge {
-            font-size: 11px;
-            font-weight: 600;
-            padding: 2px 8px;
-            border-radius: var(--radius-full);
-            background: rgba(255, 255, 255, 0.15);
-            border: 1px solid var(--glass-border-light);
-            color: var(--text-muted);
-            transition: all 0.3s ease;
+        .top-nav { 
+            display: flex; 
+            gap: 8px; 
+            align-items: center; 
         }
-        .sync-badge.syncing { color: #ffd60a; border-color: rgba(255, 214, 10, 0.4); }
-        .sync-badge.success { color: var(--accent-green); border-color: rgba(48, 209, 88, 0.4); }
-        .sync-badge.error { color: var(--accent-red); border-color: rgba(255, 69, 58, 0.4); }
 
-        .top-nav { display: flex; gap: 8px; align-items: center; }
-
+        /* Glass Button Component Specification */
         .glass-btn {
             background: var(--glass-bg-primary);
             border: 1px solid var(--glass-border-light);
@@ -151,8 +156,13 @@
             border-radius: var(--radius-element);
         }
 
-        .glass-container { width: 100%; max-width: 620px; }
+        /* Container Component Specification */
+        .glass-container {
+            width: 100%;
+            max-width: 620px;
+        }
 
+        /* Setup Accordion Container */
         .setup-area {
             background: var(--glass-bg-card);
             backdrop-filter: blur(16px);
@@ -176,6 +186,7 @@
             opacity: 1;
         }
 
+        /* Controls Specification (Inputs & Textareas) */
         input[type="text"], textarea {
             width: 100%;
             margin-bottom: 12px;
@@ -193,7 +204,9 @@
             transition: all 0.2s ease;
         }
 
-        input[type="text"]::placeholder, textarea::placeholder { color: var(--text-muted); }
+        input[type="text"]::placeholder, textarea::placeholder {
+            color: var(--text-muted);
+        }
 
         input[type="text"]:focus, textarea:focus {
             background: rgba(255, 255, 255, 0.25);
@@ -201,6 +214,7 @@
             box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
         }
 
+        /* Student Glass Card Container */
         .student-row {
             display: grid;
             grid-template-columns: 36px 1fr 130px;
@@ -230,7 +244,10 @@
             z-index: 10;
         }
 
-        .student-row.absent { opacity: 0.4; filter: grayscale(1); }
+        .student-row.absent {
+            opacity: 0.4;
+            filter: grayscale(1);
+        }
 
         .attendance-toggle {
             font-size: 16px;
@@ -241,7 +258,10 @@
             transition: transform 0.2s ease;
         }
 
-        .attendance-toggle:hover { color: var(--text-main); transform: scale(1.2); }
+        .attendance-toggle:hover {
+            color: var(--text-main);
+            transform: scale(1.2);
+        }
 
         .student-info {
             display: flex;
@@ -258,7 +278,11 @@
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
         }
 
-        .medal { font-size: 18px; width: 24px; text-align: center; }
+        .medal {
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+        }
 
         .score-box {
             display: flex;
@@ -278,7 +302,9 @@
             transition: transform 0.15s ease;
         }
 
-        .score-display:hover { transform: scale(1.15); }
+        .score-display:hover {
+            transform: scale(1.15);
+        }
 
         .points-btn {
             width: 30px;
@@ -304,8 +330,11 @@
             border-color: var(--glass-border-strong);
         }
 
-        .points-btn:active { transform: scale(0.92) translateZ(0); }
+        .points-btn:active {
+            transform: scale(0.92) translateZ(0);
+        }
 
+        /* Bottom Floating Dock Bar */
         .bottom-dock {
             position: fixed;
             bottom: 24px;
@@ -346,9 +375,18 @@
             border-color: var(--glass-border-light);
         }
 
-        .dock-btn:active { transform: scale(0.95); }
-        .dock-btn.danger { color: var(--accent-red); }
-        .dock-btn.danger:hover { background: rgba(255, 69, 58, 0.22); border-color: rgba(255, 69, 58, 0.4); }
+        .dock-btn:active {
+            transform: scale(0.95);
+        }
+
+        .dock-btn.danger {
+            color: var(--accent-red);
+        }
+
+        .dock-btn.danger:hover {
+            background: rgba(255, 69, 58, 0.22);
+            border-color: rgba(255, 69, 58, 0.4);
+        }
 
         .dock-divider {
             width: 1px;
@@ -357,6 +395,7 @@
             margin: 0 2px;
         }
 
+        /* Mobile Actions Hub */
         .mobile-actions-hub {
             display: none;
             position: fixed;
@@ -414,11 +453,25 @@
             gap: 8px;
         }
 
-        .mobile-menu-item:hover { background: var(--glass-bg-hover); }
-        .mobile-menu-item.danger { color: var(--accent-red); }
-        .mobile-menu-item.danger:hover { background: rgba(255, 69, 58, 0.22); }
+        .mobile-menu-item:hover {
+            background: var(--glass-bg-hover);
+        }
 
-        .mode-hub { position: fixed; bottom: 24px; left: 24px; z-index: 1100; }
+        .mobile-menu-item.danger {
+            color: var(--accent-red);
+        }
+
+        .mobile-menu-item.danger:hover {
+            background: rgba(255, 69, 58, 0.22);
+        }
+
+        /* Class Switcher Hub */
+        .mode-hub {
+            position: fixed; 
+            bottom: 24px; 
+            left: 24px;
+            z-index: 1100;
+        }
 
         .mode-trigger {
             background: var(--glass-bg-primary);
@@ -474,19 +527,21 @@
             align-items: center;
         }
 
-        .mode-link:hover { background: var(--glass-bg-hover); }
+        .mode-link:hover {
+            background: var(--glass-bg-hover);
+        }
 
         .status-counter {
-            position: fixed;
-            bottom: 28px;
+            position: fixed; 
+            bottom: 28px; 
             right: 24px;
-            font-weight: 600;
-            color: var(--text-sub);
+            font-weight: 600; 
+            color: var(--text-sub); 
             font-size: 13px;
-            z-index: 900;
+            z-index: 900; 
             pointer-events: none;
             background: var(--glass-bg-primary);
-            padding: 6px 14px;
+            padding: 6px 14px; 
             border-radius: var(--radius-full);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
@@ -513,15 +568,15 @@
             line-height: 1.6;
         }
 
-        #appVersion {
-            position: fixed;
-            right: 12px;
-            bottom: 6px;
-            font-size: 10px;
-            font-weight: 500;
-            color: var(--text-muted);
-            pointer-events: none;
-            z-index: 2000;
+        #appVersion { 
+            position: fixed; 
+            right: 12px; 
+            bottom: 6px; 
+            font-size: 10px; 
+            font-weight: 500; 
+            color: var(--text-muted); 
+            pointer-events: none; 
+            z-index: 2000; 
         }
 
         @media (max-width: 600px) {
@@ -537,23 +592,21 @@
 </head>
 <body>
 
+    <!-- Ambient Dynamic Background Canvas -->
     <canvas id="liquidCanvas"></canvas>
 
+    <!-- Glass Header Wrapper -->
     <header>
-        <div class="header-title-box">
-            <h1>Scoreboard</h1>
-            <span id="syncBadge" class="sync-badge">Offline</span>
-        </div>
+        <h1>Scoreboard</h1>
         <nav class="top-nav">
             <button class="glass-btn" onclick="toggleSetup()">Add Class</button>
-            <button class="glass-btn" onclick="setTeacherIdPrompt()">Sync ID</button>
-            <button class="glass-btn" onclick="downloadData()">Backup</button>
-            <button class="glass-btn" onclick="document.getElementById('fileInput').click()">Load</button>
-            <input type="file" id="fileInput" class="hidden" accept=".json" onchange="uploadData(event)">
+            <button class="glass-btn" onclick="saveDataToScript()">Save</button>
+            <button class="glass-btn" onclick="loadDataFromScript()">Load</button>
         </nav>
     </header>
 
     <div class="glass-container">
+        <!-- Glass Accordion Container -->
         <div id="setupArea" class="setup-area">
             <h3 style="margin-top:0; font-size: 12px; font-weight:700; color: var(--text-muted); margin-bottom: 12px; letter-spacing: 0.5px;">NEW CLASS SETUP</h3>
             <input type="text" id="className" placeholder="Class Name (e.g. Science 7B)">
@@ -564,6 +617,7 @@
         <div id="studentContainer"></div>
     </div>
 
+    <!-- Desktop Floating Glass Dock -->
     <div id="scoreboardActions" class="bottom-dock hidden">
         <button class="dock-btn" onclick="pickRandomNoRepeat()">
             🎲 <span id="noRepeatBtn">0/0</span>
@@ -575,6 +629,7 @@
         <button class="dock-btn danger" onclick="resetScores()">Reset</button>
     </div>
 
+    <!-- Mobile Compact Actions Menu -->
     <div id="mobileActionsHub" class="mobile-actions-hub hidden">
         <button class="mobile-actions-trigger" onclick="toggleMobileActions()">Actions ⚡</button>
         <div class="mobile-actions-menu" id="mobileActionsMenu">
@@ -589,16 +644,19 @@
         </div>
     </div>
 
+    <!-- Class Switcher Hub (Bottom-Left) -->
     <div class="mode-hub">
         <div class="mode-trigger" id="currentClassLabel" onclick="toggleModeMenu()">Select Class</div>
         <div class="mode-options" id="tabsContainer"></div>
     </div>
 
     <div class="status-counter" id="presenceCounter">0 Present</div>
-    <div id="appVersion">v3.0 | Sheets Cloud Sync</div>
+    <div id="appVersion">v3.0 | GAS Cloud Sync</div>
 
     <script>
-        /* Ambient Canvas Background Engine */
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyBmq-YXH01cMTE3-pmgZvKl9iojmE15KCeZFBqETHKoJELsROZ-p-Ihk9WmFbD09i3/exec";
+
+        /* Mobile-Optimized Ambient Canvas Background Engine */
         const canvas = document.getElementById('liquidCanvas');
         const ctx = canvas.getContext('2d');
         let width, height, dpr;
@@ -648,14 +706,9 @@
         }
         animateBlobs();
 
-        /* Scoreboard & Google Sheets Sync Logic */
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyBmq-YXH01cMTE3-pmgZvKl9iojmE15KCeZFBqETHKoJELsROZ-p-Ihk9WmFbD09i3/exec";
-        const STORE_KEY = 'teacherApp_v7_light_only';
-        const ID_KEY = 'scoreboard_teacher_id';
-
+        /* Scoreboard Application Logic */
         let state = { classes: [], lastSelectedIndex: null, lastSortMode: 'original' };
-        let teacherId = localStorage.getItem(ID_KEY) || null;
-        let syncTimeout = null;
+        const STORE_KEY = 'teacherApp_v7_light_only';
 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playSound(type) {
@@ -676,88 +729,11 @@
             } catch(e) {}
         }
 
-        function updateSyncBadge(status, text) {
-            const badge = document.getElementById('syncBadge');
-            if (!badge) return;
-            badge.className = `sync-badge ${status}`;
-            badge.innerText = text;
-        }
-
-        function sync() {
-            localStorage.setItem(STORE_KEY, JSON.stringify(state));
-            
-            if (!teacherId) {
-                updateSyncBadge('', 'Local');
-                return;
-            }
-
-            updateSyncBadge('syncing', 'Syncing...');
-            clearTimeout(syncTimeout);
-
-            // Debounce cloud post request by 800ms
-            syncTimeout = setTimeout(() => {
-                const payload = { teacherId: teacherId, state: state };
-                fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify(payload)
-                })
-                .then(() => updateSyncBadge('success', 'Synced'))
-                .catch(err => {
-                    console.error("Cloud push failed:", err);
-                    updateSyncBadge('error', 'Sync Failed');
-                });
-            }, 800);
-        }
-
-        function fetchCloudData() {
-            if (!teacherId) return;
-            updateSyncBadge('syncing', 'Loading...');
-
-            fetch(`${GOOGLE_SCRIPT_URL}?teacherId=${encodeURIComponent(teacherId)}`)
-                .then(res => res.json())
-                .then(resData => {
-                    if (resData.status === 'success' && resData.data) {
-                        state = resData.data;
-                        localStorage.setItem(STORE_KEY, JSON.stringify(state));
-                        updateSyncBadge('success', 'Synced');
-                        renderTabs();
-                    } else {
-                        updateSyncBadge('error', 'Not Found');
-                    }
-                })
-                .catch(err => {
-                    console.error("Cloud fetch failed:", err);
-                    updateSyncBadge('error', 'Offline');
-                });
-        }
-
-        function setTeacherIdPrompt() {
-            const newId = prompt("Enter your Teacher Sync ID (or leave blank for local mode):", teacherId || "");
-            if (newId !== null) {
-                teacherId = newId.trim() || null;
-                if (teacherId) {
-                    localStorage.setItem(ID_KEY, teacherId);
-                    fetchCloudData();
-                } else {
-                    localStorage.removeItem(ID_KEY);
-                    updateSyncBadge('', 'Local');
-                }
-            }
-        }
-
+        function sync() { localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
+        
         function init() {
             const saved = localStorage.getItem(STORE_KEY);
-            if (saved) {
-                try { state = JSON.parse(saved); } catch(e){}
-                renderTabs();
-            }
-            if (teacherId) {
-                fetchCloudData();
-            } else {
-                updateSyncBadge('', 'Local');
-            }
+            if (saved) { state = JSON.parse(saved); renderTabs(); }
         }
 
         function toggleSetup() { document.getElementById('setupArea').classList.toggle('open'); }
@@ -967,23 +943,45 @@
             }
         }
 
-        function downloadData() {
-            const blob = new Blob([JSON.stringify(state)], { type: 'application/json' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `Scoreboard_Backup.json`;
-            a.click();
+        /* Google Apps Script Save / Load Functions */
+        function saveDataToScript() {
+            let teacherId = localStorage.getItem('teacherApp_teacherId') || '';
+            teacherId = prompt("Enter Teacher ID to save:", teacherId);
+            if (!teacherId) return;
+            localStorage.setItem('teacherApp_teacherId', teacherId);
+
+            const payload = { teacherId: teacherId, state: state };
+
+            fetch(SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "text/plain" },
+                body: JSON.stringify(payload)
+            })
+            .then(() => alert("Save request submitted to cloud!"))
+            .catch(err => alert("Error saving data: " + err));
         }
 
-        function uploadData(event) {
-            const file = event.target.files[0]; if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (e) => { 
-                state = JSON.parse(e.target.result); 
-                state.lastSelectedIndex = state.classes.length > 0 ? 0 : null;
-                sync(); renderTabs(); 
-            };
-            reader.readAsText(file);
+        function loadDataFromScript() {
+            let teacherId = localStorage.getItem('teacherApp_teacherId') || '';
+            teacherId = prompt("Enter Teacher ID to load:", teacherId);
+            if (!teacherId) return;
+            localStorage.setItem('teacherApp_teacherId', teacherId);
+
+            fetch(`${SCRIPT_URL}?teacherId=${encodeURIComponent(teacherId)}`)
+            .then(res => res.json())
+            .then(resData => {
+                if (resData.status === "success" && resData.data) {
+                    state = resData.data;
+                    state.lastSelectedIndex = state.classes.length > 0 ? 0 : null;
+                    sync(); 
+                    renderTabs();
+                    alert("Data successfully loaded!");
+                } else {
+                    alert("Load failed: " + (resData.message || "Teacher ID not found"));
+                }
+            })
+            .catch(err => alert("Error loading data: " + err));
         }
 
         window.onload = init;
