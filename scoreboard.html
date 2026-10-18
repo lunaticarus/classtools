@@ -3,14 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Scoreboard</title>
+    <title>Scoreboard - Liquid Glass Design System</title>
     <style>
         /* Liquid Glass Tokens & Principles */
         :root {
-            /* Translucent overlays & subtle glass fills */
-            --glass-bg-primary: rgba(255, 255, 255, 0.15);
+            /* Force mobile browsers to render controls in dark context */
+            color-scheme: dark;
+
+            /* Dark translucent overlays for identical baseline contrast on mobile & desktop */
+            --glass-bg-primary: rgba(18, 20, 29, 0.55);
             --glass-bg-card: rgba(255, 255, 255, 0.12);
-            --glass-bg-hover: rgba(255, 255, 255, 0.25);
+            --glass-bg-hover: rgba(255, 255, 255, 0.22);
             --glass-bg-input: rgba(255, 255, 255, 0.18);
             
             /* Glass border highlights */
@@ -41,8 +44,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background: linear-gradient(135deg, #1f1c2c 0%, #928dab 50%, #2c3e50 100%);
-            background-attachment: fixed;
+            background-color: #1a1c24;
             color: var(--text-main);
             min-height: 100vh;
             padding: 100px 20px 120px 20px;
@@ -51,6 +53,15 @@
             align-items: center;
             overflow-x: hidden;
             position: relative;
+        }
+
+        /* Fixed background overlay to prevent mobile scroll clipping */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(135deg, #1f1c2c 0%, #928dab 50%, #2c3e50 100%);
+            z-index: -2;
         }
 
         /* Multi-colored background canvas for backdrop-filter glass refraction */
@@ -76,8 +87,8 @@
             max-width: 760px;
             height: 64px;
             background: var(--glass-bg-primary);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border: 1px solid var(--glass-border-light);
             border-radius: var(--radius-container);
             box-shadow: var(--glass-shadow-sm);
@@ -104,7 +115,7 @@
 
         /* Glass Button Component Specification */
         .glass-btn {
-            background: var(--glass-bg-primary);
+            background: var(--glass-bg-card);
             border: 1px solid var(--glass-border-light);
             color: var(--text-main);
             font-size: 13px;
@@ -148,7 +159,7 @@
 
         /* Setup Accordion Container */
         .setup-area {
-            background: var(--glass-bg-card);
+            background: var(--glass-bg-primary);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid var(--glass-border-light);
@@ -200,7 +211,7 @@
         .student-row {
             display: grid;
             grid-template-columns: 36px 1fr 130px;
-            background: var(--glass-bg-card);
+            background: var(--glass-bg-primary);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             margin-bottom: 10px;
@@ -292,7 +303,7 @@
             height: 30px;
             border-radius: var(--radius-full);
             border: 1px solid var(--glass-border-light);
-            background: var(--glass-bg-primary);
+            background: var(--glass-bg-card);
             color: var(--text-main);
             font-size: 16px;
             font-weight: 600;
@@ -404,7 +415,7 @@
             left: 50%;
             transform: translateX(-50%);
             flex-direction: column;
-            background: rgba(30, 30, 40, 0.85);
+            background: rgba(22, 24, 35, 0.92);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             padding: 8px;
@@ -477,7 +488,7 @@
             bottom: 50px;
             left: 0;
             flex-direction: column;
-            background: rgba(30, 30, 40, 0.85);
+            background: rgba(22, 24, 35, 0.92);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             padding: 8px;
@@ -532,7 +543,7 @@
             padding: 60px 20px;
             font-size: 15px;
             font-weight: 500;
-            background: var(--glass-bg-card);
+            background: var(--glass-bg-primary);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid var(--glass-border-light);
@@ -625,7 +636,7 @@
     </div>
 
     <div class="status-counter" id="presenceCounter">0 Present</div>
-    <div id="appVersion">v2.8 | Pure Liquid Glass</div>
+    <div id="appVersion">v3.2 | Pure Liquid Glass</div>
 
     <script>
         /* Multi-colored Ambient Fluid Canvas Background */
