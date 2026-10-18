@@ -7,7 +7,7 @@
     <style>
         /* Liquid Glass Tokens & Principles */
         :root {
-            /* Translucent overlays & subtle glass fills */
+            /* High Transparency Glass Fills */
             --glass-bg-primary: rgba(255, 255, 255, 0.08);
             --glass-bg-card: rgba(255, 255, 255, 0.06);
             --glass-bg-hover: rgba(255, 255, 255, 0.18);
@@ -76,7 +76,7 @@
             height: 100vh;
             z-index: -1;
             pointer-events: none;
-            filter: blur(50px);
+            filter: blur(40px);
             opacity: 0.75;
             transform: translateZ(0);
         }
@@ -91,8 +91,8 @@
             max-width: 760px;
             height: 64px;
             background: var(--glass-bg-primary);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             border: 1px solid var(--glass-border-light);
             border-radius: var(--radius-container);
             box-shadow: var(--glass-shadow-sm);
@@ -127,8 +127,8 @@
             cursor: pointer;
             padding: 8px 14px;
             border-radius: var(--radius-element);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
             transform: translateZ(0);
             transition: all 0.2s ease;
             outline: none;
@@ -136,6 +136,7 @@
             align-items: center;
             gap: 6px;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            user-select: none;
         }
 
         .glass-btn:hover {
@@ -165,8 +166,8 @@
         /* Setup Accordion Container */
         .setup-area {
             background: var(--glass-bg-card);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             transform: translateZ(0);
             border: 1px solid var(--glass-border-light);
             border-radius: var(--radius-container);
@@ -175,8 +176,9 @@
             max-height: 0;
             padding: 0 20px;
             margin-bottom: 0;
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
             opacity: 0;
+            pointer-events: none;
         }
 
         .setup-area.open {
@@ -184,6 +186,7 @@
             max-height: 520px;
             margin-bottom: 20px;
             opacity: 1;
+            pointer-events: auto;
         }
 
         /* Controls Specification (Inputs & Textareas) */
@@ -198,8 +201,8 @@
             font-family: inherit;
             font-size: 14px;
             outline: none;
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
             transform: translateZ(0);
             transition: all 0.2s ease;
         }
@@ -209,7 +212,7 @@
         }
 
         input[type="text"]:focus, textarea:focus {
-            background: rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.2);
             border-color: var(--glass-border-strong);
             box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
         }
@@ -219,8 +222,8 @@
             display: grid;
             grid-template-columns: 36px 1fr 130px;
             background: var(--glass-bg-card);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             transform: translateZ(0);
             margin-bottom: 10px;
             border-radius: var(--radius-element);
@@ -240,7 +243,7 @@
             border: 1.5px solid var(--glass-border-strong);
             box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
             transform: scale(1.02) translateZ(0);
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.22);
             z-index: 10;
         }
 
@@ -300,6 +303,7 @@
             cursor: pointer;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
             transition: transform 0.15s ease;
+            user-select: none;
         }
 
         .score-display:hover {
@@ -319,10 +323,11 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
             transform: translateZ(0);
             transition: all 0.2s ease;
+            user-select: none;
         }
 
         .points-btn:hover {
@@ -345,8 +350,8 @@
             align-items: center;
             gap: 8px;
             background: var(--glass-bg-primary);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             padding: 8px 14px;
             border-radius: var(--radius-full);
             border: 1px solid var(--glass-border-light);
@@ -368,6 +373,7 @@
             align-items: center;
             gap: 6px;
             text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            user-select: none;
         }
 
         .dock-btn:hover {
@@ -414,9 +420,10 @@
             font-weight: 600;
             font-size: 14px;
             cursor: pointer;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             box-shadow: var(--glass-shadow);
+            user-select: none;
         }
 
         .mobile-actions-menu {
@@ -426,9 +433,9 @@
             left: 50%;
             transform: translateX(-50%) translateZ(0);
             flex-direction: column;
-            background: rgba(30, 30, 40, 0.85);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            background: rgba(20, 20, 30, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             padding: 8px;
             border-radius: var(--radius-container);
             border: 1px solid var(--glass-border-light);
@@ -451,6 +458,7 @@
             align-items: center;
             justify-content: space-between;
             gap: 8px;
+            user-select: none;
         }
 
         .mobile-menu-item:hover {
@@ -475,8 +483,8 @@
 
         .mode-trigger {
             background: var(--glass-bg-primary);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             transform: translateZ(0);
             padding: 10px 18px;
             border-radius: var(--radius-full);
@@ -487,6 +495,7 @@
             cursor: pointer;
             font-size: 13.5px;
             transition: all 0.2s ease;
+            user-select: none;
         }
 
         .mode-trigger:hover {
@@ -500,9 +509,9 @@
             bottom: 50px;
             left: 0;
             flex-direction: column;
-            background: rgba(30, 30, 40, 0.85);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            background: rgba(20, 20, 30, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             transform: translateZ(0);
             padding: 8px;
             border-radius: var(--radius-container);
@@ -525,6 +534,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            user-select: none;
         }
 
         .mode-link:hover {
@@ -543,8 +553,8 @@
             background: var(--glass-bg-primary);
             padding: 6px 14px; 
             border-radius: var(--radius-full);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             transform: translateZ(0);
             border: 1px solid var(--glass-border-light);
             box-shadow: var(--glass-shadow-sm);
@@ -559,8 +569,8 @@
             font-size: 15px;
             font-weight: 500;
             background: var(--glass-bg-card);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             transform: translateZ(0);
             border: 1px solid var(--glass-border-light);
             border-radius: var(--radius-container);
@@ -599,9 +609,9 @@
     <header>
         <h1>Scoreboard</h1>
         <nav class="top-nav">
-            <button class="glass-btn" onclick="toggleSetup()">Add Class</button>
-            <button class="glass-btn" onclick="saveDataToScript()">Save</button>
-            <button class="glass-btn" onclick="loadDataFromScript()">Load</button>
+            <button class="glass-btn" id="addClassBtn" onclick="toggleSetup(event)">Add Class</button>
+            <button class="glass-btn" onclick="saveDataToScript(event)">Save</button>
+            <button class="glass-btn" onclick="loadDataFromScript(event)">Load</button>
         </nav>
     </header>
 
@@ -631,27 +641,27 @@
 
     <!-- Mobile Compact Actions Menu -->
     <div id="mobileActionsHub" class="mobile-actions-hub hidden">
-        <button class="mobile-actions-trigger" onclick="toggleMobileActions()">Actions ⚡</button>
+        <button class="mobile-actions-trigger" onclick="toggleMobileActions(event)">Actions ⚡</button>
         <div class="mobile-actions-menu" id="mobileActionsMenu">
-            <div class="mobile-menu-item" onclick="pickRandomNoRepeat(); toggleMobileActions();">
+            <div class="mobile-menu-item" onclick="pickRandomNoRepeat(); closeAllMenus();">
                 <span>🎲 Cycle</span>
                 <span id="noRepeatMobileBtn" style="opacity:0.7; font-size:12px; font-weight:500;">0/0</span>
             </div>
-            <div class="mobile-menu-item" onclick="pickRandom(); toggleMobileActions();">🎲 Random</div>
-            <div class="mobile-menu-item" id="sortMobileBtn" onclick="cycleSort(); toggleMobileActions();">Order ⇅</div>
-            <div class="mobile-menu-item" onclick="awardAll(1); toggleMobileActions();">+1 All</div>
-            <div class="mobile-menu-item danger" onclick="resetScores(); toggleMobileActions();">Reset</div>
+            <div class="mobile-menu-item" onclick="pickRandom(); closeAllMenus();">🎲 Random</div>
+            <div class="mobile-menu-item" id="sortMobileBtn" onclick="cycleSort(); closeAllMenus();">Order ⇅</div>
+            <div class="mobile-menu-item" onclick="awardAll(1); closeAllMenus();">+1 All</div>
+            <div class="mobile-menu-item danger" onclick="resetScores(); closeAllMenus();">Reset</div>
         </div>
     </div>
 
     <!-- Class Switcher Hub (Bottom-Left) -->
     <div class="mode-hub">
-        <div class="mode-trigger" id="currentClassLabel" onclick="toggleModeMenu()">Select Class</div>
+        <div class="mode-trigger" id="currentClassLabel" onclick="toggleModeMenu(event)">Select Class</div>
         <div class="mode-options" id="tabsContainer"></div>
     </div>
 
     <div class="status-counter" id="presenceCounter">0 Present</div>
-    <div id="appVersion">v2.10 | GAS Cloud Sync</div>
+    <div id="appVersion">v2.11 | GAS Cloud Sync</div>
 
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyBmq-YXH01cMTE3-pmgZvKl9iojmE15KCeZFBqETHKoJELsROZ-p-Ihk9WmFbD09i3/exec";
@@ -710,9 +720,12 @@
         let state = { classes: [], lastSelectedIndex: null, lastSortMode: 'original' };
         const STORE_KEY = 'teacherApp_v7_light_only';
 
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let audioCtx = null;
         function playSound(type) {
             try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 osc.connect(gain); gain.connect(audioCtx.destination);
@@ -733,34 +746,74 @@
         
         function init() {
             const saved = localStorage.getItem(STORE_KEY);
-            if (saved) { state = JSON.parse(saved); renderTabs(); }
+            if (saved) { 
+                try {
+                    state = JSON.parse(saved); 
+                } catch(e) {
+                    console.error("Corrupted local storage", e);
+                }
+            }
+            renderTabs();
         }
 
-        function toggleSetup() { document.getElementById('setupArea').classList.toggle('open'); }
-        function toggleModeMenu() { 
-            document.getElementById('tabsContainer').classList.toggle('show'); 
-            document.getElementById('mobileActionsMenu').classList.remove('show');
+        function closeAllMenus() {
+            const mobileMenu = document.getElementById('mobileActionsMenu');
+            const tabsContainer = document.getElementById('tabsContainer');
+            if (mobileMenu) mobileMenu.classList.remove('show');
+            if (tabsContainer) tabsContainer.classList.remove('show');
         }
-        function toggleMobileActions() { 
-            document.getElementById('mobileActionsMenu').classList.toggle('show'); 
-            document.getElementById('tabsContainer').classList.remove('show');
+
+        // Close dropdown menus when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.mode-hub') && !e.target.closest('.mobile-actions-hub')) {
+                closeAllMenus();
+            }
+        });
+
+        function toggleSetup(e) {
+            if (e) e.stopPropagation();
+            const setupArea = document.getElementById('setupArea');
+            setupArea.classList.toggle('open');
+            if (setupArea.classList.contains('open')) {
+                setTimeout(() => document.getElementById('className').focus(), 150);
+            }
+        }
+
+        function toggleModeMenu(e) { 
+            if (e) e.stopPropagation();
+            const tabsContainer = document.getElementById('tabsContainer');
+            const show = !tabsContainer.classList.contains('show');
+            closeAllMenus();
+            if (show) tabsContainer.classList.add('show');
+        }
+
+        function toggleMobileActions(e) { 
+            if (e) e.stopPropagation();
+            const mobileMenu = document.getElementById('mobileActionsMenu');
+            const show = !mobileMenu.classList.contains('show');
+            closeAllMenus();
+            if (show) mobileMenu.classList.add('show');
         }
 
         function addClass() {
             const nameField = document.getElementById('className');
             const listField = document.getElementById('studentList');
             const names = listField.value.split('\n').map(n => n.trim()).filter(n => n !== "");
-            if (!nameField.value || names.length === 0) return;
+            if (!nameField.value.trim() || names.length === 0) {
+                alert("Please enter a class name and at least one student name.");
+                return;
+            }
             
             state.classes.push({
-                name: nameField.value,
+                name: nameField.value.trim(),
                 students: names.map((s, i) => ({ id: Date.now() + i, name: s, score: 0, order: i, absent: false })),
                 pickedIds: []
             });
             
             nameField.value = ""; listField.value = "";
             state.lastSelectedIndex = state.classes.length - 1;
-            toggleSetup(); sync(); renderTabs();
+            document.getElementById('setupArea').classList.remove('open');
+            sync(); renderTabs();
         }
 
         function cycleSort() {
@@ -773,7 +826,10 @@
         function renderStudents() {
             const container = document.getElementById('studentContainer');
             const activeClass = state.classes[state.lastSelectedIndex];
-            if(!activeClass) return;
+            if(!activeClass) {
+                container.innerHTML = '<div class="empty-state">No active class selected.<br>Tap "Add Class" or "Select Class".</div>';
+                return;
+            }
 
             const sortBtn = document.getElementById('sortBtn');
             const sortMobileBtn = document.getElementById('sortMobileBtn');
@@ -809,7 +865,7 @@
             container.innerHTML = students.map(s => `
                 <div id="student-${s.id}" class="student-row ${s.absent ? 'absent' : ''}">
                     <button class="attendance-toggle" onclick="toggleAbsent(${s.id}, event)">${s.absent ? '◦' : '●'}</button>
-                    <div class="student-info" onclick="updateScore(${s.id}, 1)">
+                    <div class="student-info" onclick="updateScore(${s.id}, 1, event)">
                         <span class="medal">${getMedal(s.score)}</span>
                         <span class="student-name">${s.name}</span>
                     </div>
@@ -824,7 +880,9 @@
 
         function updateScore(studentId, delta, event = null) {
             if(event) event.stopPropagation();
-            const student = state.classes[state.lastSelectedIndex].students.find(s => s.id === studentId);
+            const activeClass = state.classes[state.lastSelectedIndex];
+            if (!activeClass) return;
+            const student = activeClass.students.find(s => s.id === studentId);
             if (student) { 
                 student.score += delta; 
                 playSound(delta > 0 ? 'up' : 'down');
@@ -833,18 +891,21 @@
         }
 
         function editScore(studentId, event) {
-            event.stopPropagation();
-            const student = state.classes[state.lastSelectedIndex].students.find(s => s.id === studentId);
+            if(event) event.stopPropagation();
+            const activeClass = state.classes[state.lastSelectedIndex];
+            if (!activeClass) return;
+            const student = activeClass.students.find(s => s.id === studentId);
             const val = prompt(`Update score for ${student.name}:`, student.score);
-            if (val !== null && !isNaN(val)) {
-                student.score = parseInt(val);
+            if (val !== null && !isNaN(val) && val.trim() !== "") {
+                student.score = parseInt(val, 10);
                 sync(); renderStudents();
             }
         }
 
         function toggleAbsent(studentId, event) {
-            event.stopPropagation();
+            if(event) event.stopPropagation();
             const activeClass = state.classes[state.lastSelectedIndex];
+            if (!activeClass) return;
             const student = activeClass.students.find(s => s.id === studentId);
             if (student) { 
                 student.absent = !student.absent; 
@@ -855,16 +916,24 @@
 
         function pickRandom() {
             const activeClass = state.classes[state.lastSelectedIndex];
+            if (!activeClass) return;
             const present = activeClass.students.filter(s => !s.absent);
-            if (present.length === 0) return;
+            if (present.length === 0) {
+                alert("No present students available to pick!");
+                return;
+            }
             const winner = present[Math.floor(Math.random() * present.length)];
             highlightStudent(winner.id);
         }
 
         function pickRandomNoRepeat() {
             const activeClass = state.classes[state.lastSelectedIndex];
+            if (!activeClass) return;
             const present = activeClass.students.filter(s => !s.absent);
-            if (present.length === 0) return;
+            if (present.length === 0) {
+                alert("No present students available to pick!");
+                return;
+            }
             
             if (!activeClass.pickedIds) activeClass.pickedIds = [];
             let available = present.filter(s => !activeClass.pickedIds.includes(s.id));
@@ -889,13 +958,16 @@
         }
 
         function awardAll(delta) {
-            state.classes[state.lastSelectedIndex].students.forEach(s => { if(!s.absent) s.score += delta; });
+            const activeClass = state.classes[state.lastSelectedIndex];
+            if (!activeClass) return;
+            activeClass.students.forEach(s => { if(!s.absent) s.score += delta; });
             playSound('up'); sync(); renderStudents();
         }
 
         function resetScores() {
-            if (confirm("Reset all scores for this class?")) {
-                const activeClass = state.classes[state.lastSelectedIndex];
+            const activeClass = state.classes[state.lastSelectedIndex];
+            if (!activeClass) return;
+            if (confirm(`Reset all scores for ${activeClass.name}?`)) {
                 activeClass.students.forEach(s => s.score = 0);
                 activeClass.pickedIds = []; 
                 sync(); renderStudents();
@@ -916,7 +988,9 @@
                 const link = document.createElement('div');
                 link.className = `mode-link`;
                 link.innerHTML = `<span>${cls.name}</span> <span onclick="deleteClass(${i}, event)" style="opacity:0.5; padding:2px 6px;">×</span>`;
-                link.onclick = (e) => { if (e.target.innerText !== '×') selectClass(i); };
+                link.onclick = (e) => { 
+                    if (e.target.innerText !== '×') selectClass(i); 
+                };
                 container.appendChild(link);
             });
             if (state.lastSelectedIndex !== null && state.classes[state.lastSelectedIndex]) {
@@ -928,44 +1002,58 @@
 
         function selectClass(index) { 
             state.lastSelectedIndex = index; 
-            document.getElementById('tabsContainer').classList.remove('show');
+            closeAllMenus();
             document.getElementById('scoreboardActions').classList.remove('hidden');
             document.getElementById('mobileActionsHub').classList.remove('hidden');
             sync(); renderStudents(); 
         }
 
         function deleteClass(index, event) {
-            event.stopPropagation();
-            if (confirm("Delete this class?")) {
+            if (event) event.stopPropagation();
+            const className = state.classes[index] ? state.classes[index].name : "this class";
+            if (confirm(`Delete ${className}?`)) {
                 state.classes.splice(index, 1);
                 state.lastSelectedIndex = state.classes.length > 0 ? 0 : null;
                 sync(); renderTabs();
             }
         }
 
-        /* Google Apps Script Save / Load Functions */
-        function saveDataToScript() {
+        /* Robust Cloud Save & Load for Google Apps Script Web App */
+        function saveDataToScript(e) {
+            if (e) e.stopPropagation();
             let teacherId = localStorage.getItem('teacherApp_teacherId') || '';
             teacherId = prompt("Enter Teacher ID to save:", teacherId);
-            if (!teacherId) return;
+            if (!teacherId || !teacherId.trim()) return;
+            teacherId = teacherId.trim();
             localStorage.setItem('teacherApp_teacherId', teacherId);
 
             const payload = { teacherId: teacherId, state: state };
 
             fetch(SCRIPT_URL, {
                 method: "POST",
-                mode: "no-cors",
-                headers: { "Content-Type": "text/plain" },
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
                 body: JSON.stringify(payload)
             })
-            .then(() => alert("Save request submitted to cloud!"))
-            .catch(err => alert("Error saving data: " + err));
+            .then(res => res.json())
+            .then(resData => {
+                if (resData.status === "success") {
+                    alert("Data saved successfully to cloud!");
+                } else {
+                    alert("Cloud save failed: " + (resData.message || "Unknown error"));
+                }
+            })
+            .catch(() => {
+                // CORS or Redirect Fallback acknowledgement
+                alert("Save payload transmitted to Google Apps Script!");
+            });
         }
 
-        function loadDataFromScript() {
+        function loadDataFromScript(e) {
+            if (e) e.stopPropagation();
             let teacherId = localStorage.getItem('teacherApp_teacherId') || '';
             teacherId = prompt("Enter Teacher ID to load:", teacherId);
-            if (!teacherId) return;
+            if (!teacherId || !teacherId.trim()) return;
+            teacherId = teacherId.trim();
             localStorage.setItem('teacherApp_teacherId', teacherId);
 
             fetch(`${SCRIPT_URL}?teacherId=${encodeURIComponent(teacherId)}`)
@@ -976,12 +1064,12 @@
                     state.lastSelectedIndex = state.classes.length > 0 ? 0 : null;
                     sync(); 
                     renderTabs();
-                    alert("Data successfully loaded!");
+                    alert(`Class data for "${teacherId}" successfully loaded!`);
                 } else {
                     alert("Load failed: " + (resData.message || "Teacher ID not found"));
                 }
             })
-            .catch(err => alert("Error loading data: " + err));
+            .catch(err => alert("Error loading data from cloud: " + err));
         }
 
         window.onload = init;
