@@ -622,7 +622,7 @@
     <header>
         <h1>Scoreboard</h1>
         <nav class="top-nav">
-            <button class="glass-btn" id="addClassBtn" onclick="toggleSetup(event)">Add Class</button>
+            <button class="glass-btn" id="addClassBtn" onclick="toggleSetup(event)">New</button>
             <button class="glass-btn" onclick="saveDataToScript(event)">Save</button>
             <button class="glass-btn" onclick="loadDataFromScript(event)">Load</button>
         </nav>
@@ -839,7 +839,7 @@
             const container = document.getElementById('studentContainer');
             const activeClass = state.classes[state.lastSelectedIndex];
             if(!activeClass) {
-                container.innerHTML = '<div class="empty-state">No active class selected.<br>Tap "Add Class" or "Select Class".</div>';
+                container.innerHTML = '<div class="empty-state">No active class selected.<br>Tap "New" or "Select Class".</div>';
                 return;
             }
 
@@ -990,7 +990,7 @@
             const container = document.getElementById('tabsContainer');
             container.innerHTML = "";
             if (state.classes.length === 0) {
-                document.getElementById('studentContainer').innerHTML = '<div class="empty-state">No classes found.<br>Tap "Add Class" in the top bar to start.</div>';
+                document.getElementById('studentContainer').innerHTML = '<div class="empty-state">No classes found.<br>Tap "New" in the top bar to start.</div>';
                 document.getElementById('scoreboardActions').classList.add('hidden');
                 document.getElementById('mobileActionsHub').classList.add('hidden');
                 document.getElementById('currentClassLabel').innerText = "No Classes";
