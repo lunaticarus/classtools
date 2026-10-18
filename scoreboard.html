@@ -339,10 +339,81 @@
             transform: scale(0.92) translateZ(0);
         }
 
-        /* Bottom Floating Dock Bar */
+        /* 1. Class Switcher Hub */
+        .mode-hub {
+            position: fixed; 
+            bottom: 20px; 
+            left: 24px;
+            z-index: 1100;
+        }
+
+        .mode-trigger {
+            background: var(--glass-bg-primary);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            transform: translateZ(0);
+            padding: 8px 16px;
+            height: 38px;
+            display: inline-flex;
+            align-items: center;
+            border-radius: var(--radius-full);
+            border: 1px solid var(--glass-border-light);
+            box-shadow: var(--glass-shadow-sm);
+            font-weight: 600;
+            color: var(--text-main);
+            cursor: pointer;
+            font-size: 13.5px;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .mode-trigger:hover {
+            background: var(--glass-bg-hover);
+            border-color: var(--glass-border-strong);
+        }
+
+        .mode-options {
+            display: none;
+            position: absolute;
+            bottom: 46px;
+            left: 0;
+            flex-direction: column;
+            background: rgba(20, 20, 30, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transform: translateZ(0);
+            padding: 8px;
+            border-radius: var(--radius-container);
+            border: 1px solid var(--glass-border-light);
+            box-shadow: var(--glass-shadow);
+            min-width: 180px;
+            gap: 4px;
+        }
+
+        .mode-options.show { display: flex; }
+
+        .mode-link {
+            font-size: 13.5px;
+            font-weight: 600;
+            color: var(--text-main);
+            padding: 10px 14px;
+            border-radius: var(--radius-element);
+            cursor: pointer;
+            transition: background 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+
+        .mode-link:hover {
+            background: var(--glass-bg-hover);
+        }
+
+        /* 2. Desktop Floating Dock & Mobile Hub */
         .bottom-dock {
             position: fixed;
-            bottom: 24px;
+            bottom: 20px;
             left: 50%;
             transform: translateX(-50%) translateZ(0);
             z-index: 1000;
@@ -352,7 +423,8 @@
             background: var(--glass-bg-primary);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            padding: 8px 14px;
+            padding: 4px 12px;
+            height: 38px;
             border-radius: var(--radius-full);
             border: 1px solid var(--glass-border-light);
             box-shadow: var(--glass-shadow);
@@ -362,7 +434,7 @@
             background: transparent;
             color: var(--text-main);
             border: 1px solid transparent;
-            padding: 8px 14px;
+            padding: 6px 12px;
             border-radius: var(--radius-full);
             font-weight: 600;
             font-size: 13px;
@@ -396,16 +468,15 @@
 
         .dock-divider {
             width: 1px;
-            height: 20px;
+            height: 18px;
             background: var(--glass-border-light);
             margin: 0 2px;
         }
 
-        /* Mobile Actions Hub */
         .mobile-actions-hub {
             display: none;
             position: fixed;
-            bottom: 24px;
+            bottom: 20px;
             left: 50%;
             transform: translateX(-50%) translateZ(0);
             z-index: 1050;
@@ -415,10 +486,13 @@
             background: var(--glass-bg-primary);
             color: var(--text-main);
             border: 1px solid var(--glass-border-light);
-            padding: 10px 20px;
+            padding: 8px 18px;
+            height: 38px;
+            display: inline-flex;
+            align-items: center;
             border-radius: var(--radius-full);
             font-weight: 600;
-            font-size: 14px;
+            font-size: 13.5px;
             cursor: pointer;
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
@@ -429,7 +503,7 @@
         .mobile-actions-menu {
             display: none;
             position: absolute;
-            bottom: 50px;
+            bottom: 46px;
             left: 50%;
             transform: translateX(-50%) translateZ(0);
             flex-direction: column;
@@ -473,85 +547,21 @@
             background: rgba(255, 69, 58, 0.22);
         }
 
-        /* Class Switcher Hub */
-        .mode-hub {
-            position: fixed; 
-            bottom: 24px; 
-            left: 24px;
-            z-index: 1100;
-        }
-
-        .mode-trigger {
-            background: var(--glass-bg-primary);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            transform: translateZ(0);
-            padding: 10px 18px;
-            border-radius: var(--radius-full);
-            border: 1px solid var(--glass-border-light);
-            box-shadow: var(--glass-shadow-sm);
-            font-weight: 600;
-            color: var(--text-main);
-            cursor: pointer;
-            font-size: 13.5px;
-            transition: all 0.2s ease;
-            user-select: none;
-        }
-
-        .mode-trigger:hover {
-            background: var(--glass-bg-hover);
-            border-color: var(--glass-border-strong);
-        }
-
-        .mode-options {
-            display: none;
-            position: absolute;
-            bottom: 50px;
-            left: 0;
-            flex-direction: column;
-            background: rgba(20, 20, 30, 0.75);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            transform: translateZ(0);
-            padding: 8px;
-            border-radius: var(--radius-container);
-            border: 1px solid var(--glass-border-light);
-            box-shadow: var(--glass-shadow);
-            min-width: 180px;
-            gap: 4px;
-        }
-
-        .mode-options.show { display: flex; }
-
-        .mode-link {
-            font-size: 13.5px;
-            font-weight: 600;
-            color: var(--text-main);
-            padding: 10px 14px;
-            border-radius: var(--radius-element);
-            cursor: pointer;
-            transition: background 0.2s ease;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            user-select: none;
-        }
-
-        .mode-link:hover {
-            background: var(--glass-bg-hover);
-        }
-
+        /* 3. Present Counter Status Pill */
         .status-counter {
             position: fixed; 
-            bottom: 28px; 
+            bottom: 20px; 
             right: 24px;
+            height: 38px;
+            display: inline-flex;
+            align-items: center;
             font-weight: 600; 
             color: var(--text-sub); 
             font-size: 13px;
             z-index: 900; 
             pointer-events: none;
             background: var(--glass-bg-primary);
-            padding: 6px 14px; 
+            padding: 8px 16px; 
             border-radius: var(--radius-full);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
@@ -581,7 +591,7 @@
         #appVersion { 
             position: fixed; 
             right: 12px; 
-            bottom: 6px; 
+            bottom: 4px; 
             font-size: 10px; 
             font-weight: 500; 
             color: var(--text-muted); 
@@ -593,8 +603,11 @@
             body { padding-left: 12px; padding-right: 12px; padding-top: 90px; }
             header { width: calc(100% - 24px); padding: 0 14px; top: 12px; }
             header h1 { font-size: 18px; }
-            .mode-hub { left: 16px; bottom: 20px; }
-            .status-counter { right: 16px; bottom: 22px; }
+            
+            .mode-hub { left: 12px; bottom: 16px; }
+            .mobile-actions-hub { bottom: 16px; }
+            .status-counter { right: 12px; bottom: 16px; }
+            
             .bottom-dock { display: none !important; }
             .mobile-actions-hub { display: block; }
         }
@@ -661,7 +674,7 @@
     </div>
 
     <div class="status-counter" id="presenceCounter">0 Present</div>
-    <div id="appVersion">v2.11 | GAS Cloud Sync</div>
+    <div id="appVersion">v3.3 | Liquid Glass</div>
 
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyBmq-YXH01cMTE3-pmgZvKl9iojmE15KCeZFBqETHKoJELsROZ-p-Ihk9WmFbD09i3/exec";
@@ -763,7 +776,6 @@
             if (tabsContainer) tabsContainer.classList.remove('show');
         }
 
-        // Close dropdown menus when clicking outside
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.mode-hub') && !e.target.closest('.mobile-actions-hub')) {
                 closeAllMenus();
@@ -1043,7 +1055,6 @@
                 }
             })
             .catch(() => {
-                // CORS or Redirect Fallback acknowledgement
                 alert("Save payload transmitted to Google Apps Script!");
             });
         }
