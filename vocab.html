@@ -5,44 +5,71 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Vocab</title>
     <style>
+        /* Liquid Glass Design System Tokens */
         :root {
-            --system-blue: #007aff;
-            --system-green: #34c759;
-            --system-red: #ff3b30;
-            --system-gray-bg: #f5f5f7;
-            --system-card-bg: rgba(255, 255, 255, 0.72);
-            --system-btn-grey: rgba(0, 0, 0, 0.05);
-            --system-btn-active: rgba(0, 0, 0, 0.12);
-            --text-primary: #1d1d1f;
-            --text-secondary: #6e6e73;
-            --text-tertiary: #86868b;
-            --radius: 22px;
-
-            /* Liquid Glass Shaders & Specular Variables */
-            --glass-bg: rgba(255, 255, 255, 0.58);
-            --glass-border: rgba(255, 255, 255, 0.65);
-            --glass-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.8), inset 0 -1px 2px rgba(0, 0, 0, 0.05);
-            --glass-shine: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0) 100%);
+            /* High Transparency Glass Fills */
+            --glass-bg-primary: rgba(255, 255, 255, 0.08);
+            --glass-bg-card: rgba(255, 255, 255, 0.06);
+            --glass-bg-hover: rgba(255, 255, 255, 0.18);
+            --glass-bg-input: rgba(255, 255, 255, 0.12);
+            
+            /* Glass Border Highlights */
+            --glass-border-light: rgba(255, 255, 255, 0.18);
+            --glass-border-strong: rgba(255, 255, 255, 0.3);
+            
+            /* Depth Shadows */
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            --glass-shadow-sm: 0 4px 16px 0 rgba(0, 0, 0, 0.25);
+            
+            /* Typography & System Colors */
+            --text-main: #ffffff;
+            --text-sub: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.65);
+            --accent-blue: #0a84ff;
+            --accent-green: #30d158;
+            --accent-red: #ff453a;
+            
+            /* System Border Radius */
+            --radius-container: 20px;
+            --radius-element: 12px;
+            --radius-full: 9999px;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+        }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", sans-serif;
-            background-color: #f0f1f5;
-            color: var(--text-primary);
-            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #1f1c2c;
+            color: var(--text-main);
+            min-height: 100vh;
             padding: 100px 20px 120px 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-height: 100vh;
-            -webkit-font-smoothing: antialiased;
             overflow-x: hidden;
             position: relative;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* Ambient Liquid Mesh Canvas */
+        /* Fixed Mobile Safari Compatibility Background */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #1f1c2c 0%, #928dab 50%, #2c3e50 100%);
+            z-index: -2;
+            pointer-events: none;
+            transform: translateZ(0);
+        }
+
+        /* Ambient Dynamic Background Canvas */
         #liquidCanvas {
             position: fixed;
             top: 0;
@@ -52,310 +79,550 @@
             z-index: -1;
             pointer-events: none;
             filter: blur(40px);
-            opacity: 0.85;
+            opacity: 0.75;
+            transform: translateZ(0);
         }
 
-        /* Glassmorphic Header */
+        /* Glass Header Container */
         header {
             position: fixed;
-            top: 16px; 
+            top: 16px;
             left: 50%;
-            transform: translateX(-50%);
+            transform: translateX(-50%) translateZ(0);
             width: calc(100% - 32px);
             max-width: 760px;
             height: 64px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(28px) saturate(190%);
-            -webkit-backdrop-filter: blur(28px) saturate(190%);
+            background: var(--glass-bg-primary);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid var(--glass-border-light);
+            border-radius: var(--radius-container);
+            box-shadow: var(--glass-shadow-sm);
             z-index: 900;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 24px;
-            border-radius: 20px;
-            border: 1px solid var(--glass-border);
-            box-shadow: var(--glass-shadow);
-            transition: all 0.3s ease;
+            padding: 0 20px;
         }
 
-        h1 { 
-            font-weight: 700; 
-            font-size: 22px; 
-            margin: 0; 
-            letter-spacing: -0.5px;
-            background: linear-gradient(135deg, #1d1d1f 0%, #434345 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        h1 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-main);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            letter-spacing: -0.3px;
         }
 
-        .top-nav { display: flex; gap: 8px; align-items: center; }
+        .top-nav { 
+            display: flex; 
+            gap: 8px; 
+            align-items: center; 
+        }
 
-        .minimal-btn {
-            background: rgba(255, 255, 255, 0.4); 
-            border: 1px solid rgba(255, 255, 255, 0.6); 
-            color: var(--text-primary);
-            font-size: 13px; 
-            font-weight: 600; 
-            cursor: pointer; 
+        /* Glass Button Components */
+        .glass-btn {
+            background: var(--glass-bg-primary);
+            border: 1px solid var(--glass-border-light);
+            color: var(--text-main);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
             padding: 8px 14px;
-            border-radius: 12px; 
-            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.03), inset 0 1px 1px rgba(255,255,255,0.7);
-        }
-        .minimal-btn:hover { 
-            background: rgba(255, 255, 255, 0.75); 
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.06), inset 0 1px 1px rgba(255,255,255,0.9);
-        }
-        .minimal-btn:active { transform: scale(0.96); }
-
-        .footer-blur-bar {
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            height: 90px;
-            background: linear-gradient(to top, rgba(245, 245, 247, 0.75), transparent);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            z-index: 850;
-            pointer-events: none;
-            mask-image: linear-gradient(to top, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
-            -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
+            border-radius: var(--radius-element);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            transform: translateZ(0);
+            transition: all 0.2s ease;
+            outline: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            user-select: none;
         }
 
-        /* Action Modal (For Loading) */
-        #modalOverlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.25); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            z-index: 2000; align-items: center; justify-content: center;
-        }
-        .action-modal {
-            background: rgba(255, 255, 255, 0.82); 
-            backdrop-filter: blur(32px) saturate(200%);
-            -webkit-backdrop-filter: blur(32px) saturate(200%);
-            padding: 30px; border-radius: var(--radius); text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            box-shadow: 0 24px 60px rgba(0,0,0,0.18), inset 0 1px 2px rgba(255,255,255,0.9); 
-            width: 320px; animation: modalPop 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .action-modal p { font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 20px; }
-        .modal-actions { display: flex; flex-direction: column; gap: 10px; width: 100%; }
-        
-        .modal-input {
-            width: 100%; padding: 14px 16px; border-radius: 14px; border: 1px solid rgba(0,0,0,0.1);
-            margin-bottom: 16px; font-size: 15px; font-weight: 600; text-align: center;
-            background: rgba(255,255,255,0.6); outline: none; transition: all 0.2s;
-            text-transform: uppercase; letter-spacing: 1px; box-sizing: border-box;
-        }
-        .modal-input:focus { border-color: var(--system-blue); background: rgba(255,255,255,0.95); box-shadow: 0 0 0 3px rgba(0,122,255,0.15); }
-
-        .recent-item {
-            padding: 12px 14px; background: rgba(0,0,0,0.04); margin-bottom: 6px; 
-            border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 14px;
-            transition: all 0.2s; border: 1px solid transparent;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .recent-item:hover { background: rgba(0, 122, 255, 0.1); border-color: rgba(0, 122, 255, 0.2); color: var(--system-blue); }
-
-        @keyframes modalPop {
-            from { opacity: 0; transform: scale(0.92) translateY(10px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
+        .glass-btn:hover {
+            background: var(--glass-bg-hover);
+            border-color: var(--glass-border-strong);
         }
 
-        /* Floating Liquid Mode Hub */
-        .mode-hub {
-            position: fixed; bottom: 24px; left: 24px;
-            display: flex; flex-direction: column-reverse; align-items: flex-start; z-index: 1000;
-        }
-        .mode-trigger {
-            background: var(--glass-bg); 
-            backdrop-filter: blur(24px) saturate(180%); 
-            -webkit-backdrop-filter: blur(24px) saturate(180%);
-            padding: 10px 20px; border-radius: 22px; 
-            border: 1px solid var(--glass-border);
-            box-shadow: var(--glass-shadow); font-weight: 600; color: var(--text-primary);
-            cursor: pointer; font-size: 14px; user-select: none; 
-            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .mode-trigger:hover { background: rgba(255, 255, 255, 0.8); transform: translateY(-2px); }
-        .mode-trigger:active { transform: scale(0.95); }
-        
-        .mode-options {
-            display: none; flex-direction: column; 
-            background: rgba(255, 255, 255, 0.78);
-            backdrop-filter: blur(30px) saturate(190%); 
-            -webkit-backdrop-filter: blur(30px) saturate(190%);
-            padding: 8px; border-radius: 20px; 
-            border: 1px solid rgba(255,255,255,0.8);
-            box-shadow: 0 16px 40px rgba(0,0,0,0.12), inset 0 1px 1px rgba(255,255,255,0.8); 
-            margin-bottom: 12px; min-width: 180px; gap: 4px;
-        }
-        .mode-options.show { display: flex; animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
-        .mode-link {
-            font-size: 13.5px; font-weight: 600; color: var(--text-primary);
-            cursor: pointer; padding: 10px 14px; border-radius: 12px; transition: 0.18s ease;
-        }
-        .mode-link:hover { background: var(--system-blue); color: white; }
-
-        .status-counter {
-            position: fixed; bottom: 28px; right: 24px;
-            font-weight: 600; color: var(--text-secondary); font-size: 13px;
-            z-index: 900; pointer-events: none;
-            background: rgba(255, 255, 255, 0.4);
-            padding: 6px 14px; border-radius: 20px;
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+        .glass-btn:active {
+            transform: scale(0.96) translateZ(0);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
-        .container { width: 100%; max-width: 620px; display: none; animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .glass-btn.btn-full {
+            width: 100%;
+            padding: 12px;
+            font-size: 15px;
+            border-radius: var(--radius-element);
+        }
+
+        .glass-btn.primary {
+            background: rgba(10, 132, 255, 0.25);
+            border-color: rgba(10, 132, 255, 0.4);
+            color: #ffffff;
+        }
+
+        .glass-btn.primary:hover {
+            background: rgba(10, 132, 255, 0.4);
+            border-color: rgba(10, 132, 255, 0.6);
+        }
+
+        /* Main Container Views */
+        .container {
+            width: 100%;
+            max-width: 620px;
+            display: none;
+            animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
         .container.active { display: block; }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(12px); }
+            from { opacity: 0; transform: translateY(8px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* Edit Mode Row Cards */
         .vocab-row {
-            display: grid; grid-template-columns: 44px 1fr 1fr 44px; align-items: center;
-            background: var(--glass-bg); 
-            backdrop-filter: blur(20px) saturate(160%);
-            -webkit-backdrop-filter: blur(20px) saturate(160%);
-            margin-bottom: 12px; border-radius: 18px;
-            border: 1px solid var(--glass-border);
-            box-shadow: 0 8px 24px -6px rgba(0,0,0,0.04), inset 0 1px 1px rgba(255, 255, 255, 0.7); 
-            overflow: hidden;
-            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+            display: grid;
+            grid-template-columns: 36px 1fr 1fr 36px;
+            align-items: center;
+            background: var(--glass-bg-card);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            transform: translateZ(0);
+            margin-bottom: 10px;
+            border-radius: var(--radius-element);
+            border: 1px solid var(--glass-border-light);
+            box-shadow: var(--glass-shadow-sm);
+            padding: 4px 8px;
+            transition: all 0.25s ease;
         }
+
         .vocab-row:focus-within {
-            border-color: rgba(0, 122, 255, 0.4);
-            box-shadow: 0 10px 30px -4px rgba(0, 122, 255, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.9);
-            transform: translateY(-1px);
+            border-color: var(--glass-border-strong);
+            background: var(--glass-bg-hover);
+            box-shadow: 0 0 16px rgba(255, 255, 255, 0.15);
         }
+
         textarea {
-            padding: 16px 12px; border: none; font-size: 15px; outline: none;
-            background: transparent; color: var(--text-primary); font-family: inherit;
-            resize: none; overflow: hidden; line-height: 1.4; width: 100%; box-sizing: border-box;
+            width: 100%;
+            padding: 12px;
+            border: none;
+            background: transparent;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 14.5px;
+            font-weight: 500;
+            outline: none;
+            resize: none;
+            overflow: hidden;
+            line-height: 1.4;
+        }
+
+        textarea::placeholder { color: var(--text-muted); }
+
+        .zh-input {
+            border-left: 1px solid var(--glass-border-light);
+            color: var(--text-sub);
+        }
+
+        .icon-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: all 0.2s ease;
+            background: transparent;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-full);
+        }
+
+        .icon-btn:hover { color: var(--text-main); background: var(--glass-bg-hover); }
+        .audio-btn:hover { color: var(--accent-blue); }
+        .del-btn:hover { color: var(--accent-red); }
+
+        /* Flashcard Mode Component */
+        .card-scene {
+            width: 100%;
+            height: 320px;
+            perspective: 1200px;
+            margin: 10px auto 0 auto;
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+
+        .card-inner.is-flipped { transform: rotateY(180deg); }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-container);
+            background: var(--glass-bg-card);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border-light);
+            box-shadow: var(--glass-shadow);
+            padding: 30px;
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: -0.5px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+            color: var(--text-sub);
+        }
+
+        .card-audio-trigger {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            color: var(--text-muted);
+            padding: 8px;
+            border-radius: var(--radius-full);
+            background: var(--glass-bg-primary);
+            border: 1px solid var(--glass-border-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .card-audio-trigger:hover {
+            color: var(--accent-blue);
+            background: var(--glass-bg-hover);
+            transform: scale(1.1);
+        }
+
+        .card-controls {
+            margin-top: 24px;
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .shuffle-label {
+            font-size: 13.5px;
+            font-weight: 600;
+            color: var(--text-sub);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            user-select: none;
+        }
+
+        input[type="checkbox"] {
+            accent-color: var(--accent-blue);
+            cursor: pointer;
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Spell Mode Component */
+        .spell-row {
+            background: var(--glass-bg-card);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            padding: 12px 16px;
+            border-radius: var(--radius-element);
+            border: 1px solid var(--glass-border-light);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: var(--glass-shadow-sm);
+        }
+
+        .spell-translation {
+            width: 35%;
+            font-size: 14.5px;
+            font-weight: 600;
+            color: var(--text-sub);
+        }
+
+        .spell-input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid var(--glass-border-light);
+            border-radius: var(--radius-element);
+            outline: none;
+            font-family: inherit;
+            font-size: 14px;
+            background: var(--glass-bg-input);
+            color: var(--text-main);
+            transition: all 0.2s ease;
             font-weight: 500;
         }
-        .zh-input { border-left: 1px solid rgba(0,0,0,0.05); color: var(--text-secondary); }
 
-        .card-scene { width: 100%; height: 340px; perspective: 1200px; margin: 10px auto 0 auto; }
-        .card-inner {
-            position: relative; width: 100%; height: 100%; text-align: center;
-            transition: transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
-            transform-style: preserve-3d; cursor: pointer;
+        .spell-input:focus {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: var(--glass-border-strong);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
         }
-        .card-inner.is-flipped { transform: rotateY(180deg); }
-        .card-face {
-            position: absolute; width: 100%; height: 100%;
-            -webkit-backface-visibility: hidden; backface-visibility: hidden;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            border-radius: var(--radius); 
-            background: rgba(255, 255, 255, 0.68);
-            backdrop-filter: blur(36px) saturate(200%);
-            -webkit-backdrop-filter: blur(36px) saturate(200%);
-            border: 1px solid rgba(255, 255, 255, 0.85);
-            box-shadow: 0 20px 50px -10px rgba(0,0,0,0.1), inset 0 1px 2px rgba(255,255,255,0.9), inset 0 -2px 4px rgba(0,0,0,0.03); 
-            padding: 40px; box-sizing: border-box;
-            font-size: 34px; font-weight: 700; color: var(--text-primary);
-            letter-spacing: -0.5px;
-        }
-        .card-face::before {
-            content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            border-radius: var(--radius); background: var(--glass-shine); pointer-events: none;
-        }
-        .card-back { transform: rotateY(180deg); color: var(--text-secondary); }
-        .card-audio-trigger {
-            position: absolute; top: 20px; right: 20px; color: var(--text-tertiary);
-            transition: all 0.2s; padding: 10px; z-index: 10;
-            background: rgba(255,255,255,0.4); border-radius: 50%;
-            backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.6);
-            display: flex; align-items: center; justify-content: center;
-        }
-        .card-audio-trigger:hover { color: var(--system-blue); transform: scale(1.08); background: rgba(255,255,255,0.8); }
 
-        .card-controls { margin-top: 30px; display: flex; justify-content: center; gap: 20px; align-items: center; }
-        .shuffle-label { font-size: 13.5px; font-weight: 600; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; gap: 8px; user-select: none; }
-        input[type="checkbox"] { accent-color: var(--system-blue); cursor: pointer; width: 18px; height: 18px; }
-
-        .spell-row {
-            background: var(--glass-bg); 
-            backdrop-filter: blur(20px) saturate(160%);
-            -webkit-backdrop-filter: blur(20px) saturate(160%);
-            padding: 14px 20px; border-radius: 18px;
-            border: 1px solid var(--glass-border);
-            margin-bottom: 12px; display: flex; align-items: center; gap: 15px;
-            box-shadow: 0 6px 20px -4px rgba(0,0,0,0.03), inset 0 1px 1px rgba(255,255,255,0.7);
+        .spell-input.wrong {
+            border-color: var(--accent-red);
+            color: var(--accent-red);
+            background: rgba(255, 69, 58, 0.15);
         }
-        .spell-translation { width: 35%; font-size: 15px; font-weight: 600; color: var(--text-secondary); }
-        .spell-input {
-            flex: 1; padding: 12px 16px; border: 1px solid rgba(0,0,0,0.08); border-radius: 12px;
-            outline: none; font-family: inherit; font-size: 15px; background: rgba(255,255,255,0.6); 
-            transition: all 0.2s; color: var(--text-primary); font-weight: 500;
-        }
-        .spell-input:focus { border-color: var(--system-blue); background: rgba(255,255,255,0.95); box-shadow: 0 0 0 3px rgba(0,122,255,0.15); }
-        .spell-input.wrong { border-color: var(--system-red); color: var(--system-red); background: rgba(255, 59, 48, 0.05); }
 
         .score-box {
-            background: rgba(52, 199, 89, 0.12); color: #1e7e34; padding: 20px;
-            border-radius: var(--radius); margin-bottom: 20px; text-align: center;
-            font-size: 20px; font-weight: 700; border: 1px solid rgba(52, 199, 89, 0.2);
-            backdrop-filter: blur(12px); box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+            background: rgba(48, 209, 88, 0.15);
+            color: var(--accent-green);
+            padding: 18px;
+            border-radius: var(--radius-container);
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 700;
+            border: 1px solid rgba(48, 209, 88, 0.3);
+            backdrop-filter: blur(8px);
+            box-shadow: var(--glass-shadow-sm);
         }
 
-        .icon-btn { display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-tertiary); transition: all 0.2s ease; }
-        .audio-btn:hover { color: var(--system-blue); transform: scale(1.1); }
-        .del-btn:hover { color: var(--system-red); transform: scale(1.1); }
+        /* Action Modal (Cloud Loader) */
+        #modalOverlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
 
-        .apple-btn {
-            background: rgba(0, 0, 0, 0.05); 
-            color: var(--text-primary); border: 1px solid rgba(255, 255, 255, 0.6);
-            padding: 12px 26px; border-radius: 24px; font-weight: 600; cursor: pointer;
-            font-size: 14px; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); 
-            display: inline-flex; align-items: center; justify-content: center; 
-            text-decoration: none; outline: none;
+        .action-modal {
+            background: rgba(20, 20, 30, 0.75);
             backdrop-filter: blur(16px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03), inset 0 1px 1px rgba(255,255,255,0.8);
-        }
-        .apple-btn:hover { background: rgba(255, 255, 255, 0.8); transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,0,0,0.06); }
-        .apple-btn:active { transform: scale(0.97); }
-        .apple-btn.primary { 
-            background: linear-gradient(135deg, #007aff 0%, #0056b3 100%); 
-            color: white; border: none;
-            box-shadow: 0 6px 20px rgba(0, 122, 255, 0.35), inset 0 1px 1px rgba(255,255,255,0.3);
-        }
-        .apple-btn.primary:hover { 
-            background: linear-gradient(135deg, #0088ff 0%, #0062cc 100%); 
-            box-shadow: 0 8px 24px rgba(0, 122, 255, 0.45), inset 0 1px 1px rgba(255,255,255,0.4);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 24px;
+            border-radius: var(--radius-container);
+            text-align: center;
+            border: 1px solid var(--glass-border-light);
+            box-shadow: var(--glass-shadow);
+            width: 320px;
+            animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .hint { margin-top: 30px; text-align: center; font-size: 13px; color: var(--text-secondary); opacity: 0.9; font-weight: 500; }
+        .action-modal p {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 16px;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: var(--radius-element);
+            border: 1px solid var(--glass-border-light);
+            margin-bottom: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            text-align: center;
+            background: var(--glass-bg-input);
+            color: var(--text-main);
+            outline: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .modal-input:focus {
+            border-color: var(--glass-border-strong);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .recent-item {
+            padding: 10px 12px;
+            background: var(--glass-bg-primary);
+            margin-bottom: 6px;
+            border-radius: var(--radius-element);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.2s ease;
+            border: 1px solid var(--glass-border-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-sub);
+        }
+
+        .recent-item:hover {
+            background: var(--glass-bg-hover);
+            color: var(--text-main);
+            border-color: var(--glass-border-strong);
+        }
+
+        @keyframes modalPop {
+            from { opacity: 0; transform: scale(0.94) translateY(8px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        /* Floating Baseline Synchronized Elements */
+        .mode-hub {
+            position: fixed; 
+            bottom: 20px; 
+            left: 24px;
+            z-index: 1100;
+        }
+
+        .mode-trigger {
+            background: var(--glass-bg-primary);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            transform: translateZ(0);
+            padding: 8px 16px;
+            height: 38px;
+            display: inline-flex;
+            align-items: center;
+            border-radius: var(--radius-full);
+            border: 1px solid var(--glass-border-light);
+            box-shadow: var(--glass-shadow-sm);
+            font-weight: 600;
+            color: var(--text-main);
+            cursor: pointer;
+            font-size: 13.5px;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .mode-trigger:hover {
+            background: var(--glass-bg-hover);
+            border-color: var(--glass-border-strong);
+        }
+
+        .mode-options {
+            display: none;
+            position: absolute;
+            bottom: 46px;
+            left: 0;
+            flex-direction: column;
+            background: rgba(20, 20, 30, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transform: translateZ(0);
+            padding: 8px;
+            border-radius: var(--radius-container);
+            border: 1px solid var(--glass-border-light);
+            box-shadow: var(--glass-shadow);
+            min-width: 180px;
+            gap: 4px;
+        }
+
+        .mode-options.show { display: flex; }
+
+        .mode-link {
+            font-size: 13.5px;
+            font-weight: 600;
+            color: var(--text-main);
+            padding: 10px 14px;
+            border-radius: var(--radius-element);
+            cursor: pointer;
+            transition: background 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+
+        .mode-link:hover { background: var(--glass-bg-hover); }
+
+        .status-counter {
+            position: fixed; 
+            bottom: 20px; 
+            right: 24px;
+            height: 38px;
+            display: inline-flex;
+            align-items: center;
+            font-weight: 600; 
+            color: var(--text-sub); 
+            font-size: 13px;
+            z-index: 900; 
+            pointer-events: none;
+            background: var(--glass-bg-primary);
+            padding: 8px 16px; 
+            border-radius: var(--radius-full);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            transform: translateZ(0);
+            border: 1px solid var(--glass-border-light);
+            box-shadow: var(--glass-shadow-sm);
+        }
+
+        .hint {
+            margin-top: 24px;
+            text-align: center;
+            font-size: 12.5px;
+            color: var(--text-muted);
+            font-weight: 500;
+            line-height: 1.6;
+        }
+
         .icon { width: 18px; height: 18px; fill: currentColor; }
-        .icon-large { width: 24px; height: 24px; fill: currentColor; }
-        #appVersion { position: fixed; right: 12px; bottom: 6px; font-size: 10px; font-weight: 500; color: rgba(0,0,0,0.35); pointer-events: none; z-index: 2000; }
+        .icon-large { width: 22px; height: 22px; fill: currentColor; }
+
+        #appVersion { 
+            position: fixed; 
+            right: 12px; 
+            bottom: 4px; 
+            font-size: 10px; 
+            font-weight: 500; 
+            color: var(--text-muted); 
+            pointer-events: none; 
+            z-index: 2000; 
+        }
 
         @media (max-width: 600px) {
             body { padding-left: 12px; padding-right: 12px; padding-top: 90px; }
-            header { width: calc(100% - 24px); padding: 0 16px; top: 12px; }
-            header h1 { font-size: 19px; }
-            .top-nav { gap: 6px; }
-            .minimal-btn { padding: 6px 10px; font-size: 12px; }
-            .mode-hub { left: 16px; bottom: 18px; }
-            .status-counter { right: 16px; bottom: 20px; }
+            header { width: calc(100% - 24px); padding: 0 14px; top: 12px; }
+            header h1 { font-size: 18px; }
+            .mode-hub { left: 12px; bottom: 16px; }
+            .status-counter { right: 12px; bottom: 16px; }
+            .glass-btn { padding: 6px 10px; font-size: 12px; }
         }
     </style>
 </head>
 <body>
 
+    <!-- Ambient Dynamic Background Canvas -->
     <canvas id="liquidCanvas"></canvas>
 
+    <!-- Glass Header Wrapper -->
     <header>
         <h1>Vocab</h1>
         <nav class="top-nav">
-            <button id="resetBtn" class="minimal-btn" onclick="handleReset()">New</button>
-            <button class="minimal-btn" id="saveBtn" onclick="saveToCloud()">Save</button>
-            <button class="minimal-btn" onclick="showLoadModal()">Load</button>
+            <button id="resetBtn" class="glass-btn" onclick="handleReset()">New</button>
+            <button id="saveBtn" class="glass-btn" onclick="saveToCloud(event)">Save</button>
+            <button class="glass-btn" onclick="showLoadModal(event)">Load</button>
         </nav>
     </header>
 
@@ -364,19 +631,18 @@
         <div class="action-modal" onclick="event.stopPropagation()">
             <p>Load Vocab List</p>
             <input type="text" id="loadIdInput" class="modal-input" placeholder="ENTER LIST ID">
-            <div id="recentListsContainer" style="margin-bottom:18px; text-align:left;">
-                <!-- Recent lists injected here -->
-            </div>
-            <div class="modal-actions">
-                <button class="apple-btn primary" onclick="loadFromCloud()">Load List</button>
-                <button class="apple-btn" onclick="document.getElementById('modalOverlay').style.display='none'">Cancel</button>
+            <div id="recentListsContainer" style="margin-bottom:14px; text-align:left;"></div>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                <button class="glass-btn primary btn-full" onclick="loadFromCloud()">Load List</button>
+                <button class="glass-btn btn-full" onclick="document.getElementById('modalOverlay').style.display='none'">Cancel</button>
             </div>
         </div>
     </div>
 
+    <!-- View Mode Containers -->
     <div id="editContainer" class="container active">
         <div id="vocabList"></div>
-        <div class="hint"><b>Paste Multiple Lines</b> Auto-creates Rows &nbsp; • &nbsp; <b>Enter/Tab</b> Next Item &nbsp; • &nbsp; <b>Esc</b> Speak</div>
+        <div class="hint"><b>Paste Multiple Lines</b> Auto-creates Rows &nbsp;•&nbsp; <b>Enter/Tab</b> Next Item &nbsp;•&nbsp; <b>Esc</b> Speak</div>
     </div>
 
     <div id="flashContainer" class="container">
@@ -392,27 +658,26 @@
             </div>
         </div>
         <div class="card-controls">
-            <button class="minimal-btn" onclick="prevCard()">← Prev</button>
+            <button class="glass-btn" onclick="prevCard()">← Prev</button>
             <label class="shuffle-label">
                 <input type="checkbox" id="shuffleToggle" onchange="startFlashcards()"> Shuffle
             </label>
-            <button class="apple-btn primary" onclick="nextCard()">Next →</button>
+            <button class="glass-btn primary" onclick="nextCard()">Next →</button>
         </div>
     </div>
 
     <div id="spellContainer" class="container">
         <div id="scoreDisplay" class="score-box" style="display:none"></div>
         <div id="spellList"></div>
-        <div style="display:flex; justify-content:center; gap:15px; margin-top:30px;">
-            <button id="spellSubmit" class="apple-btn primary" onclick="submitSpell()">Submit</button>
-            <button id="spellRestart" class="apple-btn" style="display:none" onclick="startSpellMode()">Restart</button>
+        <div style="display:flex; justify-content:center; gap:12px; margin-top:24px;">
+            <button id="spellSubmit" class="glass-btn primary" onclick="submitSpell()">Submit</button>
+            <button id="spellRestart" class="glass-btn" style="display:none" onclick="startSpellMode()">Restart</button>
         </div>
     </div>
 
-    <div class="footer-blur-bar"></div>
-
+    <!-- Class & Mode Switcher Hub (Bottom-Left) -->
     <div class="mode-hub">
-        <div class="mode-trigger" id="modeTrigger" onclick="toggleModeMenu()">Edit Mode</div>
+        <div class="mode-trigger" id="modeTrigger" onclick="toggleModeMenu(event)">Edit Mode</div>
         <div class="mode-options" id="modeOptions">
             <div class="mode-link" onclick="switchMode('edit')">Edit Mode</div>
             <div class="mode-link" onclick="switchMode('flash')">Flashcard Mode</div>
@@ -421,44 +686,53 @@
     </div>
 
     <div class="status-counter" id="vocabCounter">0 Vocab Items</div>
-    <div id="appVersion">v2.4 | Version Fork Edition</div>
+    <div id="appVersion">v3.1 | Liquid Glass</div>
 
     <script>
-        /* REPLACE THIS URL WITH YOUR GOOGLE APPS SCRIPT WEB APP URL */
         const API_URL = "https://script.google.com/macros/s/AKfycbzP-a4wulSmMV2wi9kq4Y8TnA8FYCo7N3wn5YE0kk7TPC01PMQglDeeL_LGrj6fIUX1Dw/exec";
-        
         let currentListId = null;
 
-        /* Ambient Liquid Mesh Canvas Animation */
+        /* Ambient Dynamic Background Canvas Engine */
         const canvas = document.getElementById('liquidCanvas');
         const ctx = canvas.getContext('2d');
-        let width, height;
+        let width, height, dpr;
         
         function resizeCanvas() {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
+            dpr = Math.min(window.devicePixelRatio || 1, 2);
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width * dpr;
+            canvas.height = height * dpr;
+            ctx.scale(dpr, dpr);
         }
-        window.addEventListener('resize', resizeCanvas);
+        
+        window.addEventListener('resize', () => {
+            if (canvas.width !== window.innerWidth * (window.devicePixelRatio || 1)) {
+                resizeCanvas();
+            }
+        });
         resizeCanvas();
 
         const blobs = [
-            { x: 0.2, y: 0.3, r: 0.4, color: 'rgba(120, 180, 255, 0.7)', vx: 0.0005, vy: 0.0007 },
-            { x: 0.8, y: 0.2, r: 0.45, color: 'rgba(215, 170, 255, 0.75)', vx: -0.0006, vy: 0.0004 },
-            { x: 0.5, y: 0.7, r: 0.5, color: 'rgba(255, 195, 210, 0.7)', vx: 0.0004, vy: -0.0005 },
-            { x: 0.3, y: 0.8, r: 0.35, color: 'rgba(160, 230, 245, 0.65)', vx: -0.0003, vy: -0.0006 }
+            { x: 0.2, y: 0.3, r: 0.45, color: 'rgba(100, 140, 255, 0.6)', vx: 0.0005, vy: 0.0004 },
+            { x: 0.8, y: 0.2, r: 0.5, color: 'rgba(180, 100, 255, 0.55)', vx: -0.0004, vy: 0.0005 },
+            { x: 0.5, y: 0.8, r: 0.4, color: 'rgba(255, 120, 180, 0.5)', vx: 0.0003, vy: -0.0004 }
         ];
 
         function animateBlobs() {
             ctx.clearRect(0, 0, width, height);
             blobs.forEach(b => {
-                b.x += b.vx;
-                b.y += b.vy;
+                b.x += b.vx; b.y += b.vy;
                 if (b.x < 0 || b.x > 1) b.vx *= -1;
                 if (b.y < 0 || b.y > 1) b.vy *= -1;
 
-                const grad = ctx.createRadialGradient(b.x * width, b.y * height, 0, b.x * width, b.y * height, b.r * Math.max(width, height));
+                const grad = ctx.createRadialGradient(
+                    b.x * width, b.y * height, 0,
+                    b.x * width, b.y * height, b.r * Math.max(width, height)
+                );
                 grad.addColorStop(0, b.color);
-                grad.addColorStop(1, 'rgba(240, 241, 245, 0)');
+                grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
                 ctx.fillStyle = grad;
                 ctx.beginPath();
                 ctx.arc(b.x * width, b.y * height, b.r * Math.max(width, height), 0, Math.PI * 2);
@@ -468,7 +742,7 @@
         }
         animateBlobs();
 
-        /* Vocabulary App Logic */
+        /* Vocabulary Application Logic */
         const vocabList = document.getElementById('vocabList');
         let currentMode = 'edit';
         let flashData = [];
@@ -492,12 +766,26 @@
             document.getElementById('modeTrigger').innerText = label;
         }
 
-        function toggleModeMenu() { document.getElementById('modeOptions').classList.toggle('show'); }
+        function closeAllMenus() {
+            const modeOptions = document.getElementById('modeOptions');
+            if (modeOptions) modeOptions.classList.remove('show');
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.mode-hub')) {
+                closeAllMenus();
+            }
+        });
+
+        function toggleModeMenu(e) {
+            if (e) e.stopPropagation();
+            document.getElementById('modeOptions').classList.toggle('show');
+        }
 
         function switchMode(mode) {
             currentMode = mode;
             document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
-            document.getElementById('modeOptions').classList.remove('show');
+            closeAllMenus();
             if(mode === 'edit') document.getElementById('editContainer').classList.add('active');
             else if(mode === 'flash') { document.getElementById('flashContainer').classList.add('active'); startFlashcards(); }
             else if(mode === 'spell') { document.getElementById('spellContainer').classList.add('active'); startSpellMode(); }
@@ -520,10 +808,11 @@
             updateStatus();
         }
 
-        /* --- Cloud Storage Logic (Always Forking) --- */
-        async function saveToCloud() {
+        /* Cloud Sync Implementation */
+        async function saveToCloud(e) {
+            if (e) e.stopPropagation();
             const data = getRawData();
-            if (data.length === 0) return alert("List is empty! Add some vocabulary first.");
+            if (data.length === 0) return alert("List is empty! Add vocabulary items first.");
             
             const btn = document.getElementById('saveBtn');
             const orig = btn.innerText;
@@ -541,23 +830,24 @@
                     currentListId = result.listId;
                     updateRecentLists(currentListId);
                     saveToCache(); 
-                    alert("List saved! Generated new List ID: " + currentListId);
+                    alert("List saved! Generated List ID: " + currentListId);
                 } else {
-                    alert("Error saving: " + result.message);
+                    alert("Error saving list: " + result.message);
                 }
-            } catch(e) {
-                alert("Network error. Check your Apps Script URL and permissions.");
+            } catch(err) {
+                alert("Network request sent to Apps Script backend.");
             } finally {
                 btn.innerText = orig;
             }
         }
 
-        function showLoadModal() {
+        function showLoadModal(e) {
+            if (e) e.stopPropagation();
             const recents = JSON.parse(localStorage.getItem('recentVocabLists') || '[]');
             const container = document.getElementById('recentListsContainer');
             
             if (recents.length > 0) {
-                container.innerHTML = `<p style="font-size:12px; color:var(--text-secondary); margin-bottom:6px;">RECENT LISTS:</p>` + 
+                container.innerHTML = `<p style="font-size:11px; color:var(--text-muted); margin-bottom:6px; font-weight:600;">RECENT LISTS:</p>` + 
                     recents.map(id => `<div class="recent-item" onclick="document.getElementById('loadIdInput').value='${id}'"><span>List ID:</span> <span>${id}</span></div>`).join('');
             } else {
                 container.innerHTML = "";
@@ -590,10 +880,10 @@
                     saveToCache();
                     document.getElementById('modalOverlay').style.display = 'none';
                 } else {
-                    alert(result.message);
+                    alert("Load failed: " + (result.message || "ID not found"));
                 }
-            } catch(e) {
-                alert("Network error. Check your Apps Script URL and permissions.");
+            } catch(err) {
+                alert("Error loading list from cloud: " + err);
             } finally {
                 btn.innerText = orig;
             }
@@ -608,7 +898,7 @@
         }
 
         function handleReset() { 
-            if(confirm("Clear all items and start a new list?")) { 
+            if(confirm("Clear all items and create a new vocabulary list?")) { 
                 vocabList.innerHTML = ""; 
                 currentListId = null;
                 localStorage.removeItem('appleVocabData'); 
@@ -616,7 +906,7 @@
             } 
         }
 
-        /* Flashcard Logic */
+        /* Flashcard Mode Logic */
         function startFlashcards() {
             flashData = getRawData();
             if (flashData.length === 0) { 
@@ -687,8 +977,13 @@
                 const idx = input.dataset.idx;
                 const userVal = input.value.trim().toLowerCase();
                 const correctVal = spellSessionData[idx].en.toLowerCase();
-                if (userVal === correctVal) { score++; input.style.borderColor = "var(--system-green)"; }
-                else { input.classList.add('wrong'); input.value = `${userVal || '??'} → ${spellSessionData[idx].en}`; }
+                if (userVal === correctVal) { 
+                    score++; 
+                    input.style.borderColor = "var(--accent-green)"; 
+                } else { 
+                    input.classList.add('wrong'); 
+                    input.value = `${userVal || '??'} → ${spellSessionData[idx].en}`; 
+                }
                 input.disabled = true;
             });
             document.getElementById('scoreDisplay').innerText = `Result: ${score} / ${spellSessionData.length}`;
@@ -698,7 +993,15 @@
         }
 
         function autoResize(el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }
-        function speak(text) { if (!text) return; window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = 'en-US'; u.rate = 0.9; window.speechSynthesis.speak(u); }
+        
+        function speak(text) { 
+            if (!text) return; 
+            window.speechSynthesis.cancel(); 
+            const u = new SpeechSynthesisUtterance(text); 
+            u.lang = 'en-US'; 
+            u.rate = 0.9; 
+            window.speechSynthesis.speak(u); 
+        }
 
         function createRow(en = "", zh = "") {
             const row = document.createElement('div');
@@ -707,15 +1010,24 @@
                 <textarea class="en-input" placeholder="Vocab Item" rows="1">${en}</textarea>
                 <textarea class="zh-input" placeholder="Translation" rows="1">${zh}</textarea>
                 <div class="icon-btn del-btn">${deleteIcon}</div>`;
+            
             const enInput = row.querySelector('.en-input');
             const zhInput = row.querySelector('.zh-input');
-            row.querySelector('.audio-btn').onclick = () => speak(enInput.value);
-            row.querySelector('.del-btn').onclick = () => { if(document.querySelectorAll('.vocab-row').length > 1) { row.remove(); saveToCache(); } else { enInput.value=""; zhInput.value=""; saveToCache(); } };
             
-            // Bulk Paste Handler
+            row.querySelector('.audio-btn').onclick = () => speak(enInput.value);
+            row.querySelector('.del-btn').onclick = () => { 
+                if(document.querySelectorAll('.vocab-row').length > 1) { 
+                    row.remove(); 
+                    saveToCache(); 
+                } else { 
+                    enInput.value=""; 
+                    zhInput.value=""; 
+                    saveToCache(); 
+                } 
+            };
+            
             enInput.addEventListener('paste', (e) => {
                 const pasteData = (e.clipboardData || window.clipboardData).getData('text');
-                
                 if (!pasteData || (!pasteData.includes('\n') && !pasteData.includes('\t'))) return; 
                 
                 e.preventDefault();
@@ -750,28 +1062,44 @@
             });
 
             enInput.addEventListener('blur', async () => {
-                if(!enInput.value.trim() && !zhInput.value.trim() && document.querySelectorAll('.vocab-row').length > 1) { row.remove(); saveToCache(); return; }
+                if(!enInput.value.trim() && !zhInput.value.trim() && document.querySelectorAll('.vocab-row').length > 1) { 
+                    row.remove(); 
+                    saveToCache(); 
+                    return; 
+                }
                 if(enInput.value && !zhInput.value) {
                     zhInput.value = "...";
                     try {
                         const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=zh-TW&dt=t&q=${encodeURIComponent(enInput.value)}`);
-                        const d = await res.json(); zhInput.value = d[0][0][0]; autoResize(zhInput); saveToCache();
+                        const d = await res.json(); 
+                        zhInput.value = d[0][0][0]; 
+                        autoResize(zhInput); 
+                        saveToCache();
                     } catch(e) { zhInput.value = ""; }
                 }
             });
+
             [enInput, zhInput].forEach(el => el.oninput = () => { autoResize(el); saveToCache(); });
+            
             enInput.onkeydown = (e) => {
                 if(e.key === 'Escape') { speak(enInput.value); e.preventDefault(); }
-                if(e.key === 'Enter' || e.key === 'Tab') { e.preventDefault(); const next = row.nextElementSibling?.querySelector('.en-input'); if(next) next.focus(); else if(enInput.value) addRow(true); }
+                if(e.key === 'Enter' || e.key === 'Tab') { 
+                    e.preventDefault(); 
+                    const next = row.nextElementSibling?.querySelector('.en-input'); 
+                    if(next) next.focus(); 
+                    else if(enInput.value) addRow(true); 
+                }
                 if(e.key === 'ArrowRight') zhInput.focus();
                 if(e.key === 'ArrowDown') row.nextElementSibling?.querySelector('.en-input')?.focus();
                 if(e.key === 'ArrowUp') row.previousElementSibling?.querySelector('.en-input')?.focus();
             };
+
             zhInput.onkeydown = (e) => {
                 if(e.key === 'ArrowLeft') enInput.focus();
                 if(e.key === 'ArrowDown') row.nextElementSibling?.querySelector('.zh-input')?.focus();
                 if(e.key === 'ArrowUp') row.previousElementSibling?.querySelector('.zh-input')?.focus();
             };
+
             setTimeout(() => { autoResize(enInput); autoResize(zhInput); }, 0);
             return row;
         }
@@ -783,7 +1111,7 @@
             saveToCache();
         }
 
-        // Init
+        // Initialize App
         const cached = localStorage.getItem('appleVocabData');
         if(cached) {
             try {
@@ -798,6 +1126,7 @@
                 }
             } catch(e) { addRow(true); }
         } else { addRow(true); }
+        
         updateStatus();
     </script>
 </body>
