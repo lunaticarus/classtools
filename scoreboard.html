@@ -5,45 +5,55 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Scoreboard</title>
     <style>
+        /* Liquid Glass Tokens & Principles */
         :root {
-            --system-blue: #007aff;
-            --system-green: #34c759;
-            --system-red: #ff3b30;
-            --system-gray-bg: #f5f5f7;
-            --system-card-bg: rgba(255, 255, 255, 0.65);
-            --system-btn-grey: rgba(0, 0, 0, 0.05);
-            --system-btn-active: rgba(0, 0, 0, 0.12);
-            --system-border: rgba(255, 255, 255, 0.65);
-            --text-primary: #1d1d1f;
-            --text-secondary: #6e6e73;
-            --text-tertiary: #86868b;
-            --radius: 22px;
-
-            /* Liquid Glass Optics & Specular Highlights */
-            --glass-bg: rgba(255, 255, 255, 0.58);
-            --glass-border: rgba(255, 255, 255, 0.7);
-            --glass-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.8), inset 0 -1px 2px rgba(0, 0, 0, 0.05);
-            --glass-shine: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0) 100%);
+            /* Translucent overlays & subtle glass fills */
+            --glass-bg-primary: rgba(255, 255, 255, 0.15);
+            --glass-bg-card: rgba(255, 255, 255, 0.12);
+            --glass-bg-hover: rgba(255, 255, 255, 0.25);
+            --glass-bg-input: rgba(255, 255, 255, 0.18);
+            
+            /* Glass border highlights */
+            --glass-border-light: rgba(255, 255, 255, 0.22);
+            --glass-border-strong: rgba(255, 255, 255, 0.35);
+            
+            /* Depth shadows */
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            --glass-shadow-sm: 0 4px 16px 0 rgba(0, 0, 0, 0.25);
+            
+            /* Typography & High-Contrast Colors */
+            --text-main: #ffffff;
+            --text-sub: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.65);
+            --accent-red: #ff453a;
+            
+            /* System Border Radius */
+            --radius-container: 20px;
+            --radius-element: 12px;
+            --radius-full: 9999px;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+        }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", sans-serif;
-            background-color: #f0f1f5;
-            color: var(--text-primary);
-            margin: 0;
-            padding: 100px 20px 130px 20px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #1f1c2c 0%, #928dab 50%, #2c3e50 100%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 100px 20px 120px 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-height: 100vh;
-            -webkit-font-smoothing: antialiased;
             overflow-x: hidden;
             position: relative;
         }
 
-        /* Ambient Liquid Fluid Canvas */
+        /* Multi-colored background canvas for backdrop-filter glass refraction */
         #liquidCanvas {
             position: fixed;
             top: 0;
@@ -52,91 +62,258 @@
             height: 100vh;
             z-index: -1;
             pointer-events: none;
-            filter: blur(42px);
-            opacity: 0.85;
+            filter: blur(50px);
+            opacity: 0.75;
         }
 
-        /* Liquid Refractive Fixed Header */
+        /* Glass Header Container */
         header {
             position: fixed;
-            top: 16px; 
+            top: 16px;
             left: 50%;
             transform: translateX(-50%);
             width: calc(100% - 32px);
             max-width: 760px;
             height: 64px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(28px) saturate(190%);
-            -webkit-backdrop-filter: blur(28px) saturate(190%);
+            background: var(--glass-bg-primary);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border-light);
+            border-radius: var(--radius-container);
+            box-shadow: var(--glass-shadow-sm);
             z-index: 900;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 24px;
-            border-radius: 20px;
-            border: none;
-            box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s ease;
+            padding: 0 20px;
         }
 
-        header::after {
-            display: none;
+        h1 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-main);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            letter-spacing: -0.3px;
         }
 
-        h1 { 
-            font-weight: 700; 
-            font-size: 22px; 
-            margin: 0; 
-            letter-spacing: -0.5px;
-            background: linear-gradient(135deg, #1d1d1f 0%, #434345 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        .top-nav { 
+            display: flex; 
+            gap: 8px; 
+            align-items: center; 
         }
 
-        .top-nav { display: flex; gap: 8px; align-items: center; }
-
-        .minimal-btn {
-            background: rgba(255, 255, 255, 0.4); 
-            border: 1px solid rgba(255, 255, 255, 0.6); 
-            color: var(--text-primary);
-            font-size: 13px; 
-            font-weight: 600; 
-            cursor: pointer; 
+        /* Glass Button Component Specification */
+        .glass-btn {
+            background: var(--glass-bg-primary);
+            border: 1px solid var(--glass-border-light);
+            color: var(--text-main);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
             padding: 8px 14px;
-            border-radius: 12px; 
-            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.03), inset 0 1px 1px rgba(255,255,255,0.7);
-        }
-        .minimal-btn:hover { 
-            background: rgba(255, 255, 255, 0.78); 
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.06), inset 0 1px 1px rgba(255,255,255,0.9);
-        }
-        .minimal-btn:active { transform: scale(0.96); }
-
-        .container { width: 100%; max-width: 620px; animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            border-radius: var(--radius-element);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            transition: all 0.2s ease;
+            outline: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
         }
 
-        /* Liquid Glass Bottom Overlay Bar */
-        .footer-blur-bar {
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            height: 90px;
-            background: linear-gradient(to top, rgba(245, 245, 247, 0.75), transparent);
+        .glass-btn:hover {
+            background: var(--glass-bg-hover);
+            border-color: var(--glass-border-strong);
+        }
+
+        .glass-btn:active {
+            transform: scale(0.96);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .glass-btn.btn-full {
+            width: 100%;
+            justify-content: center;
+            padding: 12px;
+            font-size: 15px;
+            border-radius: var(--radius-element);
+        }
+
+        /* Container Component Specification */
+        .glass-container {
+            width: 100%;
+            max-width: 620px;
+        }
+
+        /* Setup Accordion Container */
+        .setup-area {
+            background: var(--glass-bg-card);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            z-index: 850;
-            pointer-events: none;
-            mask-image: linear-gradient(to top, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
-            -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
+            border: 1px solid var(--glass-border-light);
+            border-radius: var(--radius-container);
+            box-shadow: var(--glass-shadow);
+            overflow: hidden;
+            max-height: 0;
+            padding: 0 20px;
+            margin-bottom: 0;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            opacity: 0;
         }
 
-        /* Desktop Floating Refractive Bottom Dock */
+        .setup-area.open {
+            padding: 20px;
+            max-height: 520px;
+            margin-bottom: 20px;
+            opacity: 1;
+        }
+
+        /* Controls Specification (Inputs & Textareas) */
+        input[type="text"], textarea {
+            width: 100%;
+            margin-bottom: 12px;
+            background: var(--glass-bg-input);
+            border: 1px solid var(--glass-border-light);
+            border-radius: var(--radius-element);
+            padding: 12px 16px;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 14px;
+            outline: none;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            transition: all 0.2s ease;
+        }
+
+        input[type="text"]::placeholder, textarea::placeholder {
+            color: var(--text-muted);
+        }
+
+        input[type="text"]:focus, textarea:focus {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: var(--glass-border-strong);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+        }
+
+        /* Student Glass Card Container */
+        .student-row {
+            display: grid;
+            grid-template-columns: 36px 1fr 130px;
+            background: var(--glass-bg-card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            margin-bottom: 10px;
+            border-radius: var(--radius-element);
+            border: 1px solid var(--glass-border-light);
+            box-shadow: var(--glass-shadow-sm);
+            align-items: center;
+            padding: 10px 16px;
+            transition: all 0.25s ease;
+        }
+
+        .student-row:hover {
+            background: var(--glass-bg-hover);
+            border-color: var(--glass-border-strong);
+        }
+
+        .student-row.highlighted {
+            border: 1.5px solid var(--glass-border-strong);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+            transform: scale(1.02);
+            background: rgba(255, 255, 255, 0.3);
+            z-index: 10;
+        }
+
+        .student-row.absent {
+            opacity: 0.4;
+            filter: grayscale(1);
+        }
+
+        .attendance-toggle {
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            transition: transform 0.2s ease;
+        }
+
+        .attendance-toggle:hover {
+            color: var(--text-main);
+            transform: scale(1.2);
+        }
+
+        .student-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .student-name {
+            font-weight: 600;
+            font-size: 15px;
+            color: var(--text-main);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .medal {
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+        }
+
+        .score-box {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 6px;
+        }
+
+        .score-display {
+            font-size: 17px;
+            font-weight: 700;
+            width: 36px;
+            text-align: center;
+            color: var(--text-main);
+            cursor: pointer;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            transition: transform 0.15s ease;
+        }
+
+        .score-display:hover {
+            transform: scale(1.15);
+        }
+
+        .points-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: var(--radius-full);
+            border: 1px solid var(--glass-border-light);
+            background: var(--glass-bg-primary);
+            color: var(--text-main);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(6px);
+            transition: all 0.2s ease;
+        }
+
+        .points-btn:hover {
+            background: var(--glass-bg-hover);
+            border-color: var(--glass-border-strong);
+        }
+
+        .points-btn:active {
+            transform: scale(0.92);
+        }
+
+        /* Bottom Floating Dock Bar */
         .bottom-dock {
             position: fixed;
             bottom: 24px;
@@ -145,56 +322,56 @@
             z-index: 1000;
             display: flex;
             align-items: center;
-            gap: 6px;
-            background: rgba(255, 255, 255, 0.68);
-            backdrop-filter: blur(30px) saturate(190%);
-            -webkit-backdrop-filter: blur(30px) saturate(190%);
-            padding: 8px 12px;
-            border-radius: 30px;
-            border: 1px solid var(--glass-border);
-            box-shadow: 0 20px 48px -10px rgba(0,0,0,0.12), inset 0 1px 1px rgba(255,255,255,0.8);
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            gap: 8px;
+            background: var(--glass-bg-primary);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 8px 14px;
+            border-radius: var(--radius-full);
+            border: 1px solid var(--glass-border-light);
+            box-shadow: var(--glass-shadow);
         }
 
         .dock-btn {
             background: transparent;
-            color: var(--text-primary);
+            color: var(--text-main);
             border: 1px solid transparent;
-            padding: 9px 16px;
-            border-radius: 20px;
+            padding: 8px 14px;
+            border-radius: var(--radius-full);
             font-weight: 600;
-            font-size: 13.5px;
+            font-size: 13px;
             cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 0.2s ease;
             white-space: nowrap;
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            outline: none;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
-        .dock-btn:hover { 
-            background: rgba(255, 255, 255, 0.65); 
-            border-color: rgba(255, 255, 255, 0.8);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
-            transform: translateY(-1px);
+
+        .dock-btn:hover {
+            background: var(--glass-bg-hover);
+            border-color: var(--glass-border-light);
         }
-        .dock-btn:active { transform: scale(0.95); }
-        .dock-btn.primary { 
-            background: linear-gradient(135deg, #007aff 0%, #0056b3 100%); 
-            color: white; 
-            border: none;
-            box-shadow: 0 6px 20px rgba(0, 122, 255, 0.35), inset 0 1px 1px rgba(255,255,255,0.3);
+
+        .dock-btn:active {
+            transform: scale(0.95);
         }
-        .dock-btn.primary:hover { 
-            background: linear-gradient(135deg, #0088ff 0%, #0062cc 100%); 
-            box-shadow: 0 8px 24px rgba(0, 122, 255, 0.45);
+
+        .dock-btn.danger {
+            color: var(--accent-red);
+        }
+
+        .dock-btn.danger:hover {
+            background: rgba(255, 69, 58, 0.22);
+            border-color: rgba(255, 69, 58, 0.4);
         }
 
         .dock-divider {
             width: 1px;
-            height: 22px;
-            background: rgba(0, 0, 0, 0.1);
-            margin: 0 3px;
+            height: 20px;
+            background: var(--glass-border-light);
+            margin: 0 2px;
         }
 
         /* Mobile Actions Hub */
@@ -208,241 +385,179 @@
         }
 
         .mobile-actions-trigger {
-            background: linear-gradient(135deg, #007aff 0%, #0056b3 100%);
-            color: white;
-            border: none;
-            padding: 11px 22px;
-            border-radius: 24px;
+            background: var(--glass-bg-primary);
+            color: var(--text-main);
+            border: 1px solid var(--glass-border-light);
+            padding: 10px 20px;
+            border-radius: var(--radius-full);
             font-weight: 600;
             font-size: 14px;
             cursor: pointer;
-            box-shadow: 0 10px 28px rgba(0, 122, 255, 0.4), inset 0 1px 1px rgba(255,255,255,0.3);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            outline: none;
-            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            backdrop-filter: blur(16px);
+            box-shadow: var(--glass-shadow);
         }
-        .mobile-actions-trigger:active { transform: scale(0.95); }
 
         .mobile-actions-menu {
             display: none;
             position: absolute;
-            bottom: 54px;
+            bottom: 50px;
             left: 50%;
             transform: translateX(-50%);
             flex-direction: column;
-            background: rgba(255, 255, 255, 0.82);
-            backdrop-filter: blur(30px) saturate(190%);
-            -webkit-backdrop-filter: blur(30px) saturate(190%);
+            background: rgba(30, 30, 40, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             padding: 8px;
-            border-radius: 20px;
-            border: 1px solid var(--glass-border);
-            box-shadow: 0 16px 40px rgba(0,0,0,0.15), inset 0 1px 1px rgba(255,255,255,0.8);
-            min-width: 175px;
+            border-radius: var(--radius-container);
+            border: 1px solid var(--glass-border-light);
+            box-shadow: var(--glass-shadow);
+            min-width: 180px;
             gap: 4px;
         }
-        .mobile-actions-menu.show { display: flex; animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
+
+        .mobile-actions-menu.show { display: flex; }
 
         .mobile-menu-item {
             font-size: 13.5px;
             font-weight: 600;
-            color: var(--text-primary);
-            cursor: pointer;
+            color: var(--text-main);
             padding: 10px 14px;
-            border-radius: 12px;
-            transition: 0.18s ease;
+            border-radius: var(--radius-element);
+            cursor: pointer;
+            transition: background 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: space-between;
-        }
-        .mobile-menu-item:hover { background: var(--system-blue); color: white; }
-
-        @keyframes modalPop {
-            from { opacity: 0; transform: scale(0.92) translateY(10px) translateX(-50%); }
-            to { opacity: 1; transform: scale(1) translateY(0) translateX(-50%); }
+            gap: 8px;
         }
 
-        /* Class Selector Floating Hub (Bottom-Left) */
+        .mobile-menu-item:hover {
+            background: var(--glass-bg-hover);
+        }
+
+        .mobile-menu-item.danger {
+            color: var(--accent-red);
+        }
+
+        .mobile-menu-item.danger:hover {
+            background: rgba(255, 69, 58, 0.22);
+        }
+
+        /* Class Switcher Hub */
         .mode-hub {
-            position: fixed; bottom: 24px; left: 24px;
+            position: fixed; 
+            bottom: 24px; 
+            left: 24px;
             z-index: 1100;
         }
+
         .mode-trigger {
-            background: var(--glass-bg); 
-            backdrop-filter: blur(24px) saturate(180%); 
-            -webkit-backdrop-filter: blur(24px) saturate(180%);
-            padding: 10px 20px; border-radius: 22px; 
-            border: 1px solid var(--glass-border);
-            box-shadow: var(--glass-shadow); font-weight: 600; color: var(--text-primary);
-            cursor: pointer; font-size: 14px; user-select: none; 
-            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            background: var(--glass-bg-primary);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 10px 18px;
+            border-radius: var(--radius-full);
+            border: 1px solid var(--glass-border-light);
+            box-shadow: var(--glass-shadow-sm);
+            font-weight: 600;
+            color: var(--text-main);
+            cursor: pointer;
+            font-size: 13.5px;
+            transition: all 0.2s ease;
         }
-        .mode-trigger:hover { background: rgba(255, 255, 255, 0.8); transform: translateY(-2px); }
-        .mode-trigger:active { transform: scale(0.95); }
-        
+
+        .mode-trigger:hover {
+            background: var(--glass-bg-hover);
+            border-color: var(--glass-border-strong);
+        }
+
         .mode-options {
-            display: none; position: absolute; bottom: 52px; left: 0;
-            flex-direction: column; background: rgba(255, 255, 255, 0.82);
-            backdrop-filter: blur(30px) saturate(190%); 
-            -webkit-backdrop-filter: blur(30px) saturate(190%);
-            padding: 8px; border-radius: 20px; border: 1px solid var(--glass-border);
-            box-shadow: 0 16px 40px rgba(0,0,0,0.12), inset 0 1px 1px rgba(255,255,255,0.8); 
-            min-width: 190px; gap: 4px;
+            display: none;
+            position: absolute;
+            bottom: 50px;
+            left: 0;
+            flex-direction: column;
+            background: rgba(30, 30, 40, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 8px;
+            border-radius: var(--radius-container);
+            border: 1px solid var(--glass-border-light);
+            box-shadow: var(--glass-shadow);
+            min-width: 180px;
+            gap: 4px;
         }
-        .mode-options.show { display: flex; animation: modalPopLeft 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
-        
-        @keyframes modalPopLeft {
-            from { opacity: 0; transform: scale(0.92) translateY(10px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
-        }
+
+        .mode-options.show { display: flex; }
 
         .mode-link {
-            font-size: 13.5px; font-weight: 600; color: var(--text-primary);
-            cursor: pointer; padding: 10px 14px; border-radius: 12px; transition: 0.18s ease;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .mode-link:hover { background: var(--system-blue); color: white; }
-
-        /* Setup Accordion Card with Refractive Aesthetics */
-        .setup-area {
-            background: var(--glass-bg);
-            backdrop-filter: blur(28px) saturate(180%);
-            -webkit-backdrop-filter: blur(28px) saturate(180%);
-            border: none;
-            border-radius: var(--radius);
-            padding: 0;
-            margin-bottom: 0;
-            overflow: hidden;
-            max-height: 0;
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.08);
-            width: 100%;
-        }
-        .setup-area::before, .setup-area::after {
-            display: none !important;
-            content: none !important;
-        }
-        .setup-area.open { padding: 24px; max-height: 520px; margin-bottom: 20px; }
-        
-        input, textarea {
-            width: 100%; margin-bottom: 12px;
-            background: rgba(255, 255, 255, 0.55);
-            border: none;
-            border-radius: 14px; padding: 12px 16px;
-            color: var(--text-primary); font-family: inherit; font-size: 15px; font-weight: 500;
-            box-sizing: border-box; outline: none; transition: all 0.2s ease;
-            backdrop-filter: blur(10px);
-            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6);
-        }
-        input:focus, textarea:focus { 
-            background: rgba(255, 255, 255, 0.95);
-            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2); 
+            font-size: 13.5px;
+            font-weight: 600;
+            color: var(--text-main);
+            padding: 10px 14px;
+            border-radius: var(--radius-element);
+            cursor: pointer;
+            transition: background 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        /* Student Glass Card Row */
-        .student-row {
-            display: grid; grid-template-columns: 36px 1fr 135px;
-            background: var(--glass-bg); 
-            backdrop-filter: blur(20px) saturate(160%);
-            -webkit-backdrop-filter: blur(20px) saturate(160%);
-            margin-bottom: 12px; border-radius: 18px;
-            border: 1px solid var(--glass-border);
-            box-shadow: 0 8px 24px -6px rgba(0,0,0,0.04), inset 0 1px 1px rgba(255,255,255,0.7);
-            align-items: center; padding: 12px 18px; 
-            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease, opacity 0.25s ease;
+        .mode-link:hover {
+            background: var(--glass-bg-hover);
         }
-        .student-row:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 12px 28px -6px rgba(0,0,0,0.07), inset 0 1px 1px rgba(255,255,255,0.9);
-        }
-        .student-row.highlighted { 
-            transform: scale(1.03); 
-            border: 1.5px solid rgba(0, 122, 255, 0.8); 
-            box-shadow: 0 16px 40px rgba(0, 122, 255, 0.25), inset 0 1px 2px rgba(255,255,255,0.9); 
-            z-index: 10;
-            background: rgba(255, 255, 255, 0.88);
-        }
-        .student-row.absent { opacity: 0.38; filter: grayscale(1); }
-
-        .attendance-toggle { 
-            font-size: 18px; cursor: pointer; border: none; background: none; color: var(--text-tertiary);
-            transition: all 0.2s; padding: 4px; display: flex; align-items: center; justify-content: center;
-        }
-        .attendance-toggle:hover { color: var(--system-blue); transform: scale(1.15); }
-
-        .student-info { display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; }
-        .student-name { font-weight: 600; font-size: 16px; color: var(--text-primary); letter-spacing: -0.2px; }
-        .medal { font-size: 19px; width: 24px; text-align: center; }
-
-        .score-box { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
-        .score-display {
-            font-size: 18px; font-weight: 700; width: 40px; text-align: center;
-            font-variant-numeric: tabular-nums; cursor: pointer; color: var(--text-primary);
-            transition: transform 0.15s ease;
-        }
-        .score-display:hover { transform: scale(1.1); color: var(--system-blue); }
-
-        .points-btn {
-            width: 32px; height: 32px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.6);
-            background: rgba(255, 255, 255, 0.5); color: var(--text-primary);
-            font-size: 17px; font-weight: 600; cursor: pointer; display: flex;
-            align-items: center; justify-content: center; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-            backdrop-filter: blur(8px);
-            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
-        }
-        .points-btn:hover { background: rgba(255, 255, 255, 0.9); transform: scale(1.08); box-shadow: 0 4px 10px rgba(0,0,0,0.06); }
-        .points-btn:active { transform: scale(0.92); }
 
         .status-counter {
-            position: fixed; bottom: 28px; right: 24px;
-            font-weight: 600; color: var(--text-secondary); font-size: 13px;
-            z-index: 900; pointer-events: none;
-            background: rgba(255, 255, 255, 0.4);
-            padding: 6px 14px; border-radius: 20px;
+            position: fixed; 
+            bottom: 28px; 
+            right: 24px;
+            font-weight: 600; 
+            color: var(--text-sub); 
+            font-size: 13px;
+            z-index: 900; 
+            pointer-events: none;
+            background: var(--glass-bg-primary);
+            padding: 6px 14px; 
+            border-radius: var(--radius-full);
             backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+            border: 1px solid var(--glass-border-light);
+            box-shadow: var(--glass-shadow-sm);
         }
 
         .hidden { display: none !important; }
+
         .empty-state {
-            text-align: center; color: var(--text-secondary); padding: 60px 20px;
-            font-size: 15px; font-weight: 500;
-            background: var(--glass-bg); 
-            backdrop-filter: blur(28px) saturate(180%);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius);
-            box-shadow: var(--glass-shadow); margin-top: 10px;
+            text-align: center;
+            color: var(--text-sub);
+            padding: 60px 20px;
+            font-size: 15px;
+            font-weight: 500;
+            background: var(--glass-bg-card);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border-light);
+            border-radius: var(--radius-container);
+            box-shadow: var(--glass-shadow);
             line-height: 1.6;
         }
 
-        .apple-btn-full {
-            background: linear-gradient(135deg, #007aff 0%, #0056b3 100%); 
-            color: white; border: none;
-            padding: 14px; border-radius: 20px; font-weight: 600; cursor: pointer;
-            font-size: 15px; width: 100%; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-            box-shadow: 0 8px 24px rgba(0, 122, 255, 0.35), inset 0 1px 1px rgba(255,255,255,0.3);
+        #appVersion { 
+            position: fixed; 
+            right: 12px; 
+            bottom: 6px; 
+            font-size: 10px; 
+            font-weight: 500; 
+            color: var(--text-muted); 
+            pointer-events: none; 
+            z-index: 2000; 
         }
-        .apple-btn-full:hover { 
-            background: linear-gradient(135deg, #0088ff 0%, #0062cc 100%); 
-            transform: translateY(-1px);
-            box-shadow: 0 10px 28px rgba(0, 122, 255, 0.45);
-        }
-        .apple-btn-full:active { transform: scale(0.98); }
 
-        #appVersion { position: fixed; right: 12px; bottom: 6px; font-size: 10px; font-weight: 500; color: rgba(0,0,0,0.35); pointer-events: none; z-index: 2000; }
-
-        /* Media Query: Narrow Screens / Mobile */
         @media (max-width: 600px) {
             body { padding-left: 12px; padding-right: 12px; padding-top: 90px; }
-            header { width: calc(100% - 24px); padding: 0 16px; top: 12px; }
-            header h1 { font-size: 19px; }
-            .minimal-btn { padding: 6px 10px; font-size: 12px; }
+            header { width: calc(100% - 24px); padding: 0 14px; top: 12px; }
+            header h1 { font-size: 18px; }
             .mode-hub { left: 16px; bottom: 20px; }
             .status-counter { right: 16px; bottom: 22px; }
-            
-            /* Hide desktop dock & display compact mobile action button */
             .bottom-dock { display: none !important; }
             .mobile-actions-hub { display: block; }
         }
@@ -450,43 +565,42 @@
 </head>
 <body>
 
-    <!-- Dynamic Liquid Mesh Canvas -->
+    <!-- Ambient Dynamic Background Canvas -->
     <canvas id="liquidCanvas"></canvas>
 
+    <!-- Glass Header Wrapper -->
     <header>
         <h1>Scoreboard</h1>
         <nav class="top-nav">
-            <button class="minimal-btn" onclick="toggleSetup()">Add Class</button>
-            <button class="minimal-btn" onclick="downloadData()">Backup</button>
-            <button class="minimal-btn" onclick="document.getElementById('fileInput').click()">Load</button>
+            <button class="glass-btn" onclick="toggleSetup()">Add Class</button>
+            <button class="glass-btn" onclick="downloadData()">Backup</button>
+            <button class="glass-btn" onclick="document.getElementById('fileInput').click()">Load</button>
             <input type="file" id="fileInput" class="hidden" accept=".json" onchange="uploadData(event)">
         </nav>
     </header>
 
-    <div class="container">
+    <div class="glass-container">
+        <!-- Glass Accordion Container -->
         <div id="setupArea" class="setup-area">
-            <h3 style="margin-top:0; font-size: 13.5px; font-weight:700; color: var(--text-secondary); margin-bottom: 16px; letter-spacing: 0.5px;">NEW CLASS SETUP</h3>
+            <h3 style="margin-top:0; font-size: 12px; font-weight:700; color: var(--text-muted); margin-bottom: 12px; letter-spacing: 0.5px;">NEW CLASS SETUP</h3>
             <input type="text" id="className" placeholder="Class Name (e.g. Science 7B)">
             <textarea id="studentList" rows="5" placeholder="Paste student names (one per line)..."></textarea>
-            <button onclick="addClass()" class="apple-btn-full">Create Class</button>
+            <button onclick="addClass()" class="glass-btn btn-full">Create Class</button>
         </div>
 
         <div id="studentContainer"></div>
     </div>
 
-    <!-- Frosted Glass Bottom Blur Overlay -->
-    <div class="footer-blur-bar"></div>
-
-    <!-- Wide Desktop Dock -->
+    <!-- Desktop Floating Glass Dock -->
     <div id="scoreboardActions" class="bottom-dock hidden">
         <button class="dock-btn" onclick="pickRandomNoRepeat()">
-            🎲 <span id="noRepeatBtn"> 0/0</span>
+            🎲 <span id="noRepeatBtn">0/0</span>
         </button>
         <button class="dock-btn" onclick="pickRandom()">🎲 Random</button>
         <div class="dock-divider"></div>
         <button class="dock-btn" id="sortBtn" onclick="cycleSort()">Order ⇅</button>
         <button class="dock-btn" onclick="awardAll(1)">+1 All</button>
-        <button class="dock-btn" style="color:var(--system-red)" onclick="resetScores()">Reset</button>
+        <button class="dock-btn danger" onclick="resetScores()">Reset</button>
     </div>
 
     <!-- Mobile Compact Actions Menu -->
@@ -494,26 +608,27 @@
         <button class="mobile-actions-trigger" onclick="toggleMobileActions()">Actions ⚡</button>
         <div class="mobile-actions-menu" id="mobileActionsMenu">
             <div class="mobile-menu-item" onclick="pickRandomNoRepeat(); toggleMobileActions();">
-                <span>🎲 </span> <span id="noRepeatMobileBtn" style="opacity:0.6; font-size:11px;">0/0</span>
+                <span>🎲 Cycle</span>
+                <span id="noRepeatMobileBtn" style="opacity:0.7; font-size:12px; font-weight:500;">0/0</span>
             </div>
             <div class="mobile-menu-item" onclick="pickRandom(); toggleMobileActions();">🎲 Random</div>
             <div class="mobile-menu-item" id="sortMobileBtn" onclick="cycleSort(); toggleMobileActions();">Order ⇅</div>
             <div class="mobile-menu-item" onclick="awardAll(1); toggleMobileActions();">+1 All</div>
-            <div class="mobile-menu-item" style="color:var(--system-red)" onclick="resetScores(); toggleMobileActions();">Reset</div>
+            <div class="mobile-menu-item danger" onclick="resetScores(); toggleMobileActions();">Reset</div>
         </div>
     </div>
 
-    <!-- Class Switcher (Bottom-Left) -->
+    <!-- Class Switcher Hub (Bottom-Left) -->
     <div class="mode-hub">
         <div class="mode-trigger" id="currentClassLabel" onclick="toggleModeMenu()">Select Class</div>
         <div class="mode-options" id="tabsContainer"></div>
     </div>
 
     <div class="status-counter" id="presenceCounter">0 Present</div>
-    <div id="appVersion">v2.7 | Liquid Glass Edition</div>
+    <div id="appVersion">v2.8 | Pure Liquid Glass</div>
 
     <script>
-        /* Ambient Liquid Mesh Canvas Animation */
+        /* Multi-colored Ambient Fluid Canvas Background */
         const canvas = document.getElementById('liquidCanvas');
         const ctx = canvas.getContext('2d');
         let width, height;
@@ -526,18 +641,15 @@
         resizeCanvas();
 
         const blobs = [
-            { x: 0.25, y: 0.25, r: 0.42, color: 'rgba(120, 180, 255, 0.7)', vx: 0.0005, vy: 0.0006 },
-            { x: 0.75, y: 0.2, r: 0.48, color: 'rgba(215, 170, 255, 0.75)', vx: -0.0006, vy: 0.0004 },
-            { x: 0.5, y: 0.75, r: 0.52, color: 'rgba(255, 195, 210, 0.7)', vx: 0.0004, vy: -0.0005 },
-            { x: 0.2, y: 0.8, r: 0.38, color: 'rgba(160, 230, 245, 0.65)', vx: -0.0003, vy: -0.0006 }
+            { x: 0.2, y: 0.3, r: 0.45, color: 'rgba(100, 140, 255, 0.6)', vx: 0.0005, vy: 0.0004 },
+            { x: 0.8, y: 0.2, r: 0.5, color: 'rgba(180, 100, 255, 0.55)', vx: -0.0004, vy: 0.0005 },
+            { x: 0.5, y: 0.8, r: 0.4, color: 'rgba(255, 120, 180, 0.5)', vx: 0.0003, vy: -0.0004 }
         ];
 
         function animateBlobs() {
             ctx.clearRect(0, 0, width, height);
             blobs.forEach(b => {
-                b.x += b.vx;
-                b.y += b.vy;
-
+                b.x += b.vx; b.y += b.vy;
                 if (b.x < 0 || b.x > 1) b.vx *= -1;
                 if (b.y < 0 || b.y > 1) b.vy *= -1;
 
@@ -546,7 +658,7 @@
                     b.x * width, b.y * height, b.r * Math.max(width, height)
                 );
                 grad.addColorStop(0, b.color);
-                grad.addColorStop(1, 'rgba(240, 241, 245, 0)');
+                grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
 
                 ctx.fillStyle = grad;
                 ctx.beginPath();
@@ -557,7 +669,7 @@
         }
         animateBlobs();
 
-        /* Scoreboard Application Logic */
+        /* Scoreboard Logic */
         let state = { classes: [], lastSelectedIndex: null, lastSortMode: 'original' };
         const STORE_KEY = 'teacherApp_v7_light_only';
 
@@ -626,7 +738,6 @@
             const activeClass = state.classes[state.lastSelectedIndex];
             if(!activeClass) return;
 
-            // Sort button label update
             const sortBtn = document.getElementById('sortBtn');
             const sortMobileBtn = document.getElementById('sortMobileBtn');
             let sortLabel = "Order ⇅";
@@ -639,7 +750,7 @@
             const presentStudents = activeClass.students.filter(s => !s.absent);
             const pickedCount = (activeClass.pickedIds || []).length;
             
-            document.getElementById('noRepeatBtn').innerText = `Cycle ${pickedCount}/${presentStudents.length}`;
+            document.getElementById('noRepeatBtn').innerText = `${pickedCount}/${presentStudents.length}`;
             document.getElementById('noRepeatMobileBtn').innerText = `${pickedCount}/${presentStudents.length}`;
             document.getElementById('presenceCounter').innerText = `${presentStudents.length} Present`;
             document.getElementById('currentClassLabel').innerText = activeClass.name;
@@ -737,7 +848,7 @@
             document.querySelectorAll('.student-row').forEach(r => r.classList.remove('highlighted'));
             row.scrollIntoView({ behavior: 'smooth', block: 'center' });
             row.classList.add('highlighted');
-            setTimeout(() => row.classList.remove('highlighted'), 10000);
+            setTimeout(() => row.classList.remove('highlighted'), 8000);
         }
 
         function awardAll(delta) {
@@ -767,7 +878,7 @@
             state.classes.forEach((cls, i) => {
                 const link = document.createElement('div');
                 link.className = `mode-link`;
-                link.innerHTML = `<span>${cls.name}</span> <span onclick="deleteClass(${i}, event)" style="opacity:0.4; padding:2px 6px;">×</span>`;
+                link.innerHTML = `<span>${cls.name}</span> <span onclick="deleteClass(${i}, event)" style="opacity:0.5; padding:2px 6px;">×</span>`;
                 link.onclick = (e) => { if (e.target.innerText !== '×') selectClass(i); };
                 container.appendChild(link);
             });
