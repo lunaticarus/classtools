@@ -2,13 +2,50 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>App Hub Launcher</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>APP_HUB // TERMINAL_v4.0</title>
 
-  <!-- Phosphor Icons CDN -->
-  <script src="https://unpkg.com/@phosphor-icons/web"></script>
-  
+  <!-- Lucide Icons Vanilla JS UMD Bundle -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <!-- Cyberpunk Fonts: Orbitron (Headings), Share Tech Mono (Labels/HUD), JetBrains Mono (Body/Terminal) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Orbitron:wght@600;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
   <style>
+    /* ==========================================================================
+       CYBERPUNK DESIGN SYSTEM TOKENS & BASE STYLES
+       ========================================================================== */
+    :root {
+      --bg-void: #0a0a0f;
+      --bg-card: #12121a;
+      --bg-muted: #1c1c2e;
+      
+      --text-main: #e0e0e0;
+      --text-muted: #6b7280;
+      
+      --accent-green: #00ff88;     /* Matrix Primary Neon */
+      --accent-magenta: #ff00ff;   /* Secondary Cyber Neon */
+      --accent-cyan: #00d4ff;      /* Tertiary Data Neon */
+      --accent-amber: #ff9f0a;     /* Warning Status */
+      
+      --border-subtle: #2a2a3a;
+      
+      --font-heading: "Orbitron", sans-serif;
+      --font-body: "JetBrains Mono", monospace;
+      --font-tech: "Share Tech Mono", monospace;
+      
+      --shadow-neon: 0 0 8px #00ff88, 0 0 20px rgba(0, 255, 136, 0.35);
+      --shadow-neon-magenta: 0 0 8px #ff00ff, 0 0 20px rgba(255, 0, 255, 0.35);
+      --shadow-neon-cyan: 0 0 8px #00d4ff, 0 0 20px rgba(0, 212, 255, 0.35);
+
+      /* Chamfer clip-path definitions */
+      --clip-chamfer-lg: polygon(0 14px, 14px 0, calc(100% - 14px) 0, 100% 14px, 100% calc(100% - 14px), calc(100% - 14px) 100%, 14px 100%, 0 calc(100% - 14px));
+      --clip-chamfer-sm: polygon(0 8px, 8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px));
+      --clip-banner: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -17,92 +54,189 @@
       -webkit-user-select: none;
     }
 
-    body {
-      min-height: 100vh;
+    html, body {
       width: 100vw;
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background: #0b1120;
+      min-height: 100vh;
+      overflow-x: hidden;
+      background-color: var(--bg-void);
+      color: var(--text-main);
+      font-family: var(--font-body);
+    }
+
+    body {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-      padding: 40px 20px;
-      overflow-x: hidden;
+      padding: 40px 20px 80px 20px;
+      -webkit-font-smoothing: antialiased;
       position: relative;
     }
 
-    /* Hardware Accelerated Orbs */
-    .ambient-bg {
+    /* --------------------------------------------------------------------------
+       TEXTURES: SCANLINES, CIRCUIT GRID & GLITCH KEYFRAMES
+       -------------------------------------------------------------------------- */
+    /* Fullscreen CRT Scanlines Overlay */
+    body::after {
+      content: "";
       position: fixed;
       inset: 0;
-      z-index: 0;
-      overflow: hidden;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.35) 2px,
+        rgba(0, 0, 0, 0.35) 4px
+      );
       pointer-events: none;
-      transform: translateZ(0);
+      z-index: 999;
+      opacity: 0.85;
     }
 
-    .orb {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(100px);
-      opacity: 0.22;
-      animation: float 25s ease-in-out infinite alternate;
-      will-change: transform;
+    /* Tech PCB Circuit Grid Background */
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0, 255, 136, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 136, 0.035) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
     }
 
-    .orb-1 {
-      width: 500px;
-      height: 500px;
-      background: radial-gradient(circle, #38bdf8, #1e3a8a);
+    /* Corner Radial Glows */
+    .bg-glow-magenta {
+      position: fixed;
       top: -150px;
       left: -150px;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(255, 0, 255, 0.12) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
     }
 
-    .orb-2 {
-      width: 550px;
-      height: 550px;
-      background: radial-gradient(circle, #818cf8, #312e81);
-      bottom: -200px;
+    .bg-glow-cyan {
+      position: fixed;
+      bottom: -150px;
       right: -150px;
-      animation-delay: -8s;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(0, 212, 255, 0.12) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
     }
 
-    @keyframes float {
-      0% { transform: translate3d(0, 0, 0) scale(1); }
-      50% { transform: translate3d(50px, 30px, 0) scale(1.05); }
-      100% { transform: translate3d(-30px, 60px, 0) scale(0.95); }
-    }
-
+    /* --------------------------------------------------------------------------
+       CONTAINER & HEADER
+       -------------------------------------------------------------------------- */
     .container {
       position: relative;
-      z-index: 1;
+      z-index: 10;
       width: 100%;
-      max-width: 1080px;
+      max-width: 1100px;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
 
     header {
-      text-align: center;
-      margin-bottom: 28px;
-      color: #ffffff;
       width: 100%;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 16px;
+      margin-bottom: 36px;
+      gap: 24px;
     }
 
-    header h1 {
-      font-size: 2.2rem;
-      font-weight: 600;
-      letter-spacing: -0.5px;
-      background: linear-gradient(135deg, #ffffff 40%, rgba(255, 255, 255, 0.5));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+    /* Glitch Title Container */
+    .glitch-wrapper {
+      position: relative;
+      display: inline-block;
     }
 
+    .cyber-title {
+      font-family: var(--font-heading);
+      font-size: 3rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      color: var(--accent-green);
+      text-shadow: var(--shadow-neon);
+      position: relative;
+    }
+
+    /* Chromatic Aberration RGB Splitting Animations */
+    .cyber-title::before,
+    .cyber-title::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      clip: rect(0, 0, 0, 0);
+    }
+
+    .cyber-title::before {
+      left: -2px;
+      text-shadow: 2px 0 var(--accent-magenta);
+      animation: glitch-anim-1 2.5s infinite linear alternate-reverse;
+    }
+
+    .cyber-title::after {
+      left: 2px;
+      text-shadow: -2px 0 var(--accent-cyan);
+      animation: glitch-anim-2 3s infinite linear alternate-reverse;
+    }
+
+    @keyframes glitch-anim-1 {
+      0% { clip: rect(20px, 9999px, 40px, 0); }
+      10% { clip: rect(80px, 9999px, 100px, 0); }
+      20% { clip: rect(10px, 9999px, 50px, 0); }
+      30% { clip: rect(60px, 9999px, 70px, 0); }
+      40% { clip: rect(30px, 9999px, 90px, 0); }
+      50% { clip: rect(0px, 0px, 0px, 0); }
+      100% { clip: rect(0px, 0px, 0px, 0); }
+    }
+
+    @keyframes glitch-anim-2 {
+      0% { clip: rect(50px, 9999px, 80px, 0); }
+      15% { clip: rect(10px, 9999px, 30px, 0); }
+      35% { clip: rect(70px, 9999px, 90px, 0); }
+      55% { clip: rect(20px, 9999px, 60px, 0); }
+      75% { clip: rect(0px, 0px, 0px, 0); }
+      100% { clip: rect(0px, 0px, 0px, 0); }
+    }
+
+    /* Subtitle Terminal Header */
+    .hud-subtext {
+      font-family: var(--font-tech);
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .hud-subtext .status-pulse {
+      width: 8px;
+      height: 8px;
+      background: var(--accent-green);
+      box-shadow: 0 0 8px var(--accent-green);
+      animation: blink 1s step-end infinite;
+    }
+
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+
+    /* --------------------------------------------------------------------------
+       CONTROLS BAR (SEARCH & FILTERS)
+       -------------------------------------------------------------------------- */
     .controls-bar {
       display: flex;
       flex-wrap: wrap;
@@ -112,37 +246,48 @@
       width: 100%;
     }
 
+    /* Cyber Input Field */
     .search-wrapper {
       position: relative;
       width: 100%;
-      max-width: 320px;
+      max-width: 360px;
     }
 
-    .search-input {
-      width: 100%;
-      padding: 8px 16px 8px 38px;
-      border-radius: 14px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: #fff;
-      font-size: 0.88rem;
-      outline: none;
-      backdrop-filter: blur(10px);
-      transition: all 0.25s ease;
-    }
-
-    .search-input:focus {
-      background: rgba(255, 255, 255, 0.09);
-      border-color: rgba(255, 255, 255, 0.25);
-    }
-
-    .search-wrapper i {
+    .search-prefix {
       position: absolute;
       left: 12px;
       top: 50%;
       transform: translateY(-50%);
-      color: rgba(255, 255, 255, 0.4);
-      font-size: 16px;
+      color: var(--accent-green);
+      font-family: var(--font-tech);
+      font-weight: 700;
+      font-size: 1rem;
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 10px 42px 10px 30px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      clip-path: var(--clip-chamfer-sm);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+      outline: none;
+      transition: all 0.15s ease;
+    }
+
+    .search-input::placeholder {
+      color: var(--text-muted);
+      font-family: var(--font-tech);
+      letter-spacing: 1px;
+    }
+
+    .search-input:focus {
+      border-color: var(--accent-green);
+      box-shadow: var(--shadow-neon);
+      background: rgba(0, 255, 136, 0.05);
     }
 
     .search-shortcut {
@@ -150,167 +295,319 @@
       right: 10px;
       top: 50%;
       transform: translateY(-50%);
+      font-family: var(--font-tech);
       font-size: 10px;
-      color: rgba(255, 255, 255, 0.3);
-      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--accent-cyan);
+      border: 1px solid var(--accent-cyan);
       padding: 1px 5px;
-      border-radius: 4px;
+      background: rgba(0, 212, 255, 0.1);
+      letter-spacing: 1px;
     }
 
+    /* Cyber Pill Filters */
     .filter-pills {
       display: flex;
       gap: 8px;
-      background: rgba(255, 255, 255, 0.03);
-      padding: 5px;
-      border-radius: 16px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(12px);
     }
 
     .pill-btn {
-      position: relative;
-      background: transparent;
-      border: 1px solid transparent;
-      color: rgba(255, 255, 255, 0.55);
-      padding: 7px 18px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      font-family: var(--font-tech);
       font-size: 0.85rem;
-      font-weight: 500;
-      border-radius: 12px;
+      padding: 8px 18px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
       cursor: pointer;
-      outline: none;
-      transition: color 0.2s ease, transform 0.15s ease, background 0.2s ease, border-color 0.2s ease;
+      clip-path: var(--clip-chamfer-sm);
+      transition: all 0.15s ease;
+      position: relative;
     }
 
     .pill-btn:hover {
-      color: rgba(255, 255, 255, 0.9);
-      background: rgba(255, 255, 255, 0.06);
-      border-color: rgba(255, 255, 255, 0.12);
+      color: var(--text-main);
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 8px rgba(0, 212, 255, 0.3);
     }
 
     .pill-btn.active {
-      color: #ffffff;
-      background: rgba(255, 255, 255, 0.14);
-      border-color: rgba(255, 255, 255, 0.28);
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+      color: var(--bg-void);
+      background: var(--accent-green);
+      border-color: var(--accent-green);
+      font-weight: 700;
+      box-shadow: var(--shadow-neon);
     }
 
     .pill-btn:active {
-      transform: scale(0.95);
+      transform: scale(0.96);
     }
 
+    /* --------------------------------------------------------------------------
+       APP GRID & CYBER CARDS
+       -------------------------------------------------------------------------- */
     .app-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
       gap: 20px;
       width: 100%;
     }
 
     .glass-card {
       position: relative;
-      border-radius: 20px;
-      padding: 24px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      clip-path: var(--clip-chamfer-lg);
+      padding: 24px 16px 20px 16px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       text-decoration: none;
       cursor: grab;
-      overflow: hidden;
-      
-      background: rgba(255, 255, 255, 0.03);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    }
 
-      transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+    /* Tech Corner Accent Lines */
+    .glass-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 16px;
+      height: 2px;
+      background: var(--border-subtle);
+      transition: background 0.15s ease;
+    }
+
+    .glass-card::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 16px;
+      height: 2px;
+      background: var(--border-subtle);
+      transition: background 0.15s ease;
     }
 
     .glass-card:hover {
       transform: translateY(-4px);
-      background: rgba(255, 255, 255, 0.07);
-      border-color: rgba(255, 255, 255, 0.2);
+      border-color: var(--accent-green);
+      box-shadow: var(--shadow-neon);
+      background: rgba(18, 18, 26, 0.95);
     }
 
+    .glass-card:hover::before,
+    .glass-card:hover::after {
+      background: var(--accent-green);
+    }
+
+    /* Drag states */
     .glass-card.dragging {
       opacity: 0.3;
       cursor: grabbing;
-      transform: scale(0.96);
+      transform: scale(0.95);
     }
 
     .glass-card.drag-over {
-      border-color: rgba(255, 255, 255, 0.4);
-      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--accent-magenta);
+      box-shadow: var(--shadow-neon-magenta);
+      background: rgba(255, 0, 255, 0.08);
     }
 
-    .app-icon {
-      width: 58px;
-      height: 58px;
-      border-radius: 16px;
+    /* App Icon Frame */
+    .app-icon-container {
+      width: 60px;
+      height: 60px;
+      background: var(--bg-void);
+      border: 1px solid var(--border-subtle);
+      clip-path: var(--clip-chamfer-sm);
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
       position: relative;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.15s ease;
     }
 
-    .app-icon i {
-      font-size: 26px;
-      color: rgba(255, 255, 255, 0.85);
+    .glass-card:hover .app-icon-container {
+      border-color: var(--accent-green);
+      box-shadow: inset 0 0 10px rgba(0, 255, 136, 0.2);
     }
 
+    .app-icon-container svg {
+      width: 28px;
+      height: 28px;
+      stroke: var(--text-main);
+      stroke-width: 1.5;
+      fill: none;
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), stroke 0.2s ease;
+    }
+
+    .glass-card:hover .app-icon-container svg {
+      stroke: var(--accent-green);
+      filter: drop-shadow(0 0 4px var(--accent-green));
+    }
+
+    /* Animate-UI Spring Animations on Hover */
+    .glass-card:hover .app-icon-container svg[data-lucide="square-pen"],
+    .glass-card:hover .app-icon-container svg[data-lucide="camera"] {
+      transform: rotate(-12deg) scale(1.18);
+    }
+
+    .glass-card:hover .app-icon-container svg[data-lucide="trophy"],
+    .glass-card:hover .app-icon-container svg[data-lucide="target"] {
+      transform: scale(1.22) translateY(-2px);
+    }
+
+    .glass-card:hover .app-icon-container svg[data-lucide="timer"] {
+      transform: rotate(45deg) scale(1.15);
+    }
+
+    .glass-card:hover .app-icon-container svg[data-lucide="mic"] {
+      animation: pulseMic 0.6s ease infinite alternate;
+    }
+
+    .glass-card:hover .app-icon-container svg[data-lucide="swords"],
+    .glass-card:hover .app-icon-container svg[data-lucide="book-open-text"] {
+      transform: scale(1.18) rotate(8deg);
+    }
+
+    .glass-card:hover .app-icon-container svg[data-lucide="clipboard-list"],
+    .glass-card:hover .app-icon-container svg[data-lucide="building"] {
+      transform: translateY(-3px) scale(1.12);
+    }
+
+    @keyframes pulseMic {
+      from { transform: scale(1.1); }
+      to { transform: scale(1.25); }
+    }
+
+    /* Cyber Status Indicator Dot */
     .status-dot {
       position: absolute;
-      top: -2px;
-      right: -2px;
+      top: -3px;
+      right: -3px;
       width: 8px;
       height: 8px;
-      border-radius: 50%;
-      background: #9ca3af;
-      border: 2px solid #0b1120;
+      background: var(--text-muted);
+      border: 1px solid var(--bg-void);
+      z-index: 2;
+      transition: background 0.3s ease, box-shadow 0.3s ease;
     }
 
     .status-dot.online {
-      background: #10b981;
-      box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+      background: var(--accent-green);
+      box-shadow: 0 0 6px var(--accent-green);
     }
 
     .status-dot.offline {
-      background: #f59e0b;
+      background: var(--accent-amber);
+      box-shadow: 0 0 6px var(--accent-amber);
     }
 
+    /* App Title */
     .app-title {
-      font-size: 0.9rem;
-      font-weight: 500;
-      color: rgba(255, 255, 255, 0.85);
+      font-family: var(--font-tech);
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-main);
       text-align: center;
       line-height: 1.3;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .glass-card:hover .app-title {
+      color: var(--accent-green);
+    }
+
+    /* Category Tag Badge */
+    .card-category-tag {
+      position: absolute;
+      top: 6px;
+      left: 8px;
+      font-family: var(--font-tech);
+      font-size: 9px;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    /* --------------------------------------------------------------------------
+       FOOTER HUD & RESPONSIVE
+       -------------------------------------------------------------------------- */
+    #appVersion {
+      position: fixed;
+      right: 16px;
+      bottom: 12px;
+      font-family: var(--font-tech);
+      font-size: 10px;
+      color: var(--text-muted);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      pointer-events: none;
+      z-index: 2000;
+      background: var(--bg-card);
+      padding: 4px 8px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    @media (max-width: 650px) {
+      body {
+        padding: 24px 12px 60px 12px;
+      }
+      .cyber-title {
+        font-size: 2rem;
+        letter-spacing: 2px;
+      }
+      .controls-bar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .search-wrapper {
+        max-width: 100%;
+      }
+      .filter-pills {
+        justify-content: center;
+      }
+      .app-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 12px;
+      }
     }
   </style>
 </head>
 <body>
 
-  <div class="ambient-bg">
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-  </div>
+  <!-- Tech PCB Grid & Background Ambient Glows -->
+  <div class="bg-grid"></div>
+  <div class="bg-glow-magenta"></div>
+  <div class="bg-glow-cyan"></div>
 
   <div class="container">
     <header>
-      <h1>App Hub</h1>
+      <div class="glitch-wrapper">
+        <h1 class="cyber-title" data-text="APP_HUB //">APP_HUB //</h1>
+      </div>
       
+      <div class="hud-subtext">
+        <span class="status-pulse"></span>
+        SYSTEM_READY // NODES_ACTIVE: <span id="nodeCount">0</span>
+      </div>
+
       <div class="controls-bar">
         <div class="search-wrapper">
-          <i class="ph ph-magnifying-glass"></i>
-          <input type="text" id="searchInput" class="search-input" placeholder="Search apps..." autocomplete="off">
-          <span class="search-shortcut">⌘K</span>
+          <span class="search-prefix">&gt;</span>
+          <input type="text" id="searchInput" class="search-input" placeholder="SEARCH_NODE..." autocomplete="off">
+          <span class="search-shortcut">CMD+K</span>
         </div>
 
         <div class="filter-pills">
-          <button class="pill-btn active" onclick="setCategory('all', this)">All</button>
-          <button class="pill-btn" onclick="setCategory('classroom', this)">Classroom</button>
-          <button class="pill-btn" onclick="setCategory('school', this)">School</button>
+          <button class="pill-btn active" onclick="setCategory('all', this)">[ALL]</button>
+          <button class="pill-btn" onclick="setCategory('classroom', this)">[CLASSROOM]</button>
+          <button class="pill-btn" onclick="setCategory('school', this)">[SCHOOL]</button>
         </div>
       </div>
     </header>
@@ -318,24 +615,29 @@
     <main class="app-grid" id="app-grid"></main>
   </div>
 
+  <div id="appVersion">SYS_VER 4.0 // CYBER_GLITCH</div>
+
   <script>
+    /* --------------------------------------------------------------------------
+       APP HUBLAUNCHER LOGIC & DATA
+       -------------------------------------------------------------------------- */
     const DEFAULT_APPS = [
-      { id: 'notepad', name: 'Notepad', category: 'classroom', iconClass: 'ph-note-pencil', url: 'https://script.google.com/a/macros/lstyoungkhl.edu.hk/s/AKfycbwzSbCzx6xiE02v5FGYVa02RbukLjMXLTBN4FqMjj6Eyk4dqPUptoeld7lyHGV3c4RB7g/exec', windowSize: 'width=900,height=700' },
-      { id: 'scoreboard', name: 'Scoreboard', category: 'classroom', iconClass: 'ph-trophy', url: 'https://lunaticarus.github.io/classtools/scoreboard.html', windowSize: 'width=1000,height=700' },
-      { id: 'vocab', name: 'Vocab', category: 'classroom', iconClass: 'ph-book-open-text', url: 'https://lunaticarus.github.io/classtools/vocab.html', windowSize: 'width=1100,height=750' },
-      { id: 'timer', name: 'Timer', category: 'classroom', iconClass: 'ph-timer', url: 'https://lunaticarus.github.io/classtools/timer.html', windowSize: 'width=800,height=600' },
-      { id: 'readaloud', name: 'ReadAloud', category: 'classroom', iconClass: 'ph-microphone', url: 'https://lunaticarus.github.io/ReadAloud/', windowSize: 'width=1000,height=700' },
-      { id: 'vocabquest', name: 'VocabQuest', category: 'classroom', iconClass: 'ph-sword', url: 'https://lunaticarus.github.io/VocabQuest/', windowSize: 'width=1100,height=750' },
-      { id: 'photoservice', name: 'Photo Service Booking', category: 'school', iconClass: 'ph-camera', url: 'https://script.google.com/a/macros/lstyoungkhl.edu.hk/s/AKfycbyy2tgpqQz82rqPVNtWhrSEYzRP-LfBkX3cKZuQkkZsMjf6nhdpKaYgvkxUFiRrETgf/exec', windowSize: 'width=1000,height=750' },
-      { id: 'parentsday', name: '家長日報到平台', category: 'school', iconClass: 'ph-clipboard-text', url: 'https://lunaticarus.github.io/ParentsDay/', windowSize: 'width=1100,height=800' },
-      { id: 's1briefing', name: '中一入學簡介會報名', category: 'school', iconClass: 'ph-buildings', url: 'https://lunaticarus.github.io/s1briefing/', windowSize: 'width=1100,height=800' },
-      { id: 'openday', name: '開放日集章平台', category: 'school', iconClass: 'ph-target', url: 'https://lunaticarus.github.io/ykhl_openday/', windowSize: 'width=1100,height=800' }
+      { id: 'notepad', name: 'Notepad', category: 'classroom', iconName: 'square-pen', url: 'https://script.google.com/a/macros/lstyoungkhl.edu.hk/s/AKfycbwzSbCzx6xiE02v5FGYVa02RbukLjMXLTBN4FqMjj6Eyk4dqPUptoeld7lyHGV3c4RB7g/exec', windowSize: 'width=900,height=700' },
+      { id: 'scoreboard', name: 'Scoreboard', category: 'classroom', iconName: 'trophy', url: 'https://lunaticarus.github.io/classtools/scoreboard.html', windowSize: 'width=1000,height=700' },
+      { id: 'vocab', name: 'Vocab', category: 'classroom', iconName: 'book-open-text', url: 'https://lunaticarus.github.io/classtools/vocab.html', windowSize: 'width=1100,height=750' },
+      { id: 'timer', name: 'Timer', category: 'classroom', iconName: 'timer', url: 'https://lunaticarus.github.io/classtools/timer.html', windowSize: 'width=800,height=600' },
+      { id: 'readaloud', name: 'ReadAloud', category: 'classroom', iconName: 'mic', url: 'https://lunaticarus.github.io/ReadAloud/', windowSize: 'width=1000,height=700' },
+      { id: 'vocabquest', name: 'VocabQuest', category: 'classroom', iconName: 'swords', url: 'https://lunaticarus.github.io/VocabQuest/', windowSize: 'width=1100,height=750' },
+      { id: 'photoservice', name: 'Photo Booking', category: 'school', iconName: 'camera', url: 'https://script.google.com/a/macros/lstyoungkhl.edu.hk/s/AKfycbyy2tgpqQz82rqPVNtWhrSEYzRP-LfBkX3cKZuQkkZsMjf6nhdpKaYgvkxUFiRrETgf/exec', windowSize: 'width=1000,height=750' },
+      { id: 'parentsday', name: '家長日報到', category: 'school', iconName: 'clipboard-list', url: 'https://lunaticarus.github.io/ParentsDay/', windowSize: 'width=1100,height=800' },
+      { id: 's1briefing', name: '中一簡介會', category: 'school', iconName: 'building', url: 'https://lunaticarus.github.io/s1briefing/', windowSize: 'width=1100,height=800' },
+      { id: 'openday', name: '開放日集章', category: 'school', iconName: 'target', url: 'https://lunaticarus.github.io/ykhl_openday/', windowSize: 'width=1100,height=800' }
     ];
 
     let apps = [];
     let activeCategory = 'all';
     let draggedItem = null;
-    const statusCache = {}; // Cache host status across renders
+    const statusCache = {};
 
     function openInNewWindow(url, sizeSpecs) {
       const dualLeft = window.screenLeft ?? window.screenX;
@@ -349,7 +651,6 @@
       window.open(url, '_blank', `${sizeSpecs},top=${top},left=${left},resizable=yes,scrollbars=yes,status=yes`);
     }
 
-    /* Single-run status check per session */
     function checkAppStatusOnce(appId, url) {
       if (statusCache[appId] !== undefined) {
         updateStatusUI(appId, statusCache[appId]);
@@ -408,9 +709,13 @@
       grid.innerHTML = '';
       const query = filterQuery.toLowerCase().trim();
 
+      let visibleCount = 0;
+
       apps.forEach((app, index) => {
         if (activeCategory !== 'all' && app.category !== activeCategory) return;
         if (query && !app.name.toLowerCase().includes(query)) return;
+
+        visibleCount++;
 
         const card = document.createElement('div');
         card.className = 'glass-card';
@@ -420,9 +725,10 @@
         const cachedState = statusCache[app.id] || '';
 
         card.innerHTML = `
-          <div class="app-icon">
+          <span class="card-category-tag">${app.category}</span>
+          <div class="app-icon-container">
             <span class="status-dot ${cachedState}" id="status-${app.id}"></span>
-            <i class="ph ${app.iconClass}"></i>
+            <i data-lucide="${app.iconName}"></i>
           </div>
           <div class="app-title">${app.name}</div>
         `;
@@ -470,6 +776,14 @@
         grid.appendChild(card);
         checkAppStatusOnce(app.id, app.url);
       });
+
+      // Update Node Counter
+      document.getElementById('nodeCount').innerText = visibleCount;
+
+      // Render Lucide SVG Icons
+      if (window.lucide) {
+        lucide.createIcons();
+      }
     }
 
     function initSearchAndShortcuts() {
