@@ -155,13 +155,18 @@
             justify-content: center;
         }
 
-        .icon-nav-btn:hover {
+        .icon-nav-btn:hover:not(:disabled) {
             background: var(--glass-bg-hover);
             border-color: var(--glass-border-strong);
         }
 
-        .icon-nav-btn:active {
+        .icon-nav-btn:active:not(:disabled) {
             transform: scale(0.95) translateZ(0);
+        }
+
+        .icon-nav-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
         }
 
         .icon-nav-btn svg { width: 18px; height: 18px; fill: currentColor; }
@@ -565,7 +570,7 @@
         <button class="dock-btn" id="dockSetBtn" onclick="openSetModal()">Set</button>
     </div>
 
-    <div id="appVersion">v4.3 | Liquid Glass</div>
+    <div id="appVersion">v4.5 | Liquid Glass</div>
 
     <!-- Set Time Glass Modal -->
     <div id="modalOverlay" onpointerdown="if (event.target === this) closeSetModal()">
@@ -714,6 +719,8 @@
                 }
                 if (isRunning) {
                     startTicker();
+                    requestWakeLock();
+                    startKeepAlive();
                     syncTimer();
                 }
             }
@@ -762,9 +769,21 @@
         const circumference = 2 * Math.PI * ringRadius;
         ringPath.style.strokeDasharray = `${circumference} ${circumference}`;
 
-        function setPlayButtonState(running) {
+        function isSessionInProgress() {
+            if (isRunning) return true;
+            if (mode === 'countdown') return remainingMs > 0 && remainingMs < initialMs;
+            return elapsedMs > 0;
+        }
+
+        function setRunningUIState(running) {
             document.getElementById('startBtnIcon').innerText = running ? '⏸' : '▶';
             document.getElementById('startBtnText').innerText = running ? 'Pause' : 'Start';
+            const modeBtn = document.getElementById('modeNavBtn');
+            const locked = isSessionInProgress();
+            modeBtn.disabled = locked;
+            modeBtn.title = locked
+                ? 'Reset timer to switch mode'
+                : 'Toggle Timer Mode (Count Down / Count Up)';
         }
 
         /* Lazy Web Audio Synthesizer & Silent Audio Keep-Alive */
@@ -1046,7 +1065,7 @@
                     isRunning = false;
                     stopTicker();
                     releaseWakeLock();
-                    setPlayButtonState(false);
+                    setRunningUIState(false);
                     playLoudChime();
                     triggerFlashingAlert();
                 }
@@ -1077,7 +1096,7 @@
             
             clearFlashingAlert();
             isRunning = true;
-            setPlayButtonState(true);
+            setRunningUIState(true);
 
             if (mode === 'countdown') {
                 targetTimestamp = Date.now() + remainingMs;
@@ -1104,7 +1123,7 @@
             stopTicker();
             stopKeepAlive();
             releaseWakeLock();
-            setPlayButtonState(false);
+            setRunningUIState(false);
             updateDisplay(true);
         }
 
@@ -1115,10 +1134,10 @@
             stopTicker();
             stopKeepAlive();
             releaseWakeLock();
-            setPlayButtonState(false);
             remainingMs = initialMs;
             elapsedMs = 0;
             targetTimestamp = null;
+            setRunningUIState(false);
             updateDisplay(true);
         }
 
@@ -1151,6 +1170,7 @@
 
         function toggleMode() {
             if (document.activeElement) document.activeElement.blur();
+            if (isSessionInProgress()) return;
             const nextMode = mode === 'countdown' ? 'countup' : 'countdown';
             switchMode(nextMode);
         }
@@ -1200,8 +1220,15 @@
                     try { inp.setSelectionRange(0, inp.value.length); } catch (e) {}
                 }, 0);
             });
-            inp.addEventListener('mouseup', (e) => {
-                e.preventDefault();
+            inp.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && inp.value.length === 0 && idx > 0) {
+                    e.preventDefault();
+                    const prev = timeInputs[idx - 1];
+                    prev.focus();
+                    setTimeout(() => {
+                        try { prev.setSelectionRange(0, prev.value.length); } catch (err) {}
+                    }, 0);
+                }
             });
             inp.addEventListener('input', () => {
                 const digits = inp.value.replace(/\D/g, '').slice(0, 2);
@@ -1261,6 +1288,10 @@
             const hrs = Math.min(99, Math.max(0, Math.floor(Number(document.getElementById('inputHours').value) || 0)));
             const mins = Math.min(59, Math.max(0, Math.floor(Number(document.getElementById('inputMins').value) || 0)));
             const secs = Math.min(59, Math.max(0, Math.floor(Number(document.getElementById('inputSecs').value) || 0)));
+
+            document.getElementById('inputHours').value = String(hrs).padStart(2, '0');
+            document.getElementById('inputMins').value = String(mins).padStart(2, '0');
+            document.getElementById('inputSecs').value = String(secs).padStart(2, '0');
 
             const total = (hrs * 3600) + (mins * 60) + secs;
             if (total <= 0) {
