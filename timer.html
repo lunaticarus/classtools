@@ -45,6 +45,7 @@
         html, body {
             width: 100vw;
             height: 100vh;
+            height: 100dvh;
             overflow: hidden;
             position: fixed;
         }
@@ -69,6 +70,7 @@
             left: 0;
             width: 100vw;
             height: 100vh;
+            height: 100dvh;
             background: linear-gradient(135deg, #1f1c2c 0%, #928dab 50%, #2c3e50 100%);
             z-index: -2;
             pointer-events: none;
@@ -82,6 +84,7 @@
             left: 0;
             width: 100vw;
             height: 100vh;
+            height: 100dvh;
             z-index: -1;
             pointer-events: none;
             filter: blur(40px);
@@ -234,7 +237,7 @@
             stroke: var(--accent-blue);
             stroke-width: 8;
             stroke-linecap: round;
-            transition: stroke-dashoffset 0.3s linear, stroke 0.4s ease;
+            transition: stroke-dashoffset 0.2s linear, stroke 0.4s ease;
         }
 
         .digital-display {
@@ -253,6 +256,12 @@
             font-variant-numeric: tabular-nums;
             line-height: 1;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            transition: font-size 0.2s ease;
+        }
+
+        .time-text.has-hours {
+            font-size: clamp(36px, 6vh, 50px);
+            letter-spacing: -1px;
         }
 
         .mode-label-text {
@@ -341,7 +350,7 @@
         #modalOverlay {
             display: none;
             position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
+            top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh;
             background: rgba(0, 0, 0, 0.4);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
@@ -367,6 +376,16 @@
         @keyframes modalPopCenter {
             from { opacity: 0; transform: scale(0.94) translateY(8px); }
             to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        @keyframes inputShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); border-color: var(--accent-red); }
+            75% { transform: translateX(5px); border-color: var(--accent-red); }
+        }
+
+        .input-error {
+            animation: inputShake 0.28s ease;
         }
 
         .action-modal p {
@@ -437,6 +456,8 @@
             outline: none;
             transition: all 0.2s ease;
             font-variant-numeric: tabular-nums;
+            user-select: text;
+            -webkit-user-select: text;
         }
 
         .modal-time-input:focus {
@@ -537,18 +558,18 @@
     <!-- Center Floating Glass Dock -->
     <div id="dockActions" class="bottom-dock">
         <button id="startBtn" class="dock-btn primary" onclick="toggleTimer()">
-            ▶ <span id="startBtnText">Start</span>
+            <span id="startBtnIcon">▶</span> <span id="startBtnText">Start</span>
         </button>
         <button class="dock-btn" onclick="resetTimer()">Reset</button>
         <div class="dock-divider" id="dockSetDivider"></div>
         <button class="dock-btn" id="dockSetBtn" onclick="openSetModal()">Set</button>
     </div>
 
-    <div id="appVersion">v3.1 | Liquid Glass</div>
+    <div id="appVersion">v4.3 | Liquid Glass</div>
 
     <!-- Set Time Glass Modal -->
-    <div id="modalOverlay" onclick="closeSetModal()">
-        <div class="action-modal" onclick="event.stopPropagation()">
+    <div id="modalOverlay" onpointerdown="if (event.target === this) closeSetModal()">
+        <div class="action-modal">
             <p>Set Countdown Time</p>
             
             <div class="preset-grid">
@@ -562,17 +583,17 @@
 
             <div class="time-inputs">
                 <div class="time-field-group">
-                    <input type="number" id="inputHours" class="modal-time-input" min="0" max="23" placeholder="00" value="00">
+                    <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" data-max="99" id="inputHours" class="modal-time-input" placeholder="00" value="00">
                     <span>HRS</span>
                 </div>
                 <span style="font-weight: 700; font-size: 16px; color: var(--text-muted); margin-top: 4px;">:</span>
                 <div class="time-field-group">
-                    <input type="number" id="inputMins" class="modal-time-input" min="0" max="59" placeholder="05" value="05">
+                    <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" data-max="59" id="inputMins" class="modal-time-input" placeholder="05" value="05">
                     <span>MIN</span>
                 </div>
                 <span style="font-weight: 700; font-size: 16px; color: var(--text-muted); margin-top: 4px;">:</span>
                 <div class="time-field-group">
-                    <input type="number" id="inputSecs" class="modal-time-input" min="0" max="59" placeholder="00" value="00">
+                    <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" data-max="59" id="inputSecs" class="modal-time-input" placeholder="00" value="00">
                     <span>SEC</span>
                 </div>
             </div>
@@ -589,6 +610,7 @@
         const canvas = document.getElementById('liquidCanvas');
         const ctx = canvas.getContext('2d');
         let width, height, dpr;
+        let blobRafId = null;
         
         function resizeCanvas() {
             dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -596,11 +618,12 @@
             height = window.innerHeight;
             canvas.width = width * dpr;
             canvas.height = height * dpr;
-            ctx.scale(dpr, dpr);
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         }
         
         window.addEventListener('resize', () => {
-            if (canvas.width !== window.innerWidth * (window.devicePixelRatio || 1)) {
+            const currentDpr = Math.min(window.devicePixelRatio || 1, 2);
+            if (canvas.width !== window.innerWidth * currentDpr || canvas.height !== window.innerHeight * currentDpr) {
                 resizeCanvas();
             }
         });
@@ -613,11 +636,16 @@
         ];
 
         function animateBlobs() {
+            if (document.hidden) {
+                blobRafId = null;
+                return;
+            }
             ctx.clearRect(0, 0, width, height);
             blobs.forEach(b => {
-                b.x += b.vx; b.y += b.vy;
-                if (b.x < 0 || b.x > 1) b.vx *= -1;
-                if (b.y < 0 || b.y > 1) b.vy *= -1;
+                b.x = Math.min(1, Math.max(0, b.x + b.vx));
+                b.y = Math.min(1, Math.max(0, b.y + b.vy));
+                if (b.x <= 0 || b.x >= 1) b.vx *= -1;
+                if (b.y <= 0 || b.y >= 1) b.vy *= -1;
 
                 const grad = ctx.createRadialGradient(
                     b.x * width, b.y * height, 0,
@@ -631,33 +659,218 @@
                 ctx.arc(b.x * width, b.y * height, b.r * Math.max(width, height), 0, Math.PI * 2);
                 ctx.fill();
             });
-            requestAnimationFrame(animateBlobs);
+            blobRafId = requestAnimationFrame(animateBlobs);
         }
-        animateBlobs();
+        blobRafId = requestAnimationFrame(animateBlobs);
 
-        /* Timer Logic Engine */
+        /* Inline Web Worker for Unthrottled Background Ticks (bfcache-safe) */
+        let tickerWorker = null;
+
+        function initTickerWorker() {
+            if (tickerWorker) return;
+            try {
+                const workerBlob = new Blob([`
+                    let id = null;
+                    self.onmessage = (e) => {
+                        if (e.data === 'start') {
+                            clearInterval(id);
+                            id = setInterval(() => self.postMessage('tick'), 200);
+                        } else if (e.data === 'stop') {
+                            clearInterval(id);
+                            id = null;
+                        }
+                    };
+                `], { type: 'application/javascript' });
+                const workerUrl = URL.createObjectURL(workerBlob);
+                tickerWorker = new Worker(workerUrl);
+                URL.revokeObjectURL(workerUrl);
+                tickerWorker.onmessage = () => syncTimer();
+            } catch (e) {
+                tickerWorker = null;
+            }
+        }
+        initTickerWorker();
+
+        window.addEventListener('pagehide', () => {
+            if (tickerWorker) {
+                tickerWorker.terminate();
+                tickerWorker = null;
+            }
+            if (blobRafId) {
+                cancelAnimationFrame(blobRafId);
+                blobRafId = null;
+            }
+            stopKeepAlive();
+            if (audioCtx && audioCtx.state === 'running') {
+                audioCtx.suspend().catch(() => {});
+            }
+        });
+
+        window.addEventListener('pageshow', (e) => {
+            if (e.persisted) {
+                initTickerWorker();
+                if (!blobRafId && !document.hidden) {
+                    blobRafId = requestAnimationFrame(animateBlobs);
+                }
+                if (isRunning) {
+                    startTicker();
+                    syncTimer();
+                }
+            }
+        });
+
+        /* Screen Wake Lock (Prevents iPad/Laptop Sleep During Active Timers) */
+        let wakeLockSentinel = null;
+
+        async function requestWakeLock() {
+            if (!('wakeLock' in navigator) || wakeLockSentinel || document.hidden) return;
+            try {
+                wakeLockSentinel = await navigator.wakeLock.request('screen');
+                wakeLockSentinel.addEventListener('release', () => {
+                    wakeLockSentinel = null;
+                    if (isRunning && !document.hidden) {
+                        requestWakeLock();
+                    }
+                });
+            } catch (e) {}
+        }
+
+        function releaseWakeLock() {
+            if (wakeLockSentinel) {
+                const sentinel = wakeLockSentinel;
+                wakeLockSentinel = null;
+                sentinel.release().catch(() => {});
+            }
+        }
+
+        /* Timer Logic Engine (Millisecond-Accurate) */
         let mode = 'countdown'; 
-        let initialSeconds = 300; 
-        let remainingSeconds = 300;
-        let countUpSeconds = 0;
+        let initialMs = 300000; 
+        let remainingMs = 300000;
+        let elapsedMs = 0;
+        let targetTimestamp = null;
         let isRunning = false;
-        let timerInterval = null;
+        let fallbackInterval = null;
         let soundEnabled = true;
         let isFocusMode = false;
         let isAlertFlashing = false;
+        let alertDismissedAt = 0;
+        let lastRenderedSec = null;
 
         const ringPath = document.getElementById('progressRingPath');
         const ringRadius = 52;
         const circumference = 2 * Math.PI * ringRadius;
         ringPath.style.strokeDasharray = `${circumference} ${circumference}`;
 
-        /* Web Audio Synthesizer */
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playLoudChime() {
-            if (!soundEnabled) return;
+        function setPlayButtonState(running) {
+            document.getElementById('startBtnIcon').innerText = running ? '⏸' : '▶';
+            document.getElementById('startBtnText').innerText = running ? 'Pause' : 'Start';
+        }
+
+        /* Lazy Web Audio Synthesizer & Silent Audio Keep-Alive */
+        let audioCtx = null;
+        let keepAliveOsc = null;
+        let keepAliveGain = null;
+        let isStartingKeepAlive = false;
+
+        function handleAudioStateChange() {
+            if (audioCtx && audioCtx.state === 'running' && isRunning && soundEnabled && !keepAliveOsc) {
+                startKeepAlive();
+            }
+        }
+
+        function getAudioCtx() {
+            if (!audioCtx || audioCtx.state === 'closed') {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContextClass) return null;
+                audioCtx = new AudioContextClass();
+                if (typeof audioCtx.addEventListener === 'function') {
+                    audioCtx.addEventListener('statechange', handleAudioStateChange);
+                } else {
+                    audioCtx.onstatechange = handleAudioStateChange;
+                }
+            }
+            return audioCtx;
+        }
+
+        function unlockAudio() {
+            const ctx = getAudioCtx();
+            if (!ctx) return;
+            if (ctx.state !== 'running') {
+                ctx.resume().catch(() => {});
+            }
+            if (ctx.state === 'running') {
+                window.removeEventListener('pointerdown', unlockAudio);
+                window.removeEventListener('keydown', unlockAudio);
+            }
+        }
+        window.addEventListener('pointerdown', unlockAudio);
+        window.addEventListener('keydown', unlockAudio);
+
+        // Generates an inaudible 18.5kHz carrier wave to prevent HDMI/Bluetooth/PA hardware gates from sleeping
+        async function startKeepAlive() {
+            if (!soundEnabled || keepAliveOsc || isStartingKeepAlive) return;
+            const ctx = getAudioCtx();
+            if (!ctx) return;
+            isStartingKeepAlive = true;
             try {
-                if (audioCtx.state === 'suspended') { audioCtx.resume(); }
-                const now = audioCtx.currentTime;
+                if (ctx.state !== 'running') {
+                    await ctx.resume();
+                }
+                if (!isRunning || !soundEnabled || keepAliveOsc) return;
+
+                const now = ctx.currentTime;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(18500, now);
+                gain.gain.setValueAtTime(0.00001, now);
+                gain.gain.exponentialRampToValueAtTime(0.002, now + 0.05);
+                
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.onended = () => {
+                    try { osc.disconnect(); gain.disconnect(); } catch (e) {}
+                };
+                osc.start(now);
+
+                keepAliveOsc = osc;
+                keepAliveGain = gain;
+            } catch (e) {
+            } finally {
+                isStartingKeepAlive = false;
+            }
+        }
+
+        function stopKeepAlive() {
+            if (keepAliveOsc) {
+                const osc = keepAliveOsc;
+                const gain = keepAliveGain;
+                const ctx = audioCtx;
+                keepAliveOsc = null;
+                keepAliveGain = null;
+                try {
+                    const now = ctx ? ctx.currentTime : 0;
+                    gain.gain.cancelScheduledValues(now);
+                    gain.gain.setTargetAtTime(0.00001, now, 0.01);
+                    osc.stop(now + 0.05);
+                } catch (e) {
+                    try { osc.stop(); osc.disconnect(); gain.disconnect(); } catch (err) {}
+                }
+            }
+        }
+
+        async function playLoudChime() {
+            stopKeepAlive();
+            if (!soundEnabled) return;
+            const ctx = getAudioCtx();
+            if (!ctx) return;
+            try {
+                if (ctx.state !== 'running') {
+                    await ctx.resume();
+                }
+                const now = ctx.currentTime + 0.02;
                 
                 const chimePattern = [
                     { time: 0.0, freqs: [659.25, 830.61] },
@@ -669,8 +882,8 @@
 
                 chimePattern.forEach(note => {
                     note.freqs.forEach(freq => {
-                        const osc = audioCtx.createOscillator();
-                        const gain = audioCtx.createGain();
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
                         
                         osc.type = 'sine';
                         osc.frequency.setValueAtTime(freq, now + note.time);
@@ -680,7 +893,7 @@
                         gain.gain.exponentialRampToValueAtTime(0.0001, now + note.time + 0.9);
                         
                         osc.connect(gain);
-                        gain.connect(audioCtx.destination);
+                        gain.connect(ctx.destination);
                         
                         osc.start(now + note.time);
                         osc.stop(now + note.time + 0.9);
@@ -692,17 +905,22 @@
         function triggerFlashingAlert() {
             isAlertFlashing = true;
             document.getElementById('timerCard').classList.add('flashing-alert');
+            updateDisplay(true);
         }
 
         function clearFlashingAlert() {
+            if (isAlertFlashing) {
+                alertDismissedAt = Date.now();
+            }
             isAlertFlashing = false;
             document.getElementById('timerCard').classList.remove('flashing-alert');
+            updateDisplay(true);
         }
 
         function handleCardClick() {
             if (isAlertFlashing) {
                 clearFlashingAlert();
-            } else {
+            } else if (Date.now() - alertDismissedAt > 400) {
                 toggleFocusMode();
             }
         }
@@ -717,84 +935,214 @@
             return `${pad(mins)}:${pad(secs)}`;
         }
 
-        function updateDisplay() {
+        function setRingOffsetImmediate(offset) {
+            ringPath.style.transition = 'stroke 0.4s ease';
+            ringPath.style.strokeDashoffset = isNaN(offset) ? 0 : offset;
+            requestAnimationFrame(() => {
+                ringPath.style.transition = '';
+            });
+        }
+
+        function updateDisplay(force = false) {
             const timeDisplay = document.getElementById('timeDisplay');
 
             if (mode === 'countdown') {
-                timeDisplay.innerText = formatTime(remainingSeconds);
-                const progress = remainingSeconds / initialSeconds;
+                const progress = initialMs > 0 ? (remainingMs / initialMs) : 0;
                 const offset = circumference - (progress * circumference);
-                ringPath.style.strokeDashoffset = isNaN(offset) ? 0 : offset;
+                if (force) {
+                    setRingOffsetImmediate(offset);
+                } else {
+                    ringPath.style.strokeDashoffset = isNaN(offset) ? 0 : offset;
+                }
+
+                const displaySecs = Math.ceil(remainingMs / 1000);
+                if (!force && displaySecs === lastRenderedSec) return;
+                lastRenderedSec = displaySecs;
+
+                const formatted = formatTime(displaySecs);
+                timeDisplay.innerText = formatted;
+                timeDisplay.classList.toggle('has-hours', displaySecs >= 3600);
                 
-                if (remainingSeconds === 0 && initialSeconds > 0) {
+                if (isAlertFlashing) {
+                    document.title = "00:00 Time's Up! - Timer";
+                } else if (isRunning) {
+                    document.title = `${formatted} - Timer`;
+                } else if (remainingMs < initialMs && remainingMs > 0) {
+                    document.title = `${formatted} (Paused) - Timer`;
+                } else {
+                    document.title = "Timer";
+                }
+                
+                if (remainingMs <= 0 && initialMs > 0) {
                     ringPath.style.stroke = 'var(--accent-red)';
-                } else if (remainingSeconds <= 15) {
+                } else if (displaySecs <= 15) {
                     ringPath.style.stroke = 'var(--accent-red)';
-                } else if (remainingSeconds <= 60) {
+                } else if (displaySecs <= 60) {
                     ringPath.style.stroke = 'var(--accent-orange)';
                 } else {
                     ringPath.style.stroke = 'var(--accent-blue)';
                 }
             } else {
-                timeDisplay.innerText = formatTime(countUpSeconds);
-                const spinProgress = (countUpSeconds % 60) / 60;
-                ringPath.style.strokeDashoffset = circumference - (spinProgress * circumference);
+                const spinProgress = ((elapsedMs / 1000) % 60) / 60;
+                const offset = circumference - (spinProgress * circumference);
+                if (force) {
+                    setRingOffsetImmediate(offset);
+                } else {
+                    ringPath.style.strokeDashoffset = offset;
+                }
+
+                const displaySecs = Math.floor(elapsedMs / 1000);
+                if (!force && displaySecs === lastRenderedSec) return;
+                lastRenderedSec = displaySecs;
+
+                const formatted = formatTime(displaySecs);
+                timeDisplay.innerText = formatted;
+                timeDisplay.classList.toggle('has-hours', displaySecs >= 3600);
+                
+                if (isRunning) {
+                    document.title = `${formatted} (Up) - Timer`;
+                } else if (elapsedMs > 0) {
+                    document.title = `${formatted} (Paused) - Timer`;
+                } else {
+                    document.title = "Timer";
+                }
+                
                 ringPath.style.stroke = 'var(--accent-green)';
             }
         }
 
+        function startTicker() {
+            initTickerWorker();
+            if (tickerWorker) {
+                tickerWorker.postMessage('start');
+            } else {
+                clearInterval(fallbackInterval);
+                fallbackInterval = setInterval(syncTimer, 200);
+            }
+        }
+
+        function stopTicker() {
+            if (tickerWorker) {
+                tickerWorker.postMessage('stop');
+            }
+            clearInterval(fallbackInterval);
+            fallbackInterval = null;
+        }
+
+        function syncTimer() {
+            if (!isRunning) return;
+            const now = Date.now();
+
+            const ctx = getAudioCtx();
+            if (soundEnabled && ctx && ctx.state !== 'running') {
+                ctx.resume().catch(() => {});
+            }
+
+            if (mode === 'countdown') {
+                remainingMs = Math.max(0, targetTimestamp - now);
+                updateDisplay();
+
+                if (remainingMs <= 0) {
+                    isRunning = false;
+                    stopTicker();
+                    releaseWakeLock();
+                    setPlayButtonState(false);
+                    playLoudChime();
+                    triggerFlashingAlert();
+                }
+            } else {
+                elapsedMs = Math.max(0, now - targetTimestamp);
+                updateDisplay();
+            }
+        }
+
         function toggleTimer() {
-            if (audioCtx.state === 'suspended') { audioCtx.resume(); }
+            if (document.activeElement) document.activeElement.blur();
+            const ctx = getAudioCtx();
+            if (ctx && ctx.state !== 'running') { ctx.resume().catch(() => {}); }
             if (isAlertFlashing) clearFlashingAlert();
 
-            if (isRunning) pauseTimer();
-            else startTimer();
+            if (isRunning) {
+                pauseTimer();
+            } else {
+                if (mode === 'countdown' && remainingMs <= 0) {
+                    remainingMs = initialMs;
+                }
+                startTimer();
+            }
         }
 
         function startTimer() {
-            if (mode === 'countdown' && remainingSeconds <= 0) return;
+            if (mode === 'countdown' && remainingMs <= 0) return;
             
             clearFlashingAlert();
             isRunning = true;
-            document.getElementById('startBtnText').innerText = "Pause";
+            setPlayButtonState(true);
+
+            if (mode === 'countdown') {
+                targetTimestamp = Date.now() + remainingMs;
+            } else {
+                targetTimestamp = Date.now() - elapsedMs;
+            }
             
-            timerInterval = setInterval(() => {
-                if (mode === 'countdown') {
-                    if (remainingSeconds > 0) {
-                        remainingSeconds--;
-                        updateDisplay();
-                        if (remainingSeconds === 0) {
-                            pauseTimer();
-                            playLoudChime();
-                            triggerFlashingAlert();
-                        }
-                    }
-                } else {
-                    countUpSeconds++;
-                    updateDisplay();
-                }
-            }, 1000);
-            
-            updateDisplay();
+            startKeepAlive();
+            requestWakeLock();
+            startTicker();
+            updateDisplay(true);
         }
 
         function pauseTimer() {
+            if (isRunning) {
+                const now = Date.now();
+                if (mode === 'countdown') {
+                    remainingMs = Math.max(0, targetTimestamp - now);
+                } else {
+                    elapsedMs = Math.max(0, now - targetTimestamp);
+                }
+            }
             isRunning = false;
-            clearInterval(timerInterval);
-            document.getElementById('startBtnText').innerText = "Start";
-            updateDisplay();
+            stopTicker();
+            stopKeepAlive();
+            releaseWakeLock();
+            setPlayButtonState(false);
+            updateDisplay(true);
         }
 
         function resetTimer() {
+            if (document.activeElement) document.activeElement.blur();
             clearFlashingAlert();
-            pauseTimer();
-            remainingSeconds = initialSeconds;
-            countUpSeconds = 0;
-            updateDisplay();
+            isRunning = false;
+            stopTicker();
+            stopKeepAlive();
+            releaseWakeLock();
+            setPlayButtonState(false);
+            remainingMs = initialMs;
+            elapsedMs = 0;
+            targetTimestamp = null;
+            updateDisplay(true);
         }
 
+        // Instant sync, wake-lock re-acquisition & background canvas resume on tab focus return
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                if (!blobRafId) {
+                    blobRafId = requestAnimationFrame(animateBlobs);
+                }
+                if (isRunning) {
+                    syncTimer();
+                    requestWakeLock();
+                }
+            }
+        });
+
         function toggleSound() {
+            if (document.activeElement) document.activeElement.blur();
             soundEnabled = !soundEnabled;
+            if (!soundEnabled) {
+                stopKeepAlive();
+            } else if (isRunning) {
+                startKeepAlive();
+            }
             const iconPath = soundEnabled 
                 ? 'M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z'
                 : 'M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z';
@@ -802,6 +1150,7 @@
         }
 
         function toggleMode() {
+            if (document.activeElement) document.activeElement.blur();
             const nextMode = mode === 'countdown' ? 'countup' : 'countdown';
             switchMode(nextMode);
         }
@@ -843,49 +1192,116 @@
             });
         }
 
-        /* Modal Dialog Controls */
+        /* Modal Dialog Controls & Input Sanitization (iOS Safari Touch-Safe) */
+        const timeInputs = Array.from(document.querySelectorAll('.modal-time-input'));
+        timeInputs.forEach((inp, idx) => {
+            inp.addEventListener('focus', () => {
+                setTimeout(() => {
+                    try { inp.setSelectionRange(0, inp.value.length); } catch (e) {}
+                }, 0);
+            });
+            inp.addEventListener('mouseup', (e) => {
+                e.preventDefault();
+            });
+            inp.addEventListener('input', () => {
+                const digits = inp.value.replace(/\D/g, '').slice(0, 2);
+                if (inp.value !== digits) inp.value = digits;
+                if (digits.length === 2 && idx < timeInputs.length - 1) {
+                    const next = timeInputs[idx + 1];
+                    next.focus();
+                    setTimeout(() => {
+                        try { next.setSelectionRange(0, next.value.length); } catch (e) {}
+                    }, 0);
+                }
+            });
+            inp.addEventListener('blur', () => {
+                const max = Number(inp.dataset.max) || 59;
+                const val = Math.min(max, Math.max(0, Math.floor(Number(inp.value) || 0)));
+                inp.value = String(val).padStart(2, '0');
+            });
+        });
+
         function openSetModal() {
+            if (document.activeElement) document.activeElement.blur();
             clearFlashingAlert();
             pauseTimer();
             
-            const hrs = Math.floor(initialSeconds / 3600);
-            const mins = Math.floor((initialSeconds % 3600) / 60);
-            const secs = initialSeconds % 60;
+            const totalInitialSecs = Math.round(initialMs / 1000);
+            const hrs = Math.floor(totalInitialSecs / 3600);
+            const mins = Math.floor((totalInitialSecs % 3600) / 60);
+            const secs = totalInitialSecs % 60;
             
             document.getElementById('inputHours').value = String(hrs).padStart(2, '0');
             document.getElementById('inputMins').value = String(mins).padStart(2, '0');
             document.getElementById('inputSecs').value = String(secs).padStart(2, '0');
             
             document.getElementById('modalOverlay').style.display = 'flex';
+            const minInput = document.getElementById('inputMins');
+            requestAnimationFrame(() => {
+                minInput.focus();
+                setTimeout(() => {
+                    try { minInput.setSelectionRange(0, minInput.value.length); } catch (e) {}
+                }, 0);
+            });
         }
 
         function closeSetModal() {
+            if (document.activeElement) document.activeElement.blur();
             document.getElementById('modalOverlay').style.display = 'none';
         }
 
         function applyQuickPreset(sec) {
-            initialSeconds = sec;
+            initialMs = sec * 1000;
             if (mode !== 'countdown') switchMode('countdown');
             else resetTimer();
             closeSetModal();
         }
 
         function applySetTime() {
-            const hrs = parseInt(document.getElementById('inputHours').value) || 0;
-            const mins = parseInt(document.getElementById('inputMins').value) || 0;
-            const secs = parseInt(document.getElementById('inputSecs').value) || 0;
+            const hrs = Math.min(99, Math.max(0, Math.floor(Number(document.getElementById('inputHours').value) || 0)));
+            const mins = Math.min(59, Math.max(0, Math.floor(Number(document.getElementById('inputMins').value) || 0)));
+            const secs = Math.min(59, Math.max(0, Math.floor(Number(document.getElementById('inputSecs').value) || 0)));
 
             const total = (hrs * 3600) + (mins * 60) + secs;
-            if (total > 0) {
-                initialSeconds = total;
-                if (mode !== 'countdown') switchMode('countdown');
-                else resetTimer();
+            if (total <= 0) {
+                timeInputs.forEach(inp => {
+                    inp.classList.remove('input-error');
+                    void inp.offsetWidth;
+                    inp.classList.add('input-error');
+                });
+                return;
             }
+
+            initialMs = total * 1000;
+            if (mode !== 'countdown') switchMode('countdown');
+            else resetTimer();
             closeSetModal();
         }
 
+        // Keyboard shortcuts: Modal Enter/Escape & Global Spacebar Start/Pause
+        document.addEventListener('keydown', (e) => {
+            if (e.repeat) return;
+            const modalOpen = document.getElementById('modalOverlay').style.display === 'flex';
+            if (modalOpen) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    applySetTime();
+                } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    closeSetModal();
+                }
+            } else if (e.code === 'Space') {
+                e.preventDefault();
+                if (isAlertFlashing) {
+                    clearFlashingAlert();
+                } else {
+                    toggleTimer();
+                }
+            }
+        });
+
         // Initialize
-        updateDisplay();
+        updateDisplay(true);
     </script>
 </body>
 </html>
