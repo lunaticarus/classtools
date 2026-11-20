@@ -1,78 +1,194 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>4-House Scoreboard</title>
+  <title>Scoreboard</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, sans-serif; }
-    body { background: #111827; color: #fff; height: 100vh; display: flex; }
-    .board { display: grid; grid-template-columns: repeat(4, 1fr); width: 100%; height: 100%; gap: 8px; padding: 8px; }
-    .team { display: flex; flex-direction: column; border-radius: 12px; padding: 20px; justify-content: space-between; }
-    .team:nth-child(1) { background: #dc2626; } /* Red House */
-    .team:nth-child(2) { background: #eab308; color: #111; } /* Yellow House */
-    .team:nth-child(3) { background: #2563eb; } /* Blue House */
-    .team:nth-child(4) { background: #16a34a; } /* Green House */
-    .controls { display: flex; flex-direction: column; gap: 10px; }
-    .btn-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-    .btn-single { display: flex; justify-content: center; }
-    button {
-      padding: 10px; font-size: 1.1rem; font-weight: bold; border: none;
-      border-radius: 6px; cursor: pointer; background: rgba(255,255,255,0.2); color: inherit;
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
     }
-    button:hover { background: rgba(255,255,255,0.35); }
-    .score-box { flex: 1; display: flex; align-items: center; justify-content: center; }
-    .score { font-size: 9vw; font-weight: 800; line-height: 1; user-select: none; }
+
+    .scoreboard {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      box-sizing: border-box;
+    }
+
+    .column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      position: relative;
+      box-sizing: border-box;
+      background-size: 100% auto;
+      background-position: bottom;
+      background-repeat: no-repeat;
+    }
+
+    .column.red    { background-color: #c0524d; background-image: url('https://www.lstyoungkhl.edu.hk/sites/default/files/ExamTimer/score/1.png'); }
+    .column.purple { background-color: #5a3275; background-image: url('https://www.lstyoungkhl.edu.hk/sites/default/files/ExamTimer/score/2.png'); }
+    .column.yellow { background-color: #e1b970; background-image: url('https://www.lstyoungkhl.edu.hk/sites/default/files/ExamTimer/score/3.png'); }
+    .column.green  { background-color: #588849; background-image: url('https://www.lstyoungkhl.edu.hk/sites/default/files/ExamTimer/score/4.png'); }
+
+    .buttons {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .button-row {
+      display: flex;
+      justify-content: center;
+    }
+
+    button {
+      background-color: transparent;
+      border: 1px solid white;
+      color: white;
+      padding: 5px 10px;
+      margin: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    button:hover {
+      background-color: white;
+      color: black;
+    }
+
+    .score-container {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .score {
+      font-size: 60px;
+      font-weight: bold;
+      color: white;
+      text-align: center;
+    }
+
+    .score-update {
+      animation: scoreAnimation 0.3s;
+    }
+
+    @keyframes scoreAnimation {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
   </style>
 </head>
 <body>
-  <div class="board" id="board"></div>
-
+  <div class="scoreboard">
+    <div class="column red">
+      <div class="buttons">
+        <div class="button-row">
+          <button onclick="addPoints('red', 100)">+100</button>
+          <button onclick="addPoints('red', 10)">+10</button>
+          <button onclick="addPoints('red', 1)">+1</button>
+        </div>
+        <div class="button-row">
+          <button onclick="addPoints('red', -100)">-100</button>
+          <button onclick="addPoints('red', -10)">-10</button>
+          <button onclick="addPoints('red', -1)">-1</button>
+        </div>
+        <div class="reset-button">
+          <button onclick="resetScore('red')">Reset</button>
+        </div>
+      </div>
+      <div class="score-container">
+        <div class="score" id="red-score">0</div>
+      </div>
+    </div>
+    <div class="column purple">
+      <div class="buttons">
+        <div class="button-row">
+          <button onclick="addPoints('purple', 100)">+100</button>
+          <button onclick="addPoints('purple', 10)">+10</button>
+          <button onclick="addPoints('purple', 1)">+1</button>
+        </div>
+        <div class="button-row">
+          <button onclick="addPoints('purple', -100)">-100</button>
+          <button onclick="addPoints('purple', -10)">-10</button>
+          <button onclick="addPoints('purple', -1)">-1</button>
+        </div>
+        <div class="reset-button">
+          <button onclick="resetScore('purple')">Reset</button>
+        </div>
+      </div>
+      <div class="score-container">
+        <div class="score" id="purple-score">0</div>
+      </div>
+    </div>
+    <div class="column yellow">
+      <div class="buttons">
+        <div class="button-row">
+          <button onclick="addPoints('yellow', 100)">+100</button>
+          <button onclick="addPoints('yellow', 10)">+10</button>
+          <button onclick="addPoints('yellow', 1)">+1</button>
+        </div>
+        <div class="button-row">
+          <button onclick="addPoints('yellow', -100)">-100</button>
+          <button onclick="addPoints('yellow', -10)">-10</button>
+          <button onclick="addPoints('yellow', -1)">-1</button>
+        </div>
+        <div class="reset-button">
+          <button onclick="resetScore('yellow')">Reset</button>
+        </div>
+      </div>
+      <div class="score-container">
+        <div class="score" id="yellow-score">0</div>
+      </div>
+    </div>
+    <div class="column green">
+      <div class="buttons">
+        <div class="button-row">
+          <button onclick="addPoints('green', 100)">+100</button>
+          <button onclick="addPoints('green', 10)">+10</button>
+          <button onclick="addPoints('green', 1)">+1</button>
+        </div>
+        <div class="button-row">
+          <button onclick="addPoints('green', -100)">-100</button>
+          <button onclick="addPoints('green', -10)">-10</button>
+          <button onclick="addPoints('green', -1)">-1</button>
+        </div>
+        <div class="reset-button">
+          <button onclick="resetScore('green')">Reset</button>
+        </div>
+      </div>
+      <div class="score-container">
+        <div class="score" id="green-score">0</div>
+      </div>
+    </div>
+  </div>
   <script>
-    const teams = ["House A", "House B", "House C", "House D"];
-    const scores = JSON.parse(localStorage.getItem("scoreboard_scores")) || [0, 0, 0, 0];
-    const board = document.getElementById("board");
-
-    function saveAndRender() {
-      localStorage.setItem("scoreboard_scores", JSON.stringify(scores));
-      document.querySelectorAll(".score").forEach((el, i) => el.textContent = scores[i]);
+    function addPoints(team, points) {
+      var scoreElement = document.getElementById(team + '-score');
+      var currentScore = parseInt(scoreElement.textContent, 10);
+      scoreElement.textContent = currentScore + points;
+      scoreElement.classList.add('score-update');
+      setTimeout(() => {
+        scoreElement.classList.remove('score-update');
+      }, 300);
     }
-
-    function updateScore(index, delta) {
-      scores[index] += delta;
-      saveAndRender();
+    function resetScore(team) {
+      var scoreElement = document.getElementById(team + '-score');
+      scoreElement.textContent = 0;
+      scoreElement.classList.add('score-update');
+      setTimeout(() => {
+        scoreElement.classList.remove('score-update');
+      }, 300);
     }
-
-    function resetScore(index) {
-      scores[index] = 0;
-      saveAndRender();
-    }
-
-    teams.forEach((name, idx) => {
-      const card = document.createElement("div");
-      card.className = "team";
-      card.innerHTML = `
-        <div class="controls">
-          <div class="btn-group">
-            <button onclick="updateScore(${idx}, 1)">+1</button>
-            <button onclick="updateScore(${idx}, 5)">+5</button>
-            <button onclick="updateScore(${idx}, 10)">+10</button>
-          </div>
-          <div class="btn-group">
-            <button onclick="updateScore(${idx}, -1)">-1</button>
-            <button onclick="updateScore(${idx}, -5)">-5</button>
-            <button onclick="updateScore(${idx}, -10)">-10</button>
-          </div>
-          <div class="btn-single">
-            <button onclick="resetScore(${idx})">Reset (${name})</button>
-          </div>
-        </div>
-        <div class="score-box">
-          <div class="score">${scores[idx]}</div>
-        </div>
-      `;
-      board.appendChild(card);
-    });
   </script>
 </body>
 </html>
