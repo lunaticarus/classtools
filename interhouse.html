@@ -67,9 +67,11 @@
       opacity: 1;
     }
 
-    /* Audience Display mode or 'H' toggle hides all buttons */
+    /* Audience Display mode or 'H' toggle hides all buttons & info icon */
     body.hide-controls .buttons,
-    body.audience-mode .buttons {
+    body.audience-mode .buttons,
+    body.hide-controls #info-btn,
+    body.audience-mode #info-btn {
       opacity: 0 !important;
       pointer-events: none;
     }
@@ -99,6 +101,132 @@
 
     button:active {
       transform: scale(0.94);
+    }
+
+    /* Subtle top-right (i) manual button */
+    #info-btn {
+      position: fixed;
+      top: 12px;
+      right: 12px;
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      margin: 0;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.75);
+      background: rgba(0, 0, 0, 0.2);
+      color: white;
+      font-family: Georgia, serif;
+      font-style: italic;
+      font-weight: bold;
+      font-size: 15px;
+      line-height: 26px;
+      text-align: center;
+      opacity: 0.3;
+      z-index: 15;
+      transition: opacity 0.2s ease, background-color 0.15s ease, color 0.15s ease;
+    }
+
+    #info-btn:hover {
+      opacity: 1;
+      background: white;
+      color: black;
+    }
+
+    /* Shortcuts / Manual Modal */
+    #help-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(4px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      z-index: 30;
+    }
+
+    #help-modal.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .help-card {
+      background: #1c1c1e;
+      color: #f5f5f7;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 12px;
+      padding: 24px 28px;
+      max-width: 460px;
+      width: 90%;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      position: relative;
+    }
+
+    .help-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      padding-bottom: 10px;
+    }
+
+    .help-header h2 {
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: 0.3px;
+    }
+
+    #close-help {
+      border: none;
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      padding: 0;
+      margin: 0;
+      font-size: 16px;
+      line-height: 28px;
+    }
+
+    #close-help:hover {
+      background: #fff;
+      color: #000;
+    }
+
+    .help-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    .help-table td {
+      padding: 8px 4px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .help-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .help-table td:last-child {
+      text-align: right;
+      color: #bbb;
+    }
+
+    kbd {
+      display: inline-block;
+      padding: 2px 7px;
+      font-family: monospace;
+      font-size: 12px;
+      color: #fff;
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 4px;
     }
 
     /* Center score display */
@@ -212,6 +340,53 @@
 <body>
   <canvas id="confetti-canvas"></canvas>
   <div id="toast"></div>
+
+  <!-- Top-right (i) Info Button -->
+  <button id="info-btn" title="Controls & Shortcuts (?)">i</button>
+
+  <!-- Shortcuts / Manual Overlay -->
+  <div id="help-modal">
+    <div class="help-card">
+      <div class="help-header">
+        <h2>Scoreboard Controls & Shortcuts</h2>
+        <button id="close-help" title="Close (Esc)">✕</button>
+      </div>
+      <table class="help-table">
+        <tr>
+          <td>Set exact score</td>
+          <td><kbd>Double-Click</kbd> any score</td>
+        </tr>
+        <tr>
+          <td>Open synced audience screen</td>
+          <td><kbd>P</kbd></td>
+        </tr>
+        <tr>
+          <td>Winner spotlight & confetti</td>
+          <td><kbd>W</kbd></td>
+        </tr>
+        <tr>
+          <td>Hide / show control buttons</td>
+          <td><kbd>H</kbd></td>
+        </tr>
+        <tr>
+          <td>Toggle fullscreen</td>
+          <td><kbd>F</kbd></td>
+        </tr>
+        <tr>
+          <td>Mute / unmute sound effects</td>
+          <td><kbd>M</kbd></td>
+        </tr>
+        <tr>
+          <td>Reset all 4 teams to 0</td>
+          <td><kbd>Shift</kbd> + <kbd>R</kbd></td>
+        </tr>
+        <tr>
+          <td>Toggle this manual</td>
+          <td><kbd>?</kbd> or <kbd>Esc</kbd></td>
+        </tr>
+      </table>
+    </div>
+  </div>
 
   <div class="scoreboard">
     <div class="column red" id="col-red">
@@ -333,7 +508,6 @@
     const history = { red: [], purple: [], yellow: [], green: [] };
     let isMuted = false;
 
-    // Cache DOM elements
     const scoreEls = {};
     const colEls = {};
     const wrapEls = {};
@@ -341,6 +515,31 @@
       scoreEls[t] = document.getElementById(t + '-score');
       colEls[t] = document.getElementById('col-' + t);
       wrapEls[t] = document.getElementById('wrap-' + t);
+    });
+
+    // Help Modal Controls
+    const helpModal = document.getElementById('help-modal');
+    const infoBtn = document.getElementById('info-btn');
+    const closeHelpBtn = document.getElementById('close-help');
+
+    function toggleHelp(force) {
+      if (isAudienceWindow) return;
+      helpModal.classList.toggle('open', force);
+    }
+
+    infoBtn.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleHelp();
+    });
+
+    closeHelpBtn.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      toggleHelp(false);
+    });
+
+    helpModal.addEventListener('pointerdown', (e) => {
+      if (e.target === helpModal) toggleHelp(false);
     });
 
     // Toast notification helper
@@ -354,7 +553,7 @@
       toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2200);
     }
 
-    // 1. Offline Image Caching (caches 1.png - 4.png into localStorage as Data URIs)
+    // Offline Image Caching
     const imageUrls = {
       red: 'https://www.lstyoungkhl.edu.hk/sites/default/files/ExamTimer/score/1.png',
       purple: 'https://www.lstyoungkhl.edu.hk/sites/default/files/ExamTimer/score/2.png',
@@ -371,7 +570,6 @@
           colEls[team].style.backgroundImage = `url('${cached[team]}')`;
         } else {
           colEls[team].style.backgroundImage = `url('${imageUrls[team]}')`;
-          // Attempt background fetch & cache for future offline use
           fetch(imageUrls[team])
             .then(r => r.blob())
             .then(blob => new Promise(res => {
@@ -392,7 +590,7 @@
     }
     loadAndCacheImages();
 
-    // 2. Dual-Window Sync via BroadcastChannel + storage event fallback
+    // Dual-Window Sync via BroadcastChannel
     const channel = ('BroadcastChannel' in window) ? new BroadcastChannel('lst_scoreboard_sync') : null;
     if (channel) {
       channel.onmessage = (e) => {
@@ -426,7 +624,7 @@
       }, 250);
     }
 
-    // 3. Web Audio Chimes (with Mute toggle)
+    // Web Audio Chimes
     let audioCtx = null;
     function playTone(type) {
       if (isMuted || isAudienceWindow) return;
@@ -479,7 +677,7 @@
       } catch (e) {}
     }
 
-    // 4. Rolling Number Counter & Floating Delta Indicator
+    // Rolling Number Counter & Floating Delta Indicator
     function animateNumber(team, target) {
       if (animFrames[team]) cancelAnimationFrame(animFrames[team]);
       const start = displayed[team];
@@ -498,7 +696,7 @@
 
       function step(now) {
         const progress = Math.min((now - startTime) / duration, 1);
-        const eased = 1 - Math.pow(1 - progress, 3); // cubic ease-out
+        const eased = 1 - Math.pow(1 - progress, 3);
         displayed[team] = Math.round(start + diff * eased);
         el.textContent = displayed[team];
         if (progress < 1) {
@@ -538,7 +736,7 @@
       if (soundType) playTone(soundType);
     }
 
-    // 5. Instant Pointerdown Button Handling
+    // Instant Pointerdown Button Handling
     document.querySelector('.scoreboard').addEventListener('pointerdown', (e) => {
       if (isAudienceWindow) return;
       const btn = e.target.closest('button');
@@ -564,7 +762,7 @@
       }
     });
 
-    // 6. Double-click score to enter exact custom value
+    // Double-click score to enter exact custom value
     teams.forEach(team => {
       scoreEls[team].addEventListener('dblclick', () => {
         if (isAudienceWindow) return;
@@ -578,7 +776,7 @@
       });
     });
 
-    // 7. Confetti Burst for Winner Spotlight
+    // Confetti Burst
     const canvas = document.getElementById('confetti-canvas');
     const ctx = canvas.getContext('2d');
     let particles = [];
@@ -590,7 +788,6 @@
       const colors = ['#ffffff', '#ffd700', '#ff6b6b', '#4ecdc4', '#ffe66d'];
       const maxScore = Math.max(...teams.map(t => state[t]));
 
-      // Spawn confetti primarily over leading columns
       const leaderIndices = teams
         .map((t, i) => (maxScore > 0 && state[t] === maxScore ? i : -1))
         .filter(i => i !== -1);
@@ -638,12 +835,19 @@
       confettiAnim = requestAnimationFrame(renderConfetti);
     }
 
-    // 8. Keyboard Shortcuts
+    // Keyboard Shortcuts
     document.addEventListener('keydown', (e) => {
       if (isAudienceWindow) return;
       const key = e.key.toLowerCase();
 
-      if (key === 'h') {
+      if (key === 'escape' && helpModal.classList.contains('open')) {
+        toggleHelp(false);
+        return;
+      }
+
+      if (e.key === '?' || e.key === '/') {
+        toggleHelp();
+      } else if (key === 'h') {
         const hidden = document.body.classList.toggle('hide-controls');
         showToast(hidden ? 'Controls Hidden (Press H to show)' : 'Controls Visible');
       } else if (key === 'f') {
