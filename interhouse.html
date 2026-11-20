@@ -29,6 +29,7 @@
       background-size: 100% auto;
       background-position: bottom;
       background-repeat: no-repeat;
+      transition: box-shadow 0.3s ease;
     }
 
     .column.red    { background-color: #c0524d; background-image: url('https://www.lstyoungkhl.edu.hk/sites/default/files/ExamTimer/score/1.png'); }
@@ -36,10 +37,29 @@
     .column.yellow { background-color: #e1b970; background-image: url('https://www.lstyoungkhl.edu.hk/sites/default/files/ExamTimer/score/3.png'); }
     .column.green  { background-color: #588849; background-image: url('https://www.lstyoungkhl.edu.hk/sites/default/files/ExamTimer/score/4.png'); }
 
+    /* Subtle inner highlight for the leading team */
+    .column.leader {
+      box-shadow: inset 0 0 40px rgba(255, 255, 255, 0.25);
+    }
+
+    /* Buttons stay pinned at the top, subtle until hovered for clean projection */
     .buttons {
       display: flex;
       flex-direction: column;
       align-items: center;
+      z-index: 2;
+      opacity: 0.25;
+      transition: opacity 0.25s ease;
+    }
+
+    .column:hover .buttons {
+      opacity: 1;
+    }
+
+    /* Pressing 'H' hides buttons completely for clean screenshots/stage view */
+    body.hide-controls .buttons {
+      opacity: 0 !important;
+      pointer-events: none;
     }
 
     .button-row {
@@ -55,7 +75,7 @@
       margin: 5px;
       cursor: pointer;
       font-size: 16px;
-      transition: background-color 0.3s, color 0.3s;
+      transition: background-color 0.2s, color 0.2s;
     }
 
     button:hover {
@@ -63,18 +83,38 @@
       color: black;
     }
 
+    /* Score centered near the middle of the column */
     .score-container {
-      margin-top: 20px;
+      flex: 1;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
+      padding-bottom: 12vh;
+      z-index: 1;
+    }
+
+    .crown {
+      font-size: clamp(24px, 2.5vw, 42px);
+      height: 1.2em;
+      margin-bottom: 4px;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    .column.leader .crown {
+      opacity: 1;
+      transform: translateY(0);
     }
 
     .score {
-      font-size: 60px;
+      font-size: clamp(48px, 6.5vw, 130px);
       font-weight: bold;
       color: white;
       text-align: center;
+      text-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+      user-select: none;
     }
 
     .score-update {
@@ -83,14 +123,14 @@
 
     @keyframes scoreAnimation {
       0% { transform: scale(1); }
-      50% { transform: scale(1.1); }
+      50% { transform: scale(1.15); }
       100% { transform: scale(1); }
     }
   </style>
 </head>
 <body>
   <div class="scoreboard">
-    <div class="column red">
+    <div class="column red" id="col-red">
       <div class="buttons">
         <div class="button-row">
           <button onclick="addPoints('red', 100)">+100</button>
@@ -102,15 +142,18 @@
           <button onclick="addPoints('red', -10)">-10</button>
           <button onclick="addPoints('red', -1)">-1</button>
         </div>
-        <div class="reset-button">
+        <div class="button-row">
+          <button onclick="undoTeam('red')">Undo</button>
           <button onclick="resetScore('red')">Reset</button>
         </div>
       </div>
       <div class="score-container">
+        <div class="crown">👑</div>
         <div class="score" id="red-score">0</div>
       </div>
     </div>
-    <div class="column purple">
+
+    <div class="column purple" id="col-purple">
       <div class="buttons">
         <div class="button-row">
           <button onclick="addPoints('purple', 100)">+100</button>
@@ -122,15 +165,18 @@
           <button onclick="addPoints('purple', -10)">-10</button>
           <button onclick="addPoints('purple', -1)">-1</button>
         </div>
-        <div class="reset-button">
+        <div class="button-row">
+          <button onclick="undoTeam('purple')">Undo</button>
           <button onclick="resetScore('purple')">Reset</button>
         </div>
       </div>
       <div class="score-container">
+        <div class="crown">👑</div>
         <div class="score" id="purple-score">0</div>
       </div>
     </div>
-    <div class="column yellow">
+
+    <div class="column yellow" id="col-yellow">
       <div class="buttons">
         <div class="button-row">
           <button onclick="addPoints('yellow', 100)">+100</button>
@@ -142,15 +188,18 @@
           <button onclick="addPoints('yellow', -10)">-10</button>
           <button onclick="addPoints('yellow', -1)">-1</button>
         </div>
-        <div class="reset-button">
+        <div class="button-row">
+          <button onclick="undoTeam('yellow')">Undo</button>
           <button onclick="resetScore('yellow')">Reset</button>
         </div>
       </div>
       <div class="score-container">
+        <div class="crown">👑</div>
         <div class="score" id="yellow-score">0</div>
       </div>
     </div>
-    <div class="column green">
+
+    <div class="column green" id="col-green">
       <div class="buttons">
         <div class="button-row">
           <button onclick="addPoints('green', 100)">+100</button>
@@ -162,33 +211,120 @@
           <button onclick="addPoints('green', -10)">-10</button>
           <button onclick="addPoints('green', -1)">-1</button>
         </div>
-        <div class="reset-button">
+        <div class="button-row">
+          <button onclick="undoTeam('green')">Undo</button>
           <button onclick="resetScore('green')">Reset</button>
         </div>
       </div>
       <div class="score-container">
+        <div class="crown">👑</div>
         <div class="score" id="green-score">0</div>
       </div>
     </div>
   </div>
+
   <script>
+    const teams = ['red', 'purple', 'yellow', 'green'];
+    const STORAGE_KEY = 'lst_scoreboard_v1';
+    let state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
+      red: 0, purple: 0, yellow: 0, green: 0
+    };
+    const history = { red: [], purple: [], yellow: [], green: [] };
+
+    // Synthesized Web Audio sound effects (no external audio files needed)
+    let audioCtx = null;
+    function playTone(type) {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        const now = audioCtx.currentTime;
+        if (type === 'up') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(523.25, now); // C5
+          osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.12); // G5
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+          osc.start(now);
+          osc.stop(now + 0.15);
+        } else if (type === 'down') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(329.63, now); // E4
+          osc.frequency.exponentialRampToValueAtTime(220.00, now + 0.14); // A3
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
+          osc.start(now);
+          osc.stop(now + 0.16);
+        } else {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(261.63, now);
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+          osc.start(now);
+          osc.stop(now + 0.2);
+        }
+      } catch (e) {}
+    }
+
+    function updateDisplay(animateTeam = null) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      const maxScore = Math.max(...teams.map(t => state[t]));
+
+      teams.forEach(team => {
+        const scoreEl = document.getElementById(team + '-score');
+        const colEl = document.getElementById('col-' + team);
+        scoreEl.textContent = state[team];
+
+        // Highlight leader(s) only when score > 0
+        if (maxScore > 0 && state[team] === maxScore) {
+          colEl.classList.add('leader');
+        } else {
+          colEl.classList.remove('leader');
+        }
+
+        if (animateTeam === team) {
+          scoreEl.classList.remove('score-update');
+          void scoreEl.offsetWidth; // Force reflow to restart animation on rapid clicks
+          scoreEl.classList.add('score-update');
+        }
+      });
+    }
+
     function addPoints(team, points) {
-      var scoreElement = document.getElementById(team + '-score');
-      var currentScore = parseInt(scoreElement.textContent, 10);
-      scoreElement.textContent = currentScore + points;
-      scoreElement.classList.add('score-update');
-      setTimeout(() => {
-        scoreElement.classList.remove('score-update');
-      }, 300);
+      history[team].push(state[team]);
+      state[team] += points;
+      playTone(points > 0 ? 'up' : 'down');
+      updateDisplay(team);
     }
+
+    function undoTeam(team) {
+      if (history[team].length === 0) return;
+      state[team] = history[team].pop();
+      playTone('reset');
+      updateDisplay(team);
+    }
+
     function resetScore(team) {
-      var scoreElement = document.getElementById(team + '-score');
-      scoreElement.textContent = 0;
-      scoreElement.classList.add('score-update');
-      setTimeout(() => {
-        scoreElement.classList.remove('score-update');
-      }, 300);
+      if (state[team] === 0) return;
+      if (!confirm(`Reset ${team.toUpperCase()} score to 0?`)) return;
+      history[team].push(state[team]);
+      state[team] = 0;
+      playTone('reset');
+      updateDisplay(team);
     }
+
+    // Press 'H' to completely hide/show controls during live stage presentation
+    document.addEventListener('keydown', (e) => {
+      if (e.key.toLowerCase() === 'h') {
+        document.body.classList.toggle('hide-controls');
+      }
+    });
+
+    // Restore saved scores on load
+    updateDisplay();
   </script>
 </body>
 </html>
