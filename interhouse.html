@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
   <title>Scoreboard</title>
   <style>
     html, body {
@@ -10,6 +11,7 @@
       height: 100%;
       overflow: hidden;
       font-family: Arial, sans-serif;
+      background-color: #111;
     }
 
     .scoreboard {
@@ -17,6 +19,7 @@
       width: 100vw;
       height: 100vh;
       box-sizing: border-box;
+      position: relative;
     }
 
     .column {
@@ -29,23 +32,33 @@
       background-size: 100% auto;
       background-position: bottom;
       background-repeat: no-repeat;
-      transition: box-shadow 0.2s ease;
+      transition: box-shadow 0.25s ease, filter 0.3s ease;
     }
 
-    .column.red    { background-color: #c0524d; background-image: url('https://www.lstyoungkhl.edu.hk/sites/default/files/ExamTimer/score/1.png'); }
-    .column.purple { background-color: #5a3275; background-image: url('https://www.lstyoungkhl.edu.hk/sites/default/files/ExamTimer/score/2.png'); }
-    .column.yellow { background-color: #e1b970; background-image: url('https://www.lstyoungkhl.edu.hk/sites/default/files/ExamTimer/score/3.png'); }
-    .column.green  { background-color: #588849; background-image: url('https://www.lstyoungkhl.edu.hk/sites/default/files/ExamTimer/score/4.png'); }
+    .column.red    { background-color: #c0524d; }
+    .column.purple { background-color: #5a3275; }
+    .column.yellow { background-color: #e1b970; }
+    .column.green  { background-color: #588849; }
 
+    /* Leader highlight */
     .column.leader {
-      box-shadow: inset 0 0 40px rgba(255, 255, 255, 0.25);
+      box-shadow: inset 0 0 45px rgba(255, 255, 255, 0.28);
     }
 
+    /* Winner Spotlight mode (Key: W) */
+    body.winner-mode .column:not(.leader) {
+      filter: brightness(0.35) saturate(0.6);
+    }
+    body.winner-mode .column.leader {
+      box-shadow: inset 0 0 80px rgba(255, 215, 0, 0.55);
+    }
+
+    /* Top control buttons */
     .buttons {
       display: flex;
       flex-direction: column;
       align-items: center;
-      z-index: 2;
+      z-index: 3;
       opacity: 0.25;
       transition: opacity 0.15s ease;
     }
@@ -54,7 +67,9 @@
       opacity: 1;
     }
 
-    body.hide-controls .buttons {
+    /* Audience Display mode or 'H' toggle hides all buttons */
+    body.hide-controls .buttons,
+    body.audience-mode .buttons {
       opacity: 0 !important;
       pointer-events: none;
     }
@@ -69,11 +84,11 @@
       border: 1px solid white;
       color: white;
       padding: 6px 12px;
-      margin: 5px;
+      margin: 4px;
       cursor: pointer;
-      font-size: 16px;
+      font-size: 15px;
       user-select: none;
-      touch-action: manipulation; /* Eliminates 300ms tap delay */
+      touch-action: manipulation;
       transition: background-color 0.1s, color 0.1s, transform 0.05s;
     }
 
@@ -83,9 +98,10 @@
     }
 
     button:active {
-      transform: scale(0.94); /* Instant tactile feedback */
+      transform: scale(0.94);
     }
 
+    /* Center score display */
     .score-container {
       flex: 1;
       display: flex;
@@ -93,21 +109,30 @@
       justify-content: center;
       align-items: center;
       padding-bottom: 12vh;
-      z-index: 1;
+      z-index: 2;
+      position: relative;
     }
 
     .crown {
-      font-size: clamp(24px, 2.5vw, 42px);
+      font-size: clamp(26px, 2.8vw, 46px);
       height: 1.2em;
       margin-bottom: 4px;
       opacity: 0;
       transform: translateY(6px);
       transition: opacity 0.2s ease, transform 0.2s ease;
+      pointer-events: none;
     }
 
     .column.leader .crown {
       opacity: 1;
       transform: translateY(0);
+    }
+
+    .score-wrapper {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
     .score {
@@ -117,7 +142,9 @@
       text-align: center;
       text-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
       user-select: none;
-      will-change: transform; /* Promotes score to GPU layer */
+      cursor: pointer;
+      will-change: transform;
+      font-variant-numeric: tabular-nums;
     }
 
     .score-update {
@@ -126,12 +153,66 @@
 
     @keyframes scoreAnimation {
       0% { transform: scale(1); }
-      50% { transform: scale(1.15); }
+      50% { transform: scale(1.14); }
       100% { transform: scale(1); }
+    }
+
+    /* Floating +100 / -10 delta badge */
+    .delta-badge {
+      position: absolute;
+      top: -15px;
+      font-size: clamp(20px, 2vw, 34px);
+      font-weight: bold;
+      color: #fff;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+      pointer-events: none;
+      animation: floatUp 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .delta-badge.negative {
+      color: #ffd1d1;
+    }
+
+    @keyframes floatUp {
+      0%   { opacity: 1; transform: translateY(0) scale(0.9); }
+      100% { opacity: 0; transform: translateY(-48px) scale(1.1); }
+    }
+
+    /* Confetti canvas overlay */
+    #confetti-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    /* Subtle shortcut HUD toast */
+    #toast {
+      position: fixed;
+      bottom: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.75);
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+      z-index: 20;
+    }
+    #toast.show {
+      opacity: 1;
     }
   </style>
 </head>
 <body>
+  <canvas id="confetti-canvas"></canvas>
+  <div id="toast"></div>
+
   <div class="scoreboard">
     <div class="column red" id="col-red">
       <div class="buttons">
@@ -152,7 +233,9 @@
       </div>
       <div class="score-container">
         <div class="crown">👑</div>
-        <div class="score" id="red-score">0</div>
+        <div class="score-wrapper" id="wrap-red">
+          <div class="score" id="red-score" title="Double-click to set exact score">0</div>
+        </div>
       </div>
     </div>
 
@@ -175,7 +258,9 @@
       </div>
       <div class="score-container">
         <div class="crown">👑</div>
-        <div class="score" id="purple-score">0</div>
+        <div class="score-wrapper" id="wrap-purple">
+          <div class="score" id="purple-score" title="Double-click to set exact score">0</div>
+        </div>
       </div>
     </div>
 
@@ -198,7 +283,9 @@
       </div>
       <div class="score-container">
         <div class="crown">👑</div>
-        <div class="score" id="yellow-score">0</div>
+        <div class="score-wrapper" id="wrap-yellow">
+          <div class="score" id="yellow-score" title="Double-click to set exact score">0</div>
+        </div>
       </div>
     </div>
 
@@ -221,39 +308,128 @@
       </div>
       <div class="score-container">
         <div class="crown">👑</div>
-        <div class="score" id="green-score">0</div>
+        <div class="score-wrapper" id="wrap-green">
+          <div class="score" id="green-score" title="Double-click to set exact score">0</div>
+        </div>
       </div>
     </div>
   </div>
 
   <script>
     const teams = ['red', 'purple', 'yellow', 'green'];
-    const STORAGE_KEY = 'lst_scoreboard_v1';
+    const STORAGE_KEY = 'lst_scoreboard_v2';
+    const IMG_CACHE_KEY = 'lst_scoreboard_imgs_v1';
+    const isAudienceWindow = new URLSearchParams(window.location.search).get('audience') === '1';
+
+    if (isAudienceWindow) {
+      document.body.classList.add('audience-mode');
+    }
+
     let state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
       red: 0, purple: 0, yellow: 0, green: 0
     };
+    const displayed = { ...state };
+    const animFrames = { red: null, purple: null, yellow: null, green: null };
     const history = { red: [], purple: [], yellow: [], green: [] };
+    let isMuted = false;
 
-    // Cache DOM references once on load instead of querying on every click
+    // Cache DOM elements
     const scoreEls = {};
     const colEls = {};
+    const wrapEls = {};
     teams.forEach(t => {
       scoreEls[t] = document.getElementById(t + '-score');
       colEls[t] = document.getElementById('col-' + t);
+      wrapEls[t] = document.getElementById('wrap-' + t);
     });
 
-    // Debounce localStorage writes so rapid clicks never block the main thread
+    // Toast notification helper
+    const toastEl = document.getElementById('toast');
+    let toastTimer = null;
+    function showToast(msg) {
+      if (isAudienceWindow) return;
+      toastEl.textContent = msg;
+      toastEl.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2200);
+    }
+
+    // 1. Offline Image Caching (caches 1.png - 4.png into localStorage as Data URIs)
+    const imageUrls = {
+      red: 'https://www.lstyoungkhl.edu.hk/sites/default/files/ExamTimer/score/1.png',
+      purple: 'https://www.lstyoungkhl.edu.hk/sites/default/files/ExamTimer/score/2.png',
+      yellow: 'https://www.lstyoungkhl.edu.hk/sites/default/files/ExamTimer/score/3.png',
+      green: 'https://www.lstyoungkhl.edu.hk/sites/default/files/ExamTimer/score/4.png'
+    };
+
+    function loadAndCacheImages() {
+      let cached = {};
+      try { cached = JSON.parse(localStorage.getItem(IMG_CACHE_KEY)) || {}; } catch (e) {}
+
+      teams.forEach(team => {
+        if (cached[team]) {
+          colEls[team].style.backgroundImage = `url('${cached[team]}')`;
+        } else {
+          colEls[team].style.backgroundImage = `url('${imageUrls[team]}')`;
+          // Attempt background fetch & cache for future offline use
+          fetch(imageUrls[team])
+            .then(r => r.blob())
+            .then(blob => new Promise(res => {
+              const reader = new FileReader();
+              reader.onloadend = () => res(reader.result);
+              reader.readAsDataURL(blob);
+            }))
+            .then(dataUrl => {
+              try {
+                const latest = JSON.parse(localStorage.getItem(IMG_CACHE_KEY)) || {};
+                latest[team] = dataUrl;
+                localStorage.setItem(IMG_CACHE_KEY, JSON.stringify(latest));
+              } catch (e) {}
+            })
+            .catch(() => {});
+        }
+      });
+    }
+    loadAndCacheImages();
+
+    // 2. Dual-Window Sync via BroadcastChannel + storage event fallback
+    const channel = ('BroadcastChannel' in window) ? new BroadcastChannel('lst_scoreboard_sync') : null;
+    if (channel) {
+      channel.onmessage = (e) => {
+        if (e.data && e.data.type === 'SYNC') {
+          const prev = { ...state };
+          state = e.data.state;
+          if (e.data.winnerMode !== undefined) {
+            document.body.classList.toggle('winner-mode', e.data.winnerMode);
+            if (e.data.winnerMode) launchConfetti();
+          }
+          teams.forEach(t => {
+            if (state[t] !== prev[t]) {
+              const delta = state[t] - prev[t];
+              spawnDeltaBadge(t, delta);
+              animateNumber(t, state[t]);
+            }
+          });
+          updateLeaders();
+        }
+      };
+    }
+
     let saveTimer = null;
-    function scheduleSave() {
+    function broadcastAndSave(winnerMode) {
+      if (channel) {
+        channel.postMessage({ type: 'SYNC', state, winnerMode });
+      }
       clearTimeout(saveTimer);
       saveTimer = setTimeout(() => {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
       }, 250);
     }
 
-    // Non-blocking Web Audio chime
+    // 3. Web Audio Chimes (with Mute toggle)
     let audioCtx = null;
     function playTone(type) {
+      if (isMuted || isAudienceWindow) return;
       try {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -279,6 +455,19 @@
           gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
           osc.start(now);
           osc.stop(now + 0.14);
+        } else if (type === 'fanfare') {
+          [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.connect(g);
+            g.connect(audioCtx.destination);
+            o.type = 'triangle';
+            o.frequency.setValueAtTime(freq, now + idx * 0.08);
+            g.gain.setValueAtTime(0.12, now + idx * 0.08);
+            g.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.35);
+            o.start(now + idx * 0.08);
+            o.stop(now + idx * 0.08 + 0.35);
+          });
         } else {
           osc.type = 'sine';
           osc.frequency.setValueAtTime(261.63, now);
@@ -290,26 +479,68 @@
       } catch (e) {}
     }
 
-    function updateDisplay(animateTeam = null) {
-      const maxScore = Math.max(...teams.map(t => state[t]));
-
-      teams.forEach(team => {
-        scoreEls[team].textContent = state[team];
-        colEls[team].classList.toggle('leader', maxScore > 0 && state[team] === maxScore);
-      });
-
-      if (animateTeam) {
-        const el = scoreEls[animateTeam];
-        el.classList.remove('score-update');
-        // Schedule on next animation frame instead of forcing synchronous layout reflow
-        requestAnimationFrame(() => el.classList.add('score-update'));
+    // 4. Rolling Number Counter & Floating Delta Indicator
+    function animateNumber(team, target) {
+      if (animFrames[team]) cancelAnimationFrame(animFrames[team]);
+      const start = displayed[team];
+      const diff = target - start;
+      if (diff === 0) {
+        scoreEls[team].textContent = target;
+        return;
       }
 
-      scheduleSave();
+      const el = scoreEls[team];
+      el.classList.remove('score-update');
+      requestAnimationFrame(() => el.classList.add('score-update'));
+
+      const duration = Math.abs(diff) >= 50 ? 240 : 120;
+      const startTime = performance.now();
+
+      function step(now) {
+        const progress = Math.min((now - startTime) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3); // cubic ease-out
+        displayed[team] = Math.round(start + diff * eased);
+        el.textContent = displayed[team];
+        if (progress < 1) {
+          animFrames[team] = requestAnimationFrame(step);
+        } else {
+          displayed[team] = target;
+          el.textContent = target;
+          animFrames[team] = null;
+        }
+      }
+      animFrames[team] = requestAnimationFrame(step);
     }
 
-    // Use pointerdown for instant 0ms response on both mouse and touchscreens
+    function spawnDeltaBadge(team, delta) {
+      if (!delta) return;
+      const badge = document.createElement('div');
+      badge.className = 'delta-badge' + (delta < 0 ? ' negative' : '');
+      badge.textContent = delta > 0 ? `+${delta}` : `${delta}`;
+      wrapEls[team].appendChild(badge);
+      setTimeout(() => badge.remove(), 750);
+    }
+
+    function updateLeaders() {
+      const maxScore = Math.max(...teams.map(t => state[t]));
+      teams.forEach(team => {
+        colEls[team].classList.toggle('leader', maxScore > 0 && state[team] === maxScore);
+      });
+    }
+
+    function applyScoreChange(team, newVal, soundType = null) {
+      const delta = newVal - state[team];
+      state[team] = newVal;
+      spawnDeltaBadge(team, delta);
+      animateNumber(team, newVal);
+      updateLeaders();
+      broadcastAndSave();
+      if (soundType) playTone(soundType);
+    }
+
+    // 5. Instant Pointerdown Button Handling
     document.querySelector('.scoreboard').addEventListener('pointerdown', (e) => {
+      if (isAudienceWindow) return;
       const btn = e.target.closest('button');
       if (!btn) return;
       e.preventDefault();
@@ -318,35 +549,146 @@
       if (btn.dataset.pts) {
         const points = parseInt(btn.dataset.pts, 10);
         history[team].push(state[team]);
-        state[team] += points;
-        updateDisplay(team);
-        playTone(points > 0 ? 'up' : 'down');
+        applyScoreChange(team, state[team] + points, points > 0 ? 'up' : 'down');
       } else if (btn.dataset.action === 'undo') {
         if (history[team].length === 0) return;
-        state[team] = history[team].pop();
-        updateDisplay(team);
-        playTone('reset');
+        applyScoreChange(team, history[team].pop(), 'reset');
       } else if (btn.dataset.action === 'reset') {
         if (state[team] === 0) return;
-        // Defer confirm() by 1 frame so button active state renders cleanly first
         setTimeout(() => {
           if (confirm(`Reset ${team.toUpperCase()} score to 0?`)) {
             history[team].push(state[team]);
-            state[team] = 0;
-            updateDisplay(team);
-            playTone('reset');
+            applyScoreChange(team, 0, 'reset');
           }
         }, 0);
       }
     });
 
+    // 6. Double-click score to enter exact custom value
+    teams.forEach(team => {
+      scoreEls[team].addEventListener('dblclick', () => {
+        if (isAudienceWindow) return;
+        const input = prompt(`Enter exact score for ${team.toUpperCase()}:`, state[team]);
+        if (input === null) return;
+        const parsed = parseInt(input.trim(), 10);
+        if (!isNaN(parsed) && parsed !== state[team]) {
+          history[team].push(state[team]);
+          applyScoreChange(team, parsed, parsed > state[team] ? 'up' : 'down');
+        }
+      });
+    });
+
+    // 7. Confetti Burst for Winner Spotlight
+    const canvas = document.getElementById('confetti-canvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    let confettiAnim = null;
+
+    function launchConfetti() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      const colors = ['#ffffff', '#ffd700', '#ff6b6b', '#4ecdc4', '#ffe66d'];
+      const maxScore = Math.max(...teams.map(t => state[t]));
+
+      // Spawn confetti primarily over leading columns
+      const leaderIndices = teams
+        .map((t, i) => (maxScore > 0 && state[t] === maxScore ? i : -1))
+        .filter(i => i !== -1);
+      const targetCols = leaderIndices.length ? leaderIndices : [0, 1, 2, 3];
+
+      particles = [];
+      for (let i = 0; i < 160; i++) {
+        const colIdx = targetCols[i % targetCols.length];
+        const colWidth = canvas.width / 4;
+        particles.push({
+          x: colIdx * colWidth + Math.random() * colWidth,
+          y: -20 - Math.random() * canvas.height * 0.5,
+          w: 8 + Math.random() * 6,
+          h: 4 + Math.random() * 4,
+          vx: (Math.random() - 0.5) * 4,
+          vy: 3 + Math.random() * 5,
+          rot: Math.random() * 360,
+          vRot: (Math.random() - 0.5) * 10,
+          color: colors[Math.floor(Math.random() * colors.length)]
+        });
+      }
+
+      if (confettiAnim) cancelAnimationFrame(confettiAnim);
+      function renderConfetti() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let active = 0;
+        particles.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.rot += p.vRot;
+          if (p.y < canvas.height + 20) active++;
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rot * Math.PI) / 180);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+          ctx.restore();
+        });
+        if (active > 0) {
+          confettiAnim = requestAnimationFrame(renderConfetti);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      }
+      confettiAnim = requestAnimationFrame(renderConfetti);
+    }
+
+    // 8. Keyboard Shortcuts
     document.addEventListener('keydown', (e) => {
-      if (e.key.toLowerCase() === 'h') {
-        document.body.classList.toggle('hide-controls');
+      if (isAudienceWindow) return;
+      const key = e.key.toLowerCase();
+
+      if (key === 'h') {
+        const hidden = document.body.classList.toggle('hide-controls');
+        showToast(hidden ? 'Controls Hidden (Press H to show)' : 'Controls Visible');
+      } else if (key === 'f') {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+          document.exitFullscreen().catch(() => {});
+        }
+      } else if (key === 'm') {
+        isMuted = !isMuted;
+        showToast(isMuted ? 'Sound Muted' : 'Sound Unmuted');
+      } else if (key === 'w') {
+        const active = document.body.classList.toggle('winner-mode');
+        if (active) {
+          launchConfetti();
+          playTone('fanfare');
+          showToast('Winner Spotlight ON (Press W to exit)');
+        } else {
+          showToast('Winner Spotlight OFF');
+        }
+        broadcastAndSave(active);
+      } else if (key === 'p') {
+        const url = new URL(window.location.href);
+        url.searchParams.set('audience', '1');
+        window.open(url.toString(), 'ScoreboardAudience', 'width=1280,height=720');
+        showToast('Opened Synced Audience Window');
+      } else if (key === 'r' && e.shiftKey) {
+        if (confirm('Reset ALL 4 teams to 0?')) {
+          teams.forEach(t => {
+            history[t].push(state[t]);
+            state[t] = 0;
+            animateNumber(t, 0);
+          });
+          document.body.classList.remove('winner-mode');
+          updateLeaders();
+          broadcastAndSave(false);
+          playTone('reset');
+          showToast('All Scores Reset');
+        }
       }
     });
 
-    updateDisplay();
+    // Initial render
+    teams.forEach(t => { scoreEls[t].textContent = state[t]; });
+    updateLeaders();
   </script>
 </body>
 </html>
